@@ -4,6 +4,7 @@ import { useApi } from '../context/ApiContext'
 
 import Modal from '../component/modal/Modal'
 import ModalBook from '../component/modal/ModalBook'
+import Editor from "../component/Editor";
 
 
 export default function Dashboard() {
@@ -73,9 +74,7 @@ export default function Dashboard() {
 
                         {/* edditeur de texte  */}
                         <section className='mt-10'>
-
-                            <p>ici mettre editeur texte</p>
-
+                            <Editor />
                         </section>
                     </div>
 
