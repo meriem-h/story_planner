@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Menu, X, CircleUserRound, BookUser } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import { LogOut } from 'lucide-react'
+import { Menu, X, Lightbulb, BookUser, BookOpenText, NotebookPen } from 'lucide-react'
 
-
+import Chapter from "./ChapterLayout";
+import Character from "./CharacterLayout";
+import Snippet from "./SnippetLayout";
+import Note from "./NoteLayout";
 
 
 export default function Layout({ children }) {
     const [isOpen, setIsOpen] = useState(false)
-
-    // const { user, logout } = useAuth()
+    const [content, setContent] = useState(<Chapter />)
 
     return (
         <div className="flex h-screen">
@@ -18,22 +18,42 @@ export default function Layout({ children }) {
             {/* Sidebar */}
             <div className={`${isOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden  bg-orange-200`}>
 
-                {/* <nav className="flex flex-col p-4 gap-4 w-64">
+                <div className='p-4 flex gap-6 justify-center'>
+                    <button onClick={() => setContent(<Chapter />)}> <BookOpenText className='' /> </button>
+                    <button onClick={() => setContent(<Character />)}><BookUser className='' /></button>
+                    <button onClick={() => setContent(<Snippet />)}><Lightbulb className='' /></button>
+                    <button onClick={() => setContent(<Note />)}><NotebookPen className='' /></button>
+                </div>
 
+                <div>
+                    {content}
+                </div>
 
-
-                    <Link to="/">Dashboard</Link>
-                    <Link to="/Home">Home</Link>
-                </nav> */}
+            
             </div>
 
             {/* Contenu */}
             <div className="flex-1 flex">
                 {/* Burger */}
-                <div className="p-4 bg-orange-200">
-                    <button onClick={() => setIsOpen(!isOpen)}>
-                        {isOpen ? <X /> : <Menu />}
+                <div className="p-4 bg-orange-200 flex flex-col" onClick={() => setIsOpen(!isOpen)}>
+                    <button>
+                        {isOpen ? <X />
+                            : <div>
+                                <Menu className='mb-4' />
+                            </div>
+                        }
                     </button>
+
+                    {!isOpen &&
+                        <>
+                            <button onClick={() => setContent(<Chapter />)}><BookOpenText className='mb-4' /></button>
+                            <button onClick={() => setContent(<Character />)}><BookUser className='mb-4' /></button>
+                            <button onClick={() => setContent(<Snippet />)}><Lightbulb className='mb-4' /></button>
+                            <button onClick={() => setContent(<Note />)}><NotebookPen className='mb-4' /></button>
+                        </>
+                    }
+
+
                 </div>
 
                 {/* Page */}
