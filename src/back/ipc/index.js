@@ -1,2 +1,6 @@
 require('./book.ipc')
-// ...
+require('./chapter.ipc')
+require('./character.ipc')
+require('./loreEntrie.ipc')
+require('./note.ipc')
+require('./snippet.ipc')

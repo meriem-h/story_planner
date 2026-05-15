@@ -1,10 +1,10 @@
 const BaseRepository = require('./BaseRepository')
 const db = require('./db')
 
-class BookRepository extends BaseRepository {
+class ChapterRepository extends BaseRepository {
     constructor() {
-        super('book')
+        super('chapter')
     }
 }
 
-module.exports = BookRepository
+module.exports = ChapterRepository

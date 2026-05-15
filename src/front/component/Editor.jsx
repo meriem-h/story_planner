@@ -16,16 +16,43 @@ const modules = {
   ]
 }
 
-export default function Editor() {
-  const [value, setValue] = useState('')
+export default function Editor({ content, onChange }) {
+  const [value, setValue] = useState(content || '')
+
+  // quand le contenu change (changement de chapitre)
+  useEffect(() => {
+    setValue(content || '')
+  }, [content])
+
+  const handleChange = (newValue) => {
+    setValue(newValue)
+    onChange?.(newValue)  // remonte la valeur au parent
+  }
 
   return (
     <ReactQuill
       theme="snow"
       value={value}
-      onChange={setValue}
+      onChange={handleChange}
       modules={modules}
-      style={{ height: 'calc(90vh - 150px)' }}
+      style={{ height: 'calc(80vh - 150px)' }}
     />
   )
 }
+
+
+
+
+// export default function Editor() {
+//   const [value, setValue] = useState('')
+
+//   return (
+//     <ReactQuill
+//       theme="snow"
+//       value={value}
+//       onChange={setValue}
+//       modules={modules}
+//       style={{ height: 'calc(90vh - 150px)' }}
+//     />
+//   )
+// }

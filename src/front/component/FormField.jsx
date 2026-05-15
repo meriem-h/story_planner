@@ -26,8 +26,27 @@ const SingleField = ({ field, onChange, errors }) => {
                         onChange={onChange}
                         className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
                     >
-                        {datas.map((data) => (
+                        {/* {datas.map((data) => (
                             <option key={data.value} value={data.value}>{data.text}</option>
+                        ))} */}
+
+                        {datas.map((data) => (
+                            data.selected ? (
+                                <option
+                                    key={data.value}
+                                    value={data.value}
+                                    selected
+                                >
+                                    {data.text}
+                                </option>
+                            ) : (
+                                <option
+                                    key={data.value}
+                                    value={data.value}
+                                >
+                                    {data.text}
+                                </option>
+                            )
                         ))}
                     </select>
                     : (field.type === "textarea") ?

@@ -1,34 +1,33 @@
 import React, { useState, useEffect } from 'react'
 
-import { KeyRound, Mail, Gem, Book } from 'lucide-react'
+import { KeyRound, Mail, Gem, chapter } from 'lucide-react'
 
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
 
-export default function ModalBook({ onSuccess }) {
+export default function ModalChapter({ onSuccess, book }) {
 
     const [error, setError] = useState(null)
-    const [book, setBook] = useState({})
+    const [chapter, setChapter] = useState({book_id: book.id})
 
     const api = useApi()
 
 
     const fieldBook = [
-        { label: 'titre *', name: 'title', type: 'text' },
-        { label: 'description', name: 'description', type: 'textarea' },
+        { name: 'title', type: 'text' },
     ]
 
     const handleChange = (e) => {
 
-        setBook(prev => ({ ...prev, [e.target.name]: e.target.value }))
+        setChapter(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
     }
 
     useEffect(() => {
 
-        console.log("book => ", book);
+        console.log("chapterModal => ", chapter);
 
-    }, [book])
+    }, [chapter])
 
 
 
@@ -41,7 +40,7 @@ export default function ModalBook({ onSuccess }) {
         const errorListe = {}
         const missingFields = []
 
-        if (!book.title) missingFields.push('title')
+        if (!chapter.title) missingFields.push('title')
         console.log("missingFields => ", missingFields);
 
 
@@ -52,14 +51,14 @@ export default function ModalBook({ onSuccess }) {
         // }
 
 
-        // const result = await api('book:create',book)
-        const result = await api('book:createWithChapter',book)
+        // const result = await api('chapter:create',chapter)
+        const result = await api('chapter:create', chapter)
 
 
 
         if (result.success) {
 
-            console.log('book success => ', result);
+            console.log('chapter success => ', result);
             onSuccess(result)
 
         } else {
@@ -81,8 +80,8 @@ export default function ModalBook({ onSuccess }) {
         <div className=''>
             <section>
                 <article className='border border-2 border-orange-100 bg-orange-100 rounded-lg m-4 p-4'>
-                    {/* <Book /> */}
-                    <h1 className='mb-4 text-center'>Livre</h1>
+                    <chapter />
+                    <h1 className='mb-4 text-center'>Nouveau chapitre</h1>
                     <form className="max-w-sm mx-auto flex flex-col gap-4">
 
 

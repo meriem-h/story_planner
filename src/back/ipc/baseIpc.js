@@ -8,7 +8,7 @@ class BaseIPC {
         this.rootes()
     }
 
-    rootes() {
+    rootes() {        
         ipcMain.handle(`${this.name}:findAll`, async () => {
             try {
                 const data = await this.repo.findAll()
@@ -28,6 +28,7 @@ class BaseIPC {
         })
 
         ipcMain.handle(`${this.name}:create`, async (event, data) => {
+            
             try {
                 const id = await this.repo.create(data)
                 return { success: true, id }
