@@ -39,20 +39,3 @@ export default function Editor({ content, onChange }) {
     />
   )
 }
-
-
-
-
-// export default function Editor() {
-//   const [value, setValue] = useState('')
-
-//   return (
-//     <ReactQuill
-//       theme="snow"
-//       value={value}
-//       onChange={setValue}
-//       modules={modules}
-//       style={{ height: 'calc(90vh - 150px)' }}
-//     />
-//   )
-// }

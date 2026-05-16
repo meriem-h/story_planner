@@ -21,34 +21,46 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
                 )}
 
                 {(field.type == "select" && datas) ?
+
                     <select
                         name={field.name}
                         onChange={onChange}
+                        value={datas.find(d => d.selected)?.value || ''}
                         className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
                     >
-                        {/* {datas.map((data) => (
-                            <option key={data.value} value={data.value}>{data.text}</option>
-                        ))} */}
-
                         {datas.map((data) => (
-                            data.selected ? (
-                                <option
-                                    key={data.value}
-                                    value={data.value}
-                                    selected
-                                >
-                                    {data.text}
-                                </option>
-                            ) : (
-                                <option
-                                    key={data.value}
-                                    value={data.value}
-                                >
-                                    {data.text}
-                                </option>
-                            )
+                            <option key={data.value} value={data.value}>
+                                {data.text}
+                            </option>
                         ))}
                     </select>
+
+                    
+                    // <select
+                    //     name={field.name}
+                    //     onChange={onChange}
+                    //     className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
+                    // >
+
+                    //     {datas.map((data) => (
+                    //         data.selected ? (
+                    //             <option
+                    //                 key={data.value}
+                    //                 value={data.value}
+                    //                 selected
+                    //             >
+                    //                 {data.text}
+                    //             </option>
+                    //         ) : (
+                    //             <option
+                    //                 key={data.value}
+                    //                 value={data.value}
+                    //             >
+                    //                 {data.text}
+                    //             </option>
+                    //         )
+                    //     ))}
+                    // </select>
                     : (field.type === "textarea") ?
 
                         <textarea
@@ -91,7 +103,7 @@ export default function FormField({ fields, onChange, errors, selectClass }) {
                         </div>
                     )
                 }
-                return  <SingleField key={field.name} field={field} onChange={onChange} errors={errors} selectClass={selectClass} />
+                return <SingleField key={field.name} field={field} onChange={onChange} errors={errors} selectClass={selectClass} />
             })}
         </>
     )

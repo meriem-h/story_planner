@@ -36,15 +36,6 @@ export default function ModalBook({ onSuccess }) {
 
         if (!book.title) missingFields.push('title')
 
-
-        // if (missingFields.length > 0) {
-        //     missingFields.forEach(field => errorListe[field] = true) // juste pour mettre en rouge
-        //     errorListe.all = 'Le champ est obligatoire'
-        //     return
-        // }
-
-
-        // const result = await api('book:create',book)
         const result = await api('book:createWithChapter',book)
 
 
@@ -65,37 +56,37 @@ export default function ModalBook({ onSuccess }) {
 
 
     return (
-
-        <div className=''>
-            <section>
-                <article className='border border-2 border-orange-100 bg-orange-100 rounded-lg m-4 p-4'>
-                    {/* <Book /> */}
-                    <h1 className='mb-4 text-center'>Livre</h1>
-                    <form className="max-w-sm mx-auto flex flex-col gap-4">
-
-
-                        <FormField fields={fieldBook} onChange={handleChange} errors={error} />
-
-                        {error?.all && (
-                            <div className="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded">
-                                {error.all}
-                            </div>
-                        )}
-
-                        <div>
-                            <button onClick={handleClick} className='border rounded rounded-lg px-4 py-2  bg-orange-300 text-white'>valider</button>
-                        </div>
-
-
-                    </form>
-                </article>
-
-            </section>
-
-
+        <div className='p-4 flex flex-col gap-6'>
+      
+          {/* icône livre live */}
+          <div className='flex flex-col items-center gap-2'>
+            <div className='w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center'>
+              <Book className='text-white' size={32} />
+            </div>
+            <p className='text-orange-800 font-bold text-lg'>
+              {book.title || 'Nouveau livre'}
+            </p>
+          </div>
+      
+          <form className='flex flex-col gap-4'>
+            <FormField fields={fieldBook} onChange={handleChange} errors={error} />
+      
+            {error?.all && (
+              <div className="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error.all}
+              </div>
+            )}
+      
+            <button
+              onClick={handleClick}
+              className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold mt-2'
+            >
+              Créer le livre
+            </button>
+          </form>
+      
         </div>
-
-    )
+      )
 
 
 }

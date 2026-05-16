@@ -26,6 +26,16 @@ export default function Home() {
         : fetchChapters(selectedBook.id)
     }, [selectedBook])
 
+    useEffect(() => {
+        if (!chapters.length) return
+        const fildListe = chapters.map(element => ({
+          value: element.id,
+          text: element.title,
+          selected: element.id == selectedChapter?.id
+        }))
+        setChapterListeField([{ name: 'chapter', type: 'select', data: fildListe }])
+      }, [selectedChapter])
+
     const fetchBooks = async () => {
         const result = await api('book:findAll')
         if (result.data.length > 0) {
@@ -116,88 +126,96 @@ export default function Home() {
         }
     }
 
+
     return (
         <div className="min-h-screen bg-orange-50">
-            <Layout
-                chapters={chapters}
-                books={books}
-                selectedBook={selectedBook}
-                setSelectedBook={setSelectedBook}
-                selectedChapter={selectedChapter}
-                setSelectedChapter={setSelectedChapter}
-                addChapter={setIsChapterOpen}
-                addBook={setIsOpen}
-            >
-                <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Créer un nouveau livre" size={50}>
-                    <ModalBook onSuccess={handleBookCreated} />
-                </Modal>
-                <Modal isOpen={isChapterOpen} onClose={() => setIsChapterOpen(false)} title="Créer un nouveau chapitre" size={50}>
-                    <ModalChapter onSuccess={handleChapterCreated} book={selectedBook} />
-                </Modal>
-
-                <div className=''>
-                    <div className="text-center mb-8 font-bold text-orange-300">
-                        {/* <h1 className='text-4xl'>{selectedBook?.title || 'Aucun livre'}</h1> */}
-
-                        <h1
-                            className='text-4xl'
-                            contentEditable
-                            suppressContentEditableWarning
-                            onInput={(e) => {
-                                changeBookTitle(e)
-                            }}
-                        >
-                            {selectedBook?.title || 'Aucun livre'}
-                        </h1>
-
-                        <p className='text-2xl'
-                            contentEditable
-                            suppressContentEditableWarning
-                            onInput={(e) => {
-                                changeChapterTitle(e)
-                            }}>{selectedChapter?.title || ''}</p>
-                    </div>
-
-                    {books.length <= 0 ?
-                        <div className='flex justify-center pt-12'>
-                            <button onClick={() => setIsOpen(true)} className='border border-4 border-orange-200 w-[50%] text-center p-6'>
-                                crée un nouveau livre
-                            </button>
-                        </div>
-                        :
-                        <div>
-
-
-
-                            <section className='flex justify-between'>
-                                <div>
-                                    {chapterListeField &&
-
-                                        <FormField fields={chapterListeField} onChange={handleChapterChange} selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-orange-500 hover:text-orange-300 transition-colors"}/>
-                                    }
-                                </div>
-
-                                <div className='flex justify-end'>
-
-                                    <button onClick={() => setIsChapterOpen(true)} className='border rounded-lg px-4 py-2 bg-orange-300 text-white'>
-                                        ajouter un nouveau chapitre
-                                    </button>
-                                    <button onClick={saveChapter} className='border rounded-lg px-4 py-2 bg-orange-300 text-white'>
-                                        Enregistrer
-                                    </button>
-                                </div>
-
-                            </section>
-                            <section className='mt-10'>
-                                {saved && (
-                                    <span className="text-green-500">✅ Sauvegardé !</span>
-                                )}
-                                <Editor content={selectedChapter?.content} onChange={handleContentChange} />
-                            </section>
-                        </div>
-                    }
+          <Layout
+            chapters={chapters}
+            books={books}
+            selectedBook={selectedBook}
+            setSelectedBook={setSelectedBook}
+            selectedChapter={selectedChapter}
+            setSelectedChapter={setSelectedChapter}
+            addChapter={setIsChapterOpen}
+            addBook={setIsOpen}
+          >
+            <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size={50}>
+              <ModalBook onSuccess={handleBookCreated} />
+            </Modal>
+            <Modal isOpen={isChapterOpen} onClose={() => setIsChapterOpen(false)} size={50}>
+              <ModalChapter onSuccess={handleChapterCreated} book={selectedBook} />
+            </Modal>
+      
+            {books.length <= 0 ? (
+              <div className='flex justify-center pt-12'>
+                <button
+                  onClick={() => setIsOpen(true)}
+                  className='border-4 border-orange-200 rounded-xl w-[50%] text-center p-8 text-orange-300 hover:bg-orange-100 transition-colors'
+                >
+                  + Créer un nouveau livre
+                </button>
+              </div>
+            ) : (
+              <div className='flex flex-col h-screen'>
+      
+                {/* titre + sous titre */}
+                <div className="text-center py-6 border-b border-orange-200">
+                  <h1
+                    className='text-3xl font-bold text-orange-300 cursor-text outline-none'
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={changeBookTitle}
+                  >
+                    {selectedBook?.title || 'Aucun livre'}
+                  </h1>
+                  <p
+                    className='text-lg text-orange-200 cursor-text outline-none mt-1'
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={changeChapterTitle}
+                  >
+                    {selectedChapter?.title || ''}
+                  </p>
                 </div>
-            </Layout>
+      
+                {/* barre d'actions */}
+                <div className='flex justify-between items-center px-4 py-2 bg-white shadow-sm'>
+                  <div>
+                    {chapterListeField &&
+                      <FormField
+                        fields={chapterListeField}
+                        onChange={handleChapterChange}
+                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-orange-500 hover:text-orange-300 transition-colors"}
+                      />
+                    }
+                  </div>
+                  <div className='flex gap-2'>
+                    <button
+                      onClick={() => setIsChapterOpen(true)}
+                      className='flex items-center gap-2 px-4 py-2 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg text-sm font-bold'
+                    >
+                      + Chapitre
+                    </button>
+                    <button
+                      onClick={saveChapter}
+                      className={`flex items-center gap-2 px-4 py-2 transition-colors text-white rounded-lg text-sm font-bold ${saved ? 'bg-green-400' : 'bg-orange-300 hover:bg-orange-400'}`}
+                    >
+                      {saved ? '✅ Sauvegardé !' : 'Enregistrer'}
+                    </button>
+                  </div>
+                </div>
+      
+                {/* éditeur */}
+                <div className='flex-1 overflow-hidden'>
+                  <Editor content={selectedChapter?.content} onChange={handleContentChange} />
+                </div>
+      
+              </div>
+            )}
+      
+          </Layout>
         </div>
-    )
+      )
+
+
 }
