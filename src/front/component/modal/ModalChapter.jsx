@@ -37,15 +37,6 @@ export default function ModalChapter({ onSuccess, book }) {
 
         if (!chapter.title) missingFields.push('title')
 
-
-        // if (missingFields.length > 0) {
-        //     missingFields.forEach(field => errorListe[field] = true) // juste pour mettre en rouge
-        //     errorListe.all = 'Le champ est obligatoire'
-        //     return
-        // }
-
-
-        // const result = await api('chapter:create',chapter)
         const result = await api('chapter:create', chapter)
 
 

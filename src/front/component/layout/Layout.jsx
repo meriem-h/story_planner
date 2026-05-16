@@ -8,36 +8,38 @@ import Snippet from "./SnippetLayout";
 import Note from "./NoteLayout";
 
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter ,addBook }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook }) {
 
     const [isOpen, setIsOpen] = useState(false)
-    const [content, setContent] = useState(<Chapter chapters={chapters} addChapter={addChapter}  selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} addBook={addBook} selectedBook={selectedBook} setSelectedBook={setSelectedBook} />)
+    const [content, setContent] = useState(<Chapter chapters={chapters} addChapter={addChapter} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} addBook={addBook} selectedBook={selectedBook} setSelectedBook={setSelectedBook} />)
 
     useEffect(() => {
-        setContent(<Chapter chapters={chapters} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} selectedBook={selectedBook} setSelectedBook={setSelectedBook} addChapter={addChapter} addBook={addBook}/>)
+        setContent(<Chapter chapters={chapters} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} selectedBook={selectedBook} setSelectedBook={setSelectedBook} addChapter={addChapter} addBook={addBook} />)
     }, [chapters, selectedChapter, books, selectedBook])
 
     return (
         <div className="flex h-screen">
 
             {/* Sidebar */}
-            <div className={`${isOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden  bg-orange-200`}>
+            <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} transition-all duration-300 overflow-hidden  bg-orange-200`}>
 
-                <div className='p-4 flex gap-6 justify-center'>
+                <div className='p-4 flex gap-2 justify-center'>
                     <button className='bg-orange-400 rounded-2xl p-2 text-orange-100'
                         onClick={() => setContent(<Chapter
                             chapters={chapters}
                             selectedChapter={selectedChapter}
                             setSelectedChapter={setSelectedChapter}
-                            books={books} 
-                            selectedBook={selectedBook} 
+                            books={books}
+                            selectedBook={selectedBook}
                             setSelectedBook={setSelectedBook}
-                            addChapter={addChapter}  
+                            addChapter={addChapter}
                             addBook={addBook}
                         />)}> <BookOpenText className='' /></button>
-                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Character />)}><BookUser /></button>
-                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Snippet />)}><Lightbulb className='' /></button>
-                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Note />)}><NotebookPen className='' /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Character selectedBook={selectedBook}/>)}><BookUser /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Snippet selectedBook={selectedBook}/>)}><Lightbulb /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Note selectedBook={selectedBook}/>)}><NotebookPen /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setIsOpen(!isOpen)}><X /></button>
+
                 </div>
 
                 <div>
@@ -48,34 +50,40 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             </div>
 
             {/* Contenu */}
-            <div className="flex-1 flex">
+            <div className="flex">
                 {/* Burger */}
-                <div className="p-4 bg-orange-200 flex flex-col" onClick={() => setIsOpen(!isOpen)}>
-                    <button>
-                        {isOpen ? <X />
-                            : <div>
-                                <Menu className='mb-4' />
-                            </div>
-                        }
-                    </button>
+                <div className={`${isOpen && "hidden" } p-4 bg-orange-200 flex flex-col gap-4`} onClick={() => setIsOpen(!isOpen)}>
+
 
                     {!isOpen &&
                         <>
-                            <button onClick={() => setContent(<Chapter />)}><BookOpenText className='mb-4' /></button>
-                            <button onClick={() => setContent(<Character />)}><BookUser className='mb-4' /></button>
-                            <button onClick={() => setContent(<Snippet />)}><Lightbulb className='mb-4' /></button>
-                            <button onClick={() => setContent(<Note />)}><NotebookPen className='mb-4' /></button>
+                            <button className='bg-orange-400 rounded-2xl p-2 text-orange-100'
+                                onClick={() => setContent(<Chapter
+                                    chapters={chapters}
+                                    selectedChapter={selectedChapter}
+                                    setSelectedChapter={setSelectedChapter}
+                                    books={books}
+                                    selectedBook={selectedBook}
+                                    setSelectedBook={setSelectedBook}
+                                    addChapter={addChapter}
+                                    addBook={addBook}
+                                />)}> <BookOpenText className='' /></button>
+                            <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Character selectedBook={selectedBook} />)}><BookUser /></button>
+                            <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Snippet selectedBook={selectedBook} />)}><Lightbulb /></button>
+                            <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Note selectedBook={selectedBook} />)}><NotebookPen /></button>
                         </>
                     }
 
 
                 </div>
 
-                {/* Page */}
-                <div className="flex-1 p-4">
+                
+            </div>
+
+            {/* Page */}
+            <div className="flex-1 py-10 px-40">
                     {children}
                 </div>
-            </div>
         </div>
     )
 }

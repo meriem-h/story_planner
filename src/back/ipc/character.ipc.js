@@ -1,10 +1,10 @@
 const BaseIPC = require('./baseIpc')
-const ChapterRepository = require('../database/ChapterRepository')
+const CharacterRepository = require('../database/CharacterRepository')
 const { ipcMain } = require('electron')
 
 class CharacterIPC extends BaseIPC {
     constructor() {
-        super('character', new ChapterRepository())
+        super('characters', new CharacterRepository())
         this.custom()
     }
 

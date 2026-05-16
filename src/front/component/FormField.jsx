@@ -1,6 +1,6 @@
 import React from 'react'
 
-const SingleField = ({ field, onChange, errors }) => {
+const SingleField = ({ field, onChange, errors, selectClass = null }) => {
 
     const Icon = field.icon || false
     const datas = field.data || false
@@ -24,7 +24,7 @@ const SingleField = ({ field, onChange, errors }) => {
                     <select
                         name={field.name}
                         onChange={onChange}
-                        className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
+                        className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
                     >
                         {/* {datas.map((data) => (
                             <option key={data.value} value={data.value}>{data.text}</option>
@@ -55,8 +55,10 @@ const SingleField = ({ field, onChange, errors }) => {
                             name={field.name}
                             placeholder={field.placeholder}
                             onChange={onChange}
+                            {...(field.value !== undefined && { value: field.value })}
                             className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
                             rows={5}
+
                         />
 
                         :
@@ -65,6 +67,7 @@ const SingleField = ({ field, onChange, errors }) => {
                             name={field.name}
                             placeholder={field.placeholder}
                             onChange={onChange}
+                            {...(field.value !== undefined && { value: field.value })}
                             className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
                         />
                 }
@@ -74,7 +77,8 @@ const SingleField = ({ field, onChange, errors }) => {
     )
 }
 
-export default function FormField({ fields, onChange, errors }) {
+export default function FormField({ fields, onChange, errors, selectClass }) {
+
     return (
         <>
             {fields.map((field, index) => {
@@ -82,12 +86,12 @@ export default function FormField({ fields, onChange, errors }) {
                     return (
                         <div key={index} className="flex justify-around gap-2">
                             {field.data.map((twinField) => (
-                                <SingleField key={twinField.name} field={twinField} onChange={onChange} errors={errors} />
+                                <SingleField key={twinField.name} field={twinField} onChange={onChange} errors={errors} selectClass={selectClass} />
                             ))}
                         </div>
                     )
                 }
-                return <SingleField key={field.name} field={field} onChange={onChange} errors={errors} />
+                return  <SingleField key={field.name} field={field} onChange={onChange} errors={errors} selectClass={selectClass} />
             })}
         </>
     )

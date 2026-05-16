@@ -20,15 +20,10 @@ export default function Home() {
     const [saved, setSaved] = useState(false)
 
 
-    // 1. Au démarrage → charge les livres
+    // Au démarrage → charge les livres  Quand selectedBook change → charge les chapitres
     useEffect(() => {
-        fetchBooks()
-    }, [])
-
-    // 2. Quand selectedBook change → charge les chapitres
-    useEffect(() => {
-        if (!selectedBook) return
-        fetchChapters(selectedBook.id)
+        !selectedBook ? fetchBooks()
+        : fetchChapters(selectedBook.id)
     }, [selectedBook])
 
     const fetchBooks = async () => {
@@ -178,7 +173,7 @@ export default function Home() {
                                 <div>
                                     {chapterListeField &&
 
-                                        <FormField fields={chapterListeField} onChange={handleChapterChange} />
+                                        <FormField fields={chapterListeField} onChange={handleChapterChange} selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-orange-500 hover:text-orange-300 transition-colors"}/>
                                     }
                                 </div>
 
