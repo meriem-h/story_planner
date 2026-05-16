@@ -23,11 +23,6 @@ export default function ModalChapter({ onSuccess, book }) {
 
     }
 
-    useEffect(() => {
-
-        console.log("chapterModal => ", chapter);
-
-    }, [chapter])
 
 
 
@@ -41,7 +36,6 @@ export default function ModalChapter({ onSuccess, book }) {
         const missingFields = []
 
         if (!chapter.title) missingFields.push('title')
-        console.log("missingFields => ", missingFields);
 
 
         // if (missingFields.length > 0) {
@@ -57,14 +51,9 @@ export default function ModalChapter({ onSuccess, book }) {
 
 
         if (result.success) {
-
-            console.log('chapter success => ', result);
             onSuccess(result)
-
         } else {
-
             errorListe[result.type] = result.message
-            console.log('error => ', result);
         }
 
         if (Object.keys(errorListe).length > 0) {

@@ -45,7 +45,6 @@ class BaseRepository {
         const keys = Object.keys(conditions)
         const where = keys.map(key => `${key} = ?`).join(' AND ')
         const values = Object.values(conditions)
-        console.log('🔍 SQL =>', `SELECT * FROM ${this.table} WHERE ${where}`, values)
         const [rows] = await db.query(
             `SELECT * FROM ${this.table} WHERE ${where}`,
             values

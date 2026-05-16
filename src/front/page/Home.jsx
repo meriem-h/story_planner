@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Layout from '../component/Layout'
+import Layout from '../component/layout/Layout'
 import { useApi } from '../context/ApiContext'
 import Modal from '../component/modal/Modal'
 import ModalBook from '../component/modal/ModalBook'
@@ -25,12 +25,6 @@ export default function Home() {
         fetchBooks()
     }, [])
 
-
-    useEffect(() => {
-        console.log("selectedChapter => ", selectedChapter);
-        console.log("chapterListeField => ", chapterListeField);
-    }, [selectedChapter, chapterListeField])
-
     // 2. Quand selectedBook change → charge les chapitres
     useEffect(() => {
         if (!selectedBook) return
@@ -53,7 +47,6 @@ export default function Home() {
         const result = await api('chapter:findBy', { book_id: bookId })
         const fildListe = []
 
-        console.log('chapter data => ', result);
         if (result.data && result.data.length > 0) {  // ← vérifie que data existe
             setChapters(result.data)
             const lastChapter = result.data.reduce((a, b) =>
@@ -84,9 +77,8 @@ export default function Home() {
         setIsOpen(false)
         fetchBooks()
     }
-    const handleChapterCreated = (bookId) => {
 
-        console.log('bookId => ', bookId);
+    const handleChapterCreated = (bookId) => {
         setIsChapterOpen(false)
         fetchChapters(bookId.id)
     }
@@ -132,12 +124,14 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-orange-50">
             <Layout
+                chapters={chapters}
                 books={books}
                 selectedBook={selectedBook}
                 setSelectedBook={setSelectedBook}
-                chapters={chapters}
                 selectedChapter={selectedChapter}
                 setSelectedChapter={setSelectedChapter}
+                addChapter={setIsChapterOpen}
+                addBook={setIsOpen}
             >
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Créer un nouveau livre" size={50}>
                     <ModalBook onSuccess={handleBookCreated} />

@@ -24,13 +24,6 @@ export default function ModalBook({ onSuccess }) {
 
     }
 
-    useEffect(() => {
-
-        console.log("book => ", book);
-
-    }, [book])
-
-
 
     const handleClick = async (e) => {
 
@@ -42,7 +35,6 @@ export default function ModalBook({ onSuccess }) {
         const missingFields = []
 
         if (!book.title) missingFields.push('title')
-        console.log("missingFields => ", missingFields);
 
 
         // if (missingFields.length > 0) {
@@ -58,14 +50,10 @@ export default function ModalBook({ onSuccess }) {
 
 
         if (result.success) {
-
-            console.log('book success => ', result);
             onSuccess(result)
 
         } else {
-
             errorListe[result.type] = result.message
-            console.log('error => ', result);
         }
 
         if (Object.keys(errorListe).length > 0) {

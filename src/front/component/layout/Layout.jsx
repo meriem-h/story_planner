@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X, Lightbulb, BookUser, BookOpenText, NotebookPen } from 'lucide-react'
 
@@ -8,9 +8,14 @@ import Snippet from "./SnippetLayout";
 import Note from "./NoteLayout";
 
 
-export default function Layout({ children }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter ,addBook }) {
+
     const [isOpen, setIsOpen] = useState(false)
-    const [content, setContent] = useState(<Chapter />)
+    const [content, setContent] = useState(<Chapter chapters={chapters} addChapter={addChapter}  selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} addBook={addBook} selectedBook={selectedBook} setSelectedBook={setSelectedBook} />)
+
+    useEffect(() => {
+        setContent(<Chapter chapters={chapters} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} selectedBook={selectedBook} setSelectedBook={setSelectedBook} addChapter={addChapter} addBook={addBook}/>)
+    }, [chapters, selectedChapter, books, selectedBook])
 
     return (
         <div className="flex h-screen">
@@ -19,17 +24,27 @@ export default function Layout({ children }) {
             <div className={`${isOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden  bg-orange-200`}>
 
                 <div className='p-4 flex gap-6 justify-center'>
-                    <button onClick={() => setContent(<Chapter />)}> <BookOpenText className='' /> </button>
-                    <button onClick={() => setContent(<Character />)}><BookUser className='' /></button>
-                    <button onClick={() => setContent(<Snippet />)}><Lightbulb className='' /></button>
-                    <button onClick={() => setContent(<Note />)}><NotebookPen className='' /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100'
+                        onClick={() => setContent(<Chapter
+                            chapters={chapters}
+                            selectedChapter={selectedChapter}
+                            setSelectedChapter={setSelectedChapter}
+                            books={books} 
+                            selectedBook={selectedBook} 
+                            setSelectedBook={setSelectedBook}
+                            addChapter={addChapter}  
+                            addBook={addBook}
+                        />)}> <BookOpenText className='' /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Character />)}><BookUser /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Snippet />)}><Lightbulb className='' /></button>
+                    <button className='bg-orange-400 rounded-2xl p-2 text-orange-100' onClick={() => setContent(<Note />)}><NotebookPen className='' /></button>
                 </div>
 
                 <div>
                     {content}
                 </div>
 
-            
+
             </div>
 
             {/* Contenu */}
