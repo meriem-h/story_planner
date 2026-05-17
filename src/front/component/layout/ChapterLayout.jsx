@@ -79,12 +79,15 @@ export default function ChapterLayout(props) {
                                     onClick={(e) => e.stopPropagation()}
                                 />
                                 {/* filtre archivé */}
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowArchived(!showArchived) }}
-                                    className={`text-xs px-2 py-1 rounded-lg text-left transition-colors ${showArchived ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-50'}`}
-                                >
-                                    📦 {showArchived ? 'Masquer les archivés' : 'Afficher les archivés'}
-                                </button>
+                                <div>
+
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowArchived(!showArchived) }}
+                                        className={`text-xs px-2 py-1 rounded-lg text-left transition-colors ${showArchived ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-50'}`}
+                                    >
+                                        📦 {showArchived ? 'Masquer les archivés' : 'Afficher les archivés'}
+                                    </button>
+                                </div>
                                 <hr className='border-orange-100' />
                                 {/* liste */}
                                 <div className='overflow-y-auto max-h-48'>
@@ -92,11 +95,10 @@ export default function ChapterLayout(props) {
                                         <div
                                             key={book.id}
                                             onClick={() => { props.setSelectedBook(book); setBookDropdownOpen(false); setBookSearch('') }}
-                                            className={`px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors flex items-center gap-2 ${
-                                                book.id === props.selectedBook?.id
+                                            className={`px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors flex items-center gap-2 ${book.id === props.selectedBook?.id
                                                     ? 'bg-orange-300 text-white font-bold'
                                                     : 'hover:bg-orange-50 text-orange-800'
-                                            }`}
+                                                }`}
                                         >
                                             {book.archived ? <span className='text-xs'>📦</span> : null}
                                             {book.title}
@@ -134,11 +136,10 @@ export default function ChapterLayout(props) {
                     {props?.chapters?.map((chapter) => (
                         <div
                             key={chapter.id}
-                            className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${
-                                props.selectedChapter?.id == chapter.id
+                            className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${props.selectedChapter?.id == chapter.id
                                     ? 'bg-orange-300 text-white font-bold'
                                     : 'hover:bg-orange-100 text-orange-800'
-                            }`}
+                                }`}
                         >
                             <button
                                 data-id={chapter.id}
