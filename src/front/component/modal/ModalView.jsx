@@ -1,0 +1,94 @@
+import React from 'react'
+import { Pin, BookOpen, ScrollText, NotebookPen, Lightbulb } from 'lucide-react'
+
+const TYPE_LABELS = {
+    dialogue: 'Dialogue',
+    scene: 'Scène',
+    description: 'Description',
+    flashback: 'Flashback',
+    idee: 'Idée',
+    citation: 'Citation',
+    note_auteur: 'Note auteur',
+    transition: 'Transition',
+    autre: 'Autre',
+}
+
+const USED_LABELS = {
+    disponible: { label: 'Disponible', class: 'bg-orange-100 text-orange-600' },
+    utilise: { label: '✅ Utilisé', class: 'bg-green-100 text-green-600' },
+    abandonne: { label: '❌ Abandonné', class: 'bg-red-100 text-red-600' },
+}
+
+const TYPE_ICONS = {
+    lore: <ScrollText size={24} className='text-white' />,
+    note: <NotebookPen size={24} className='text-white' />,
+    snippet: <Lightbulb size={24} className='text-white' />,
+    book: <BookOpen size={24} className='text-white' />,
+}
+
+export default function ModalView({ item, type }) {
+    if (!item) return null
+
+    return (
+        <div className='flex flex-col gap-4 overflow-y-auto max-h-[70vh]'>
+
+            {/* header */}
+            <div className='flex items-center gap-3'>
+                <div className='w-12 h-12 rounded-2xl bg-orange-300 flex items-center justify-center flex-shrink-0'>
+                    {TYPE_ICONS[type]}
+                </div>
+                <div>
+                    <p className='text-xs text-orange-400 uppercase tracking-wider font-bold mb-1'>
+                        {type === 'snippet' && (TYPE_LABELS[item.type] || item.type)}
+                        {type === 'lore' && 'Lore'}
+                        {type === 'note' && 'Note'}
+                        {type === 'book' && 'Livre'}
+                    </p>
+                    <h2 className='text-xl font-bold text-orange-800'>
+                        {item.title || 'Sans titre'}
+                    </h2>
+                </div>
+            </div>
+
+            {/* badges */}
+            <div className='flex gap-2 flex-wrap'>
+                {type === 'lore' && item.category && (
+                    <span className='text-xs bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-medium'>
+                        {item.category}
+                    </span>
+                )}
+                {type === 'snippet' && item.used && (
+                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${USED_LABELS[item.used]?.class}`}>
+                        {USED_LABELS[item.used]?.label}
+                    </span>
+                )}
+                {type === 'snippet' && !!item.pinned && (
+                    <span className='text-xs bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-medium flex items-center gap-1'>
+                        <Pin size={10} className='fill-orange-400' /> Épinglé
+                    </span>
+                )}
+            </div>
+
+            {/* séparateur */}
+            <hr className='border-orange-100' />
+
+            {/* contenu */}
+            {/* contenu */}
+            <div className='min-h-[200px] pb-4'>
+                {item.content || item.description ? (
+                    <div>
+                        <p className='text-xs font-bold text-orange-400 uppercase tracking-wider mb-3'>
+                            {type === 'book' ? 'Description' : 'Contenu'}
+                        </p>
+                        <p className='text-orange-800 leading-relaxed whitespace-pre-wrap'>
+                            {item.content || item.description}
+                        </p>
+                    </div>
+                ) : (
+                    <p className='text-center text-orange-300 italic pt-8'>Aucun contenu</p>
+                )}
+            </div>
+
+        </div>
+    )
+}

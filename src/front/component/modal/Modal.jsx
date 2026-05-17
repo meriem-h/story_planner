@@ -2,7 +2,7 @@ import React from 'react'
 import { X } from 'lucide-react'
 
 
-export default function Modal({ isOpen, onClose, title, children, size = 80 }) {
+export default function Modal({ isOpen, onClose, title, children, size = 80, maxSize = 80 }) {
     if (!isOpen) return null
     
     return (
@@ -14,10 +14,9 @@ export default function Modal({ isOpen, onClose, title, children, size = 80 }) {
             />
             
             {/* modal par dessus */}
-            {/* <div className={`relative bg-white rounded-lg p-6 shadow-xl z-10  min-w-[50%]`}> */}
-            <div className={`relative bg-white rounded-lg p-6 shadow-xl z-10  min-w-[${size}%]`}>
+            <div className={`relative bg-white rounded-lg p-6 shadow-xl z-10  min-w-[${size}%]  max-w-[${maxSize}%]`}>
             
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center">
                     <h2>{title}</h2>
                     <button onClick={onClose}><X /></button>
                 </div>

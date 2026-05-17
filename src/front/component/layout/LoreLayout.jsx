@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useApi } from '../../context/ApiContext'
-import { BadgePlus, ScrollText } from 'lucide-react'
+import { BadgePlus, ScrollText, Search, Trash2, Pen } from 'lucide-react'
 import Modal from '../modal/Modal'
+import ModalView from '../modal/ModalView'
 import ModalLore from '../modal/ModalLore'
+import ModalDelete from '../modal/ModalDelete'
 
 export default function LoreLayout({ selectedBook }) {
 
@@ -10,7 +12,12 @@ export default function LoreLayout({ selectedBook }) {
     const [lores, setLores] = useState([])
     const [isOpen, setIsOpen] = useState(false)
     const [loreToEdit, setLoreToEdit] = useState(null)
+    const [loreToDelete, setLoreToDelete] = useState(null)
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const [filterCategory, setFilterCategory] = useState('tous')
+    const [search, setSearch] = useState('')
+    const [itemToView, setItemToView] = useState(null)
+    const [isViewOpen, setIsViewOpen] = useState(false)
 
     useEffect(() => {
         fetchLore()
@@ -28,15 +35,26 @@ export default function LoreLayout({ selectedBook }) {
 
     const categories = ['tous', ...new Set(lores.map(l => l.category).filter(Boolean))]
 
-    const filteredLores = filterCategory === 'tous'
-        ? lores
-        : lores.filter(l => l.category === filterCategory)
+    const filteredLores = lores
+        .filter(l => filterCategory === 'tous' || l.category === filterCategory)
+        .filter(l => l.title.toLowerCase().includes(search.toLowerCase()))
 
     return (
         <>
-            <Modal isOpen={isOpen} onClose={() => { setIsOpen(false); setLoreToEdit(null) }} title={loreToEdit ? "Modifier" : "Nouveau lore"} size={50}>
+            <Modal isOpen={isOpen} onClose={() => { setIsOpen(false); setLoreToEdit(null) }} size={50}>
                 <ModalLore onSuccess={handleLoreCreated} book={selectedBook} selectedLore={loreToEdit} />
             </Modal>
+            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
+                <ModalView item={itemToView} type="lore" />
+            </Modal>
+
+            <ModalDelete
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onSuccess={() => { fetchLore(); setIsConfirmOpen(false) }}
+                table="lore_entrie"
+                id={loreToDelete}
+            />
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
@@ -46,18 +64,34 @@ export default function LoreLayout({ selectedBook }) {
                 </button>
             </div>
 
+            {/* recherche */}
+            <div className='px-3 mb-2'>
+                <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
+                    <Search size={12} className='text-orange-400 flex-shrink-0' />
+                    <input
+                        type='text'
+                        placeholder='Rechercher...'
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className='w-full bg-transparent border-none outline-none text-sm text-orange-600 placeholder:text-orange-300'
+                    />
+                </div>
+            </div>
+
             {/* filtre catégorie */}
             {lores.length > 0 && (
                 <div className='px-3 mb-3'>
-                    <select
-                        className='w-full bg-transparent border-none outline-none cursor-pointer text-sm text-orange-600 appearance-none'
-                        value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value)}
-                    >
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat === 'tous' ? 'Toutes les catégories' : cat}</option>
-                        ))}
-                    </select>
+                    <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
+                        <select
+                            className='w-full bg-transparent border-none outline-none cursor-pointer text-sm text-orange-600 appearance-none'
+                            value={filterCategory}
+                            onChange={(e) => setFilterCategory(e.target.value)}
+                        >
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat === 'tous' ? 'Toutes les catégories' : cat}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             )}
 
@@ -73,8 +107,9 @@ export default function LoreLayout({ selectedBook }) {
                     {filteredLores.map(lore => (
                         <div
                             key={lore.id}
-                            className='p-3 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition-colors'
-                            onClick={() => { setLoreToEdit(lore); setIsOpen(true) }}
+                            className='group p-3 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition-colors'
+                            // onClick={() => { setLoreToEdit(lore); setIsOpen(true) }}
+                            onClick={() => { setItemToView(lore); setIsViewOpen(true) }}
                         >
                             <div className='flex items-start gap-3'>
                                 <div className='w-8 h-8 rounded-lg bg-orange-300 flex items-center justify-center text-white flex-shrink-0'>
@@ -91,6 +126,18 @@ export default function LoreLayout({ selectedBook }) {
                                         <p className='text-xs text-orange-400 line-clamp-2 mt-1'>{lore.content}</p>
                                     )}
                                 </div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setLoreToEdit(lore); setIsOpen(true) }}
+                                    className='opacity-0 group-hover:opacity-100 transition-opacity text-orange-300 hover:text-orange-500 flex-shrink-0'
+                                >
+                                    <Pen size={14} />
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setLoreToDelete(lore.id); setIsConfirmOpen(true) }}
+                                    className='opacity-0 group-hover:opacity-100 transition-opacity text-red-300 hover:text-red-500 flex-shrink-0'
+                                >
+                                    <Trash2 size={14} />
+                                </button>
                             </div>
                         </div>
                     ))}

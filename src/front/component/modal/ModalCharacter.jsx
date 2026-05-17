@@ -10,6 +10,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
     const [character, setCharacter] = useState({ book_id: book.id })
     const [fieldCharacter, setFieldCharacter] = useState([
         { label: 'Nom', name: 'name', type: 'text' },
+        { label: 'Âge', name: 'age', type: 'text', placeholder: 'ex: 25' },
         { label: 'Description', name: 'description', type: 'textarea' },
         { label: 'Personalité', name: 'personality', type: 'textarea' },
         { label: 'Notes', name: 'notes', type: 'textarea' },
