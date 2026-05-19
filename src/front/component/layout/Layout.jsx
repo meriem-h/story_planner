@@ -94,7 +94,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             </div>
 
             {/* Page */}
-            <div className="flex-1 py-10 px-40">
+            <div className="flex-1 px-40">
                 {children}
             </div>
         </div>
