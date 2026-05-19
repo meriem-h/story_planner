@@ -134,6 +134,7 @@ export default function Home() {
         })
         if (updateResult.success == true) {
             setSaved(true)
+            fetchChapters(selectedBook.id)
             setTimeout(() => setSaved(false), 2000)
         }
     }

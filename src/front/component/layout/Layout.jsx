@@ -41,7 +41,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
 
     return (
-        <div className="flex h-screen">
+        <div className="flex">
 
             {/* Sidebar */}
             <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} transition-all duration-300 overflow-hidden bg-orange-200`}>

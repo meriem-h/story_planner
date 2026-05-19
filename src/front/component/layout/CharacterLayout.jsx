@@ -52,7 +52,7 @@ export default function CharacterLayout({ selectedBook }) {
                 <ModalCharacter onSuccess={handleCharacterCreated} book={selectedBook} selectedCharacter={selectedCharacter} />
             </Modal>
 
-            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
+            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50} maxSize={60}>
                 <ModalViewCharacter character={characterToView} />
             </Modal>
 
