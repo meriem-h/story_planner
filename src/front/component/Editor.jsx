@@ -86,7 +86,7 @@ export default function Editor({ content, onChange }) {
                 .ql-toolbar {
                     position: sticky !important;
                     top: 0 !important;
-                    z-index: 100 !important;
+                    z-index: 8 !important;
                     background: white !important;
                     display: flex !important;
                     justify-content: center !important;
