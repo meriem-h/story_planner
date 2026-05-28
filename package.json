@@ -22,8 +22,17 @@
     "forge": {
       "packagerConfig": {
         "name": "Story Planner",
+        "executableName": "story-planner",
         "icon": "./assets/icon",
-        "asar": true
+        "asar": {
+          "unpack": "*.{node,dll}"
+        },
+        "extraFiles": [
+        {
+            "from": ".env",
+            "to": ".env"
+        }
+    ]
       },
       "makers": [
         {
@@ -70,13 +79,6 @@
               ]
             }
           }
-        },
-        {
-          "name": "@electron-forge/plugin-fuses",
-          "config": {
-            "version": 1,
-            "ResetAdHocDarwinSignature": false
-          }
         }
       ]
     }
@@ -90,9 +92,7 @@
     "@electron-forge/maker-squirrel": "^7.11.1",
     "@electron-forge/maker-zip": "^7.11.1",
     "@electron-forge/plugin-auto-unpack-natives": "^7.11.1",
-    "@electron-forge/plugin-fuses": "^7.11.1",
     "@electron-forge/plugin-webpack": "^7.11.1",
-    "@electron/fuses": "^1.8.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "autoprefixer": "^10.5.0",
     "babel-loader": "^10.1.1",
