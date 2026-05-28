@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText } from 'lucide-react'
+import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images } from 'lucide-react'
 
 import Chapter from "./ChapterLayout";
 import Character from "./CharacterLayout";
 import Snippet from "./SnippetLayout";
 import Note from "./NoteLayout";
 import Lore from "./LoreLayout";
+import Modal from '../modal/Modal';
+import ModalGallery from '../modal/ModalGallery';
 
 export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters }) {
 
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false)
     const [content, setContent] = useState(<Chapter chapters={chapters} addChapter={addChapter} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} addBook={addBook} selectedBook={selectedBook} setSelectedBook={setSelectedBook} fetchChapters={fetchChapters} />)
 
     useEffect(() => {
@@ -43,7 +46,12 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     return (
         <div className="flex">
 
-            {/* Sidebar */}
+            {/* Modal galerie */}
+            <Modal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} size={60}>
+                <ModalGallery book={selectedBook} />
+            </Modal>
+
+            {/* Sidebar ouverte */}
             <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} transition-all duration-300 overflow-hidden bg-orange-200`}>
                 <div className='p-4 flex gap-2 justify-center'>
                     <button className={btnClass('chapter')} title="Chapitres" onClick={showChapter}>
@@ -68,7 +76,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                 <div>{content}</div>
             </div>
 
-            {/* Contenu */}
+            {/* Sidebar fermée */}
             <div className="flex">
                 <div className={`${isOpen && "hidden"} p-4 bg-orange-200 flex flex-col gap-4`} onClick={() => setIsOpen(!isOpen)}>
                     {!isOpen &&
@@ -97,6 +105,16 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             <div className="flex-1 px-40">
                 {children}
             </div>
+
+            {/* Bouton galerie flottant */}
+            <button
+                onClick={() => setIsGalleryOpen(true)}
+                title="Galerie"
+                className='fixed bottom-6 right-6 z-50 bg-orange-400 hover:bg-orange-500 text-white rounded-full p-4 shadow-lg transition-colors'
+            >
+                <Images size={22} />
+            </button>
+
         </div>
     )
 }

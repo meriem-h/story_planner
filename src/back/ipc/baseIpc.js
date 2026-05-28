@@ -8,7 +8,18 @@ class BaseIPC {
         this.rootes()
     }
 
-    rootes() {        
+    rootes() {
+
+        ipcMain.handle(`${this.name}:reorder`, async (event, items) => {
+            try {
+                await this.repo.reorder(items)
+                return { success: true }
+            } catch (err) {
+                return { success: false, message: err.message }
+            }
+        })
+
+
         ipcMain.handle(`${this.name}:findAll`, async () => {
             try {
                 const data = await this.repo.findAll()
@@ -28,7 +39,7 @@ class BaseIPC {
         })
 
         ipcMain.handle(`${this.name}:create`, async (event, data) => {
-            
+
             try {
                 const id = await this.repo.create(data)
                 return { success: true, id }

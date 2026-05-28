@@ -6,6 +6,14 @@ class BaseRepository {
         this.table = table
     }
 
+    async reorder(items) {
+        const promises = items.map((item, index) =>
+            db.query(`UPDATE ${this.table} SET position = ? WHERE id = ?`, [index + 1, item.id])
+        )
+        await Promise.all(promises)
+        return true
+    }
+
 
     // on recupere les champs possible
     async getColumns() {
@@ -16,7 +24,7 @@ class BaseRepository {
         )
         return rows.map(row => row.COLUMN_NAME)
     }
-    
+
     // on retire les champs qui ne sont pas disponible en bdd
     async clean(data) {
         const columns = await this.getColumns()
@@ -25,13 +33,32 @@ class BaseRepository {
         )
     }
 
+    async findAll(joins = []) {
+        const hasPosition = await this.getColumns().then(cols => cols.includes('position'))
+        const orderBy = hasPosition ? 'ORDER BY position ASC' : ''
 
+        if (joins.length === 0) {
+            const [rows] = await db.query(`SELECT * FROM ${this.table} ${orderBy}`)
+            return rows
+        }
 
-    // les requette generique et repetitif
-    async findAll() {
-        const [rows] = await db.query(`SELECT * FROM ${this.table}`)
+        const joinSQL = joins.map(j =>
+            `${j.type || 'LEFT'} JOIN ${j.table} ${j.alias} ON ${j.alias}.${j.on.foreign} = t.${j.on.local}`
+        ).join(' ')
+
+        const selectExtra = joins.map(j =>
+            j.fields.map(f => `${j.alias}.${f} AS ${j.alias}_${f}`).join(', ')
+        ).join(', ')
+
+        const [rows] = await db.query(
+            `SELECT t.*, ${selectExtra}
+            FROM ${this.table} t
+            ${joinSQL}
+            ${orderBy}`
+        )
         return rows
     }
+
 
     async findById(id) {
         const [rows] = await db.query(
@@ -41,25 +68,77 @@ class BaseRepository {
         return rows[0] || null
     }
 
-    async findBy(conditions) {
+    async findBy(conditions, joins = []) {
+        const hasPosition = await this.getColumns().then(cols => cols.includes('position'))
+        const orderBy = hasPosition ? 'ORDER BY position ASC' : ''
+
         const keys = Object.keys(conditions)
-        const where = keys.map(key => `${key} = ?`).join(' AND ')
         const values = Object.values(conditions)
+
+        if (joins.length === 0) {
+            const where = keys.map(key => `${key} = ?`).join(' AND ')
+            const [rows] = await db.query(
+                `SELECT * FROM ${this.table} WHERE ${where} ${orderBy}`,
+                values
+            )
+            return rows
+        }
+
+        const where = keys.map(key => `t.${key} = ?`).join(' AND ')
+
+        const joinSQL = joins.map(j =>
+            `${j.type || 'LEFT'} JOIN ${j.table} ${j.alias} ON ${j.alias}.${j.on.foreign} = t.${j.on.local}`
+        ).join(' ')
+
+        const selectExtra = joins.map(j =>
+            j.fields.map(f => `${j.alias}.${f} AS ${j.alias}_${f}`).join(', ')
+        ).join(', ')
+
         const [rows] = await db.query(
-            `SELECT * FROM ${this.table} WHERE ${where}`,
+            `SELECT t.*, ${selectExtra}
+            FROM ${this.table} t
+            ${joinSQL}
+            WHERE ${where}
+            ${orderBy}`,
             values
         )
         return rows
     }
 
-    // async findBy(field, value) {
+    // async findBy(conditions, joins = []) {
+    //     const keys = Object.keys(conditions)
+    //     const values = Object.values(conditions)
+
+    //     if (joins.length === 0) {
+    //         const where = keys.map(key => `${key} = ?`).join(' AND ')
+    //         const [rows] = await db.query(
+    //             `SELECT * FROM ${this.table} WHERE ${where}`,
+    //             values
+    //         )
+    //         return rows
+    //     }
+
+    //     const where = keys.map(key => `t.${key} = ?`).join(' AND ')
+
+    //     const joinSQL = joins.map(j =>
+    //         `${j.type || 'LEFT'} JOIN ${j.table} ${j.alias} ON ${j.alias}.${j.on.foreign} = t.${j.on.local}`
+    //     ).join(' ')
+
+    //     const selectExtra = joins.map(j =>
+    //         j.fields.map(f => `${j.alias}.${f} AS ${j.alias}_${f}`).join(', ')
+    //     ).join(', ')
 
     //     const [rows] = await db.query(
-    //         `SELECT * FROM ${this.table} WHERE ${[field]} = ?`,
-    //         [value]
+    //         `SELECT t.*, ${selectExtra}
+    //      FROM ${this.table} t
+    //      ${joinSQL}
+    //      WHERE ${where}`,
+    //         values
     //     )
-    //     return rows[0] || null
+    //     return rows
     // }
+
+
 
     async create(data) {
         const cleanData = await this.clean(data)

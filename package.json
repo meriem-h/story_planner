@@ -51,6 +51,8 @@
     "react-dom": "^19.2.5",
     "react-quill-new": "^3.8.3",
     "react-router-dom": "^7.14.2",
-    "recharts": "^3.8.1"
+    "react-sortablejs": "^6.1.4",
+    "recharts": "^3.8.1",
+    "sortablejs": "^1.15.7"
   }
 }

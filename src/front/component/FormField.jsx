@@ -20,13 +20,12 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
                     </span>
                 )}
 
-                {(field.type == "select" && datas) ?
-
+                {(field.type === 'select' && datas) ?
                     <select
                         name={field.name}
                         onChange={onChange}
-                        value={datas.find(d => d.selected)?.value || ''}
-                        className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
+                        value={field.value !== undefined ? field.value : (datas.find(d => d.selected)?.value || '')}
+                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
                     >
                         {datas.map((data) => (
                             <option key={data.value} value={data.value}>
@@ -35,66 +34,36 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
                         ))}
                     </select>
 
-                    
-                    // <select
-                    //     name={field.name}
-                    //     onChange={onChange}
-                    //     className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
-                    // >
+                : (field.type === 'textarea') ?
+                    <textarea
+                        name={field.name}
+                        placeholder={field.placeholder}
+                        onChange={onChange}
+                        {...(field.value !== undefined && { value: field.value })}
+                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
+                        rows={5}
+                    />
 
-                    //     {datas.map((data) => (
-                    //         data.selected ? (
-                    //             <option
-                    //                 key={data.value}
-                    //                 value={data.value}
-                    //                 selected
-                    //             >
-                    //                 {data.text}
-                    //             </option>
-                    //         ) : (
-                    //             <option
-                    //                 key={data.value}
-                    //                 value={data.value}
-                    //             >
-                    //                 {data.text}
-                    //             </option>
-                    //         )
-                    //     ))}
-                    // </select>
-                    : (field.type === "textarea") ?
-
-                        <textarea
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            onChange={onChange}
-                            {...(field.value !== undefined && { value: field.value })}
-                            className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
-                            rows={5}
-
-                        />
-
-                        :
-                        <input
-                            type={field.type || 'text'}
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            onChange={onChange}
-                            {...(field.value !== undefined && { value: field.value })}
-                            className={` ${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body `}
-                        />
+                :
+                    <input
+                        type={field.type || 'text'}
+                        name={field.name}
+                        placeholder={field.placeholder}
+                        onChange={onChange}
+                        {...(field.value !== undefined && { value: field.value })}
+                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
+                    />
                 }
             </div>
-
         </div>
     )
 }
 
 export default function FormField({ fields, onChange, errors, selectClass }) {
-
     return (
         <>
             {fields.map((field, index) => {
-                if (field.type === "twin") {
+                if (field.type === 'twin') {
                     return (
                         <div key={index} className="flex justify-around gap-2">
                             {field.data.map((twinField) => (
