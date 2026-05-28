@@ -1,6 +1,6 @@
 {
   "name": "story-planner",
-  "productName": "story-planner",
+  "productName": "Story Planner",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
@@ -18,6 +18,69 @@
     "email": "meriem.s.hadi@gmail.com"
   },
   "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "name": "Story Planner",
+        "icon": "./assets/icon",
+        "asar": true
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "setupIcon": "./assets/icon.ico"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {
+            "options": {
+              "icon": "./assets/icon.png"
+            }
+          }
+        }
+      ],
+      "plugins": [
+        {
+          "name": "@electron-forge/plugin-auto-unpack-natives",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/plugin-webpack",
+          "config": {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/index.html",
+                  "js": "./src/renderer.jsx",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/preload.js"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/plugin-fuses",
+          "config": {
+            "version": 1,
+            "ResetAdHocDarwinSignature": false
+          }
+        }
+      ]
+    }
+  },
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-react": "^7.28.5",
