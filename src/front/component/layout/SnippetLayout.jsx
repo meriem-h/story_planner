@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useApi } from '../../context/ApiContext'
 import { BadgePlus, Pin, Check, Tag, Filter, Search, Trash2, Pen } from 'lucide-react'
+import { ReactSortable } from 'react-sortablejs'
 import Modal from '../modal/Modal'
 import ModalView from '../modal/ModalView'
 import ModalSnippet from '../modal/ModalSnippet'
@@ -40,7 +41,7 @@ export default function SnippetLayout({ selectedBook }) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const [filterType, setFilterType] = useState('tous')
     const [filterPinned, setFilterPinned] = useState(false)
-    const [filterUsed, setFilterUsed] = useState('tous')
+    const [filterUsed, setFilterUsed] = useState('disponible')
     const [search, setSearch] = useState('')
     const [itemToView, setItemToView] = useState(null)
     const [isViewOpen, setIsViewOpen] = useState(false)
@@ -59,6 +60,13 @@ export default function SnippetLayout({ selectedBook }) {
         setIsOpen(false)
     }
 
+    const handleReorder = async (newList) => {
+        setSnippets(newList)
+        await api('snippet:reorder', newList.map(s => ({ id: s.id })))
+    }
+
+    const isFiltering = search || filterType !== 'tous' || filterPinned || filterUsed !== 'tous'
+
     const filtered = snippets
         .filter(s => filterType === 'tous' || s.type === filterType)
         .filter(s => !filterPinned || s.pinned)
@@ -67,6 +75,51 @@ export default function SnippetLayout({ selectedBook }) {
             (s.title || '').toLowerCase().includes(search.toLowerCase()) ||
             s.content.toLowerCase().includes(search.toLowerCase())
         )
+
+    const renderSnippet = (snippet) => (
+        <div
+            key={snippet.id}
+            className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${
+                snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
+                : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
+                : 'bg-white border-orange-200 hover:bg-orange-50'
+            }`}
+            onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
+        >
+            <div className='flex justify-between items-start mb-2'>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[snippet.type] || TYPE_COLORS.autre}`}>
+                    {TYPE_LABELS[snippet.type] || snippet.type}
+                </span>
+                <div className='flex gap-1 items-center'>
+                    {snippet.pinned == 1 && <Pin size={14} className='text-orange-400 fill-orange-400' />}
+                    {snippet.used === 'utilise' && <Check size={14} className='text-green-400' />}
+                    {snippet.used === 'abandonne' && <span className='text-xs text-red-400'>❌</span>}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setSnippetToEdit(snippet); setIsOpen(true) }}
+                        className='hidden group-hover:flex text-orange-300 hover:text-orange-500 ml-1'
+                    >
+                        <Pen size={14} />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setSnippetToDelete(snippet.id); setIsConfirmOpen(true) }}
+                        className='hidden group-hover:flex text-red-300 hover:text-red-500 ml-1'
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                </div>
+            </div>
+            {snippet.title && (
+                <p className='font-bold text-orange-800 text-sm mb-1'>{snippet.title}</p>
+            )}
+            <p className={`text-xs line-clamp-2 ${
+                snippet.used === 'abandonne' ? 'text-red-300 line-through'
+                : snippet.used === 'utilise' ? 'text-gray-400'
+                : 'text-orange-400'
+            }`}>
+                {snippet.content}
+            </p>
+        </div>
+    )
 
     return (
         <>
@@ -154,54 +207,19 @@ export default function SnippetLayout({ selectedBook }) {
                 </div>
             ) : (
                 <div className='p-3 overflow-y-auto max-h-[calc(90vh-160px)] flex flex-col gap-3'>
-                    {filtered.map(snippet => (
-                        <div
-                            key={snippet.id}
-                            className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
-                                : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
-                                    : 'bg-white border-orange-200 hover:bg-orange-50'
-                                }`}
-                            onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
+                    {isFiltering ? (
+                        filtered.map(snippet => renderSnippet(snippet))
+                    ) : (
+                        <ReactSortable
+                            list={snippets}
+                            setList={handleReorder}
+                            animation={200}
+                            ghostClass='opacity-30'
+                            className='flex flex-col gap-3'
                         >
-                            <div className='flex justify-between items-start mb-2'>
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[snippet.type] || TYPE_COLORS.autre}`}>
-                                    {TYPE_LABELS[snippet.type] || snippet.type}
-                                </span>
-                                <div className='flex gap-1 items-center'>
-
-                                    {snippet.pinned == 1 && <Pin size={14} className='text-orange-400 fill-orange-400' />}
-                                    {snippet.used === 'utilise' && <Check size={14} className='text-green-400' />}
-                                    {snippet.used === 'abandonne' && <span className='text-xs text-red-400'>❌</span>}
-                                    
-                                    
-
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); setSnippetToEdit(snippet); setIsOpen(true) }}
-                                        className='hidden group-hover:flex text-orange-300 hover:text-orange-500 ml-1'
-                                    >
-                                        <Pen size={14} />
-                                    </button>
-                                    
-
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); setSnippetToDelete(snippet.id); setIsConfirmOpen(true) }}
-                                        className='hidden group-hover:flex text-red-300 hover:text-red-500 ml-1'
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                            {snippet.title && (
-                                <p className='font-bold text-orange-800 text-sm mb-1'>{snippet.title}</p>
-                            )}
-                            <p className={`text-xs line-clamp-2 ${snippet.used === 'abandonne' ? 'text-red-300 line-through'
-                                : snippet.used === 'utilise' ? 'text-gray-400'
-                                    : 'text-orange-400'
-                                }`}>
-                                {snippet.content}
-                            </p>
-                        </div>
-                    ))}
+                            {snippets.map(snippet => renderSnippet(snippet))}
+                        </ReactSortable>
+                    )}
                 </div>
             )}
         </>

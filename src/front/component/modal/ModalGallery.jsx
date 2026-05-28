@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Trash2, Pen, Copy, Check, Plus, Images } from 'lucide-react'
+import { ReactSortable } from 'react-sortablejs'
 import { useApi } from '../../context/ApiContext'
 
 export default function ModalGallery({ book }) {
@@ -57,10 +58,13 @@ export default function ModalGallery({ book }) {
         setTimeout(() => setCopied(false), 2000)
     }
 
-    return (
-        // <div className='flex flex-col gap-4 p-4' style={{ height: '70vh' }}>
-        <div className='flex flex-col gap-4 p-4' style={{ width: '55vw', height: '70vh' }}>
+    const handleReorder = async (newList) => {
+        setAssets(newList)
+        await api('asset:reorder', newList.map(a => ({ id: a.id })))
+    }
 
+    return (
+        <div className='flex flex-col gap-4 p-4' style={{ width: '55vw', height: '70vh' }}>
 
             {/* champ ajout */}
             <div className='flex gap-2 flex-shrink-0'>
@@ -115,7 +119,7 @@ export default function ModalGallery({ book }) {
                                 className='flex items-center gap-2 bg-orange-50 rounded-lg px-3 py-2 cursor-pointer hover:bg-orange-100 transition-colors min-w-0'
                                 title='Cliquer pour copier'
                             >
-                                <p className='text-xs text-orange-400 truncate flex-1'>{selected.url}</p>
+                                <p className='text-xs text-orange-400 truncate flex-1 min-w-0'>{selected.url}</p>
                                 {copied
                                     ? <Check size={14} className='text-green-400 flex-shrink-0' />
                                     : <Copy size={14} className='text-orange-300 flex-shrink-0' />
@@ -124,7 +128,7 @@ export default function ModalGallery({ book }) {
 
                             {/* edit inline */}
                             {editId === selected.id ? (
-                                <div className='flex flex-col gap-2'>
+                                <div className='flex flex-col gap-2 flex-shrink-0'>
                                     <input
                                         type='text'
                                         placeholder='Label'
@@ -167,8 +171,15 @@ export default function ModalGallery({ book }) {
                         </div>
                     )}
 
-                    {/* strip horizontale avec scroll */}
-                    <div className='flex gap-2 overflow-x-auto flex-shrink-0 pb-1'>
+                    {/* strip horizontale avec drag & drop */}
+                    <ReactSortable
+                        list={assets}
+                        setList={handleReorder}
+                        animation={200}
+                        ghostClass='opacity-30'
+                        direction='horizontal'
+                        className='flex gap-2 overflow-x-auto flex-shrink-0 pb-1'
+                    >
                         {assets.map(asset => (
                             <div
                                 key={asset.id}
@@ -189,7 +200,7 @@ export default function ModalGallery({ book }) {
                                 )}
                             </div>
                         ))}
-                    </div>
+                    </ReactSortable>
 
                 </div>
             )}
