@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Trash2, Pen, Copy, Check, Plus, Images } from 'lucide-react'
 import { ReactSortable } from 'react-sortablejs'
 import { useApi } from '../../context/ApiContext'
+import ModalDelete from './ModalDelete'
 
 export default function ModalGallery({ book }) {
 
     const api = useApi()
     const [assets, setAssets] = useState([])
+    const [firstAssets, setFirstAssets] = useState([])
     const [selected, setSelected] = useState(null)
     const [newUrl, setNewUrl] = useState('')
     const [newLabel, setNewLabel] = useState('')
@@ -14,6 +16,8 @@ export default function ModalGallery({ book }) {
     const [editId, setEditId] = useState(null)
     const [editLabel, setEditLabel] = useState('')
     const [editUrl, setEditUrl] = useState('')
+    const [assetToDelete, setAssetToDelete] = useState(null)
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
     useEffect(() => {
         fetchAssets()
@@ -23,7 +27,10 @@ export default function ModalGallery({ book }) {
         const result = await api('asset:findBy', { book_id: book.id })
         const data = result.data || []
         setAssets(data)
-        if (data.length > 0 && !selected) setSelected(data[0])
+        if (data.length > 0 && !selected) {
+            setSelected(data[0])
+            setFirstAssets(data[0])
+        }
     }
 
     const handleAdd = async () => {
@@ -34,9 +41,12 @@ export default function ModalGallery({ book }) {
         fetchAssets()
     }
 
-    const handleDelete = async (id) => {
-        await api('asset:delete', { id })
-        if (selected?.id === id) setSelected(null)
+    const handleDelete = async () => {
+        await api('asset:delete', assetToDelete)
+        if (selected?.id === assetToDelete) setSelected(null)
+        setIsConfirmOpen(false)
+        setSelected(firstAssets)
+
         fetchAssets()
     }
 
@@ -65,6 +75,14 @@ export default function ModalGallery({ book }) {
 
     return (
         <div className='flex flex-col gap-4 p-4' style={{ width: '55vw', height: '70vh' }}>
+
+            <ModalDelete
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onSuccess={handleDelete}
+                table="asset"
+                id={assetToDelete}
+            />
 
             {/* champ ajout */}
             <div className='flex gap-2 flex-shrink-0'>
@@ -100,7 +118,6 @@ export default function ModalGallery({ book }) {
             ) : (
                 <div className='flex flex-col gap-3 flex-1 min-h-0'>
 
-                    {/* image grande + actions */}
                     {selected && (
                         <div className='flex-1 flex flex-col gap-2 min-h-0'>
 
@@ -161,7 +178,7 @@ export default function ModalGallery({ book }) {
                                         <Pen size={13} /> Modifier
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(selected.id)}
+                                        onClick={() => { setAssetToDelete(selected.id); setIsConfirmOpen(true) }}
                                         className='flex-1 flex items-center justify-center gap-1 py-2 border border-red-200 text-red-400 hover:bg-red-50 rounded-lg text-sm transition-colors'
                                     >
                                         <Trash2 size={13} /> Supprimer

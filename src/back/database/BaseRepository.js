@@ -105,43 +105,27 @@ class BaseRepository {
         return rows
     }
 
-    // async findBy(conditions, joins = []) {
-    //     const keys = Object.keys(conditions)
-    //     const values = Object.values(conditions)
-
-    //     if (joins.length === 0) {
-    //         const where = keys.map(key => `${key} = ?`).join(' AND ')
-    //         const [rows] = await db.query(
-    //             `SELECT * FROM ${this.table} WHERE ${where}`,
-    //             values
-    //         )
-    //         return rows
-    //     }
-
-    //     const where = keys.map(key => `t.${key} = ?`).join(' AND ')
-
-    //     const joinSQL = joins.map(j =>
-    //         `${j.type || 'LEFT'} JOIN ${j.table} ${j.alias} ON ${j.alias}.${j.on.foreign} = t.${j.on.local}`
-    //     ).join(' ')
-
-    //     const selectExtra = joins.map(j =>
-    //         j.fields.map(f => `${j.alias}.${f} AS ${j.alias}_${f}`).join(', ')
-    //     ).join(', ')
-
-    //     const [rows] = await db.query(
-    //         `SELECT t.*, ${selectExtra}
-    //      FROM ${this.table} t
-    //      ${joinSQL}
-    //      WHERE ${where}`,
-    //         values
+    // async create(data) {
+    //     const cleanData = await this.clean(data)
+    //     const [result] = await db.query(
+    //         `INSERT INTO ${this.table} SET ?`,
+    //         [cleanData]
     //     )
-    //     return rows
+    //     return result.insertId
     // }
-
-
 
     async create(data) {
         const cleanData = await this.clean(data)
+
+        // récupère la position max et ajoute 1
+        const columns = await this.getColumns()
+        if (columns.includes('position')) {
+            const [rows] = await db.query(
+                `SELECT MAX(position) as maxPos FROM ${this.table}`
+            )
+            cleanData.position = (rows[0].maxPos || 0) + 1
+        }
+
         const [result] = await db.query(
             `INSERT INTO ${this.table} SET ?`,
             [cleanData]
