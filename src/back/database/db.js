@@ -1,3 +1,13 @@
+const path = require('path')
+
+const envPath = process.resourcesPath 
+    ? path.join(process.resourcesPath, '.env')
+    : path.join(__dirname, '../../.env')
+
+require('dotenv').config({ path: envPath })
+
+
+
 require('dotenv').config()
 const mysql = require('mysql2/promise')
 
