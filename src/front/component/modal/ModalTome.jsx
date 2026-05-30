@@ -3,28 +3,39 @@ import { BookOpenText } from 'lucide-react'
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
 
-export default function ModalChapter({ onSuccess, book, tome }) {
-    const [error, setError] = useState(null)
-    const [chapter, setChapter] = useState({ 
-        book_id: book.id,
-        tome_id: tome?.id || null
-    })
+export default function ModalTome({ onSuccess, book, selectedTome }) {
+
     const api = useApi()
+    const [error, setError] = useState(null)
+    const [tome, setTome] = useState({ book_id: book.id })
+
+    useEffect(() => {
+        if (!selectedTome) {
+            setTome({ book_id: book.id })
+            return
+        }
+        setTome(selectedTome)
+    }, [selectedTome])
 
     const handleChange = (e) => {
-        setChapter(prev => ({ ...prev, [e.target.name]: e.target.value }))
+        setTome(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
     const handleClick = async (e) => {
         e.preventDefault()
-        setError('')
-
-        if (!chapter.title) {
+        if (!tome.title) {
             setError({ all: 'Le titre est obligatoire' })
             return
         }
 
-        const result = await api('chapter:create', chapter)
+        // const result = selectedTome
+        //     ? await api('tome:update', { id: selectedTome.id, data: tome })
+        //     : await api('tome:create', tome)
+        
+        const result = selectedTome
+            ? await api('tome:update', { id: selectedTome.id, data: tome })
+            : await api('tome:createWithChapter', tome)
+
         if (result.success) {
             onSuccess(result)
         } else {
@@ -39,15 +50,12 @@ export default function ModalChapter({ onSuccess, book, tome }) {
                     <BookOpenText className='text-white' size={32} />
                 </div>
                 <p className='text-orange-800 font-bold text-lg'>
-                    {chapter.title || 'Nouveau chapitre'}
+                    {tome.title || 'Nouveau tome'}
                 </p>
-                {tome && (
-                    <p className='text-xs text-orange-400'>{tome.title}</p>
-                )}
             </div>
             <form className='flex flex-col gap-4'>
                 <FormField
-                    fields={[{ label: 'Titre *', name: 'title', type: 'text', placeholder: 'Titre du chapitre' }]}
+                    fields={[{ label: 'Titre *', name: 'title', type: 'text', value: tome.title || '', placeholder: 'ex: Tome 2' }]}
                     onChange={handleChange}
                     errors={error}
                 />
@@ -60,7 +68,7 @@ export default function ModalChapter({ onSuccess, book, tome }) {
                     onClick={handleClick}
                     className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold mt-2'
                 >
-                    Créer le chapitre
+                    {selectedTome ? 'Modifier' : 'Créer le tome'}
                 </button>
             </form>
         </div>

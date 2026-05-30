@@ -15,11 +15,19 @@ const TYPE_LABELS = {
     autre: 'Autre',
 }
 
-export default function ModalSnippet({ onSuccess, book, selectedSnippet }) {
+export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet }) {
 
     const api = useApi()
     const [error, setError] = useState(null)
-    const [snippet, setSnippet] = useState(selectedSnippet || { book_id: book.id, type: 'autre', pinned: 0, used: 'disponible' })
+    const [snippet, setSnippet] = useState(
+        selectedSnippet || { 
+            book_id: book.id, 
+            tome_id: tome?.id || null,
+            type: 'autre', 
+            pinned: 0, 
+            used: 'disponible' 
+        }
+    )
 
     const [fieldSnippet, setFieldSnippet] = useState([
         {
@@ -38,7 +46,13 @@ export default function ModalSnippet({ onSuccess, book, selectedSnippet }) {
 
     useEffect(() => {
         if (!selectedSnippet) {
-            setSnippet({ book_id: book.id, type: 'autre', pinned: 0, used: 'disponible' })
+            setSnippet({ 
+                book_id: book.id, 
+                tome_id: tome?.id || null,
+                type: 'autre', 
+                pinned: 0, 
+                used: 'disponible' 
+            })
             setFieldSnippet(prev => prev.map(f => ({ ...f, value: undefined })))
             return
         }
@@ -95,6 +109,9 @@ export default function ModalSnippet({ onSuccess, book, selectedSnippet }) {
                 <p className='text-orange-800 font-bold text-lg'>
                     {snippet.title || 'Nouveau snippet'}
                 </p>
+                {tome && (
+                    <p className='text-xs text-orange-400'>{tome.title}</p>
+                )}
             </div>
 
             <form className='flex flex-col gap-4'>

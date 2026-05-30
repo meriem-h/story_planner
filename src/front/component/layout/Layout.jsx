@@ -9,22 +9,32 @@ import Lore from "./LoreLayout";
 import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters }) {
-
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
-    const [content, setContent] = useState(<Chapter chapters={chapters} addChapter={addChapter} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} addBook={addBook} selectedBook={selectedBook} setSelectedBook={setSelectedBook} fetchChapters={fetchChapters} />)
+
+     const chapterProps = {
+        chapters, selectedChapter, setSelectedChapter,
+        books, selectedBook, setSelectedBook,
+        addChapter, addBook, fetchChapters,
+        tomes, selectedTome, setSelectedTome,
+        fetchTomes
+    }
+
+    const [content, setContent] = useState(<Chapter {...chapterProps} />)
 
     useEffect(() => {
-        setContent(<Chapter chapters={chapters} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} selectedBook={selectedBook} setSelectedBook={setSelectedBook} addChapter={addChapter} addBook={addBook} fetchChapters={fetchChapters} />)
-    }, [chapters, selectedChapter, books, selectedBook])
+        if (activeView === 'chapter') {
+            setContent(<Chapter {...chapterProps} />)
+        }
+    }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
 
     const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-orange-600 text-orange-100' : 'bg-orange-400 text-orange-100 hover:bg-orange-500'}`
 
     const showChapter = () => {
         setActiveView('chapter')
-        setContent(<Chapter chapters={chapters} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} books={books} selectedBook={selectedBook} setSelectedBook={setSelectedBook} addChapter={addChapter} addBook={addBook} fetchChapters={fetchChapters} />)
+        setContent(<Chapter {...chapterProps} />)
     }
     const showCharacter = () => {
         setActiveView('character')
@@ -36,7 +46,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
     const showSnippet = () => {
         setActiveView('snippet')
-        setContent(<Snippet selectedBook={selectedBook} />)
+        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} />)
     }
     const showNote = () => {
         setActiveView('note')
@@ -46,7 +56,6 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     return (
         <div className="flex">
 
-            {/* Modal galerie */}
             <Modal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} size={60}>
                 <ModalGallery book={selectedBook} />
             </Modal>

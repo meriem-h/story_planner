@@ -1,36 +1,43 @@
 const BaseIPC = require('./baseIpc')
 const BookRepository = require('../database/BookRepository')
 const ChapterRepository = require('../database/ChapterRepository')
+const TomeRepository = require('../database/TomeRepository')
 const { ipcMain } = require('electron')
 
 class BookIPC extends BaseIPC {
     constructor() {
         super('book', new BookRepository())
         this.chapterRepo = new ChapterRepository()
+        this.tomeRepo = new TomeRepository()
         this.custom()
     }
 
     custom() {
-        // supprime le create de base si je veut le remplacer par un create custom
-        // ipcMain.removeHandler('task:create')
-
-        // //exemple pour des requette custom et hor base
-        // ipcMain.handle('task:create', async (event, {}) => {
-        // })
-
         ipcMain.handle('book:createWithChapter', async (event, data) => {
             try {
-              const bookId = await this.repo.create(data)
-              const chapterId = await this.chapterRepo.create({
-                book_id: bookId,
-                title: 'Chapitre 1',
-                position: 1
-              })
-              return { success: true, bookId, chapterId }
+                // 1. crée le livre
+                const bookId = await this.repo.create(data)
+
+                // 2. crée le tome 1
+                const tomeId = await this.tomeRepo.create({
+                    book_id: bookId,
+                    title: 'Tome 1',
+                    position: 1
+                })
+
+                // 3. crée le chapitre 1 lié au tome
+                const chapterId = await this.chapterRepo.create({
+                    book_id: bookId,
+                    tome_id: tomeId,
+                    title: 'Chapitre 1',
+                    position: 1
+                })
+
+                return { success: true, bookId, tomeId, chapterId }
             } catch (err) {
-              return { success: false, message: err.message }
+                return { success: false, message: err.message }
             }
-          })
+        })
     }
 }
 

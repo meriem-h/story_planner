@@ -31,7 +31,7 @@ const TYPE_LABELS = {
     autre: 'Autre',
 }
 
-export default function SnippetLayout({ selectedBook }) {
+export default function SnippetLayout({ selectedBook, selectedTome }) {
 
     const api = useApi()
     const [snippets, setSnippets] = useState([])
@@ -48,10 +48,13 @@ export default function SnippetLayout({ selectedBook }) {
 
     useEffect(() => {
         fetchSnippets()
-    }, [])
+    }, [selectedTome])
 
     const fetchSnippets = async () => {
-        const result = await api('snippet:findBy', { book_id: selectedBook.id })
+        const conditions = selectedTome
+            ? { tome_id: selectedTome.id }
+            : { book_id: selectedBook.id }
+        const result = await api('snippet:findBy', conditions)
         setSnippets(result.data || [])
     }
 
@@ -124,10 +127,10 @@ export default function SnippetLayout({ selectedBook }) {
     return (
         <>
             <Modal isOpen={isOpen} onClose={() => { setIsOpen(false); setSnippetToEdit(null) }} size={50}>
-                <ModalSnippet onSuccess={handleSnippetCreated} book={selectedBook} selectedSnippet={snippetToEdit} />
+                <ModalSnippet onSuccess={handleSnippetCreated} book={selectedBook} tome={selectedTome} selectedSnippet={snippetToEdit} />
             </Modal>
             <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
-                <ModalView item={itemToView} type="lore" />
+                <ModalView item={itemToView} type="snippet" />
             </Modal>
 
             <ModalDelete
@@ -140,7 +143,9 @@ export default function SnippetLayout({ selectedBook }) {
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>Snippets</p>
+                <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>
+                    Snippets {selectedTome && <span className='normal-case font-normal'>— {selectedTome.title}</span>}
+                </p>
                 <div className='flex items-center gap-2'>
                     <button
                         onClick={() => setFilterPinned(!filterPinned)}
@@ -182,7 +187,6 @@ export default function SnippetLayout({ selectedBook }) {
                         ))}
                     </select>
                 </div>
-
                 <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
                     <Filter size={12} className='text-orange-400 flex-shrink-0' />
                     <select

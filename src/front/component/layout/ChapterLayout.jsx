@@ -4,6 +4,7 @@ import Modal from '../modal/Modal'
 import ModalView from '../modal/ModalView'
 import ModalBook from '../modal/ModalBook'
 import ModalDelete from '../modal/ModalDelete'
+import ModalTome from '../modal/ModalTome'
 
 export default function ChapterLayout(props) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -13,6 +14,7 @@ export default function ChapterLayout(props) {
     const [bookSearch, setBookSearch] = useState('')
     const [bookDropdownOpen, setBookDropdownOpen] = useState(false)
     const [showArchived, setShowArchived] = useState(false)
+    const [isTomeOpen, setIsTomeOpen] = useState(false)
 
     useEffect(() => {
         const close = () => setBookDropdownOpen(false)
@@ -37,13 +39,24 @@ export default function ChapterLayout(props) {
             </Modal>
 
             <Modal isOpen={isUpdateBookOpen} onClose={() => setIsUpdateBookOpen(false)} size={50}>
-                <ModalBook onSuccess={() => { props.fetchChapters(props.selectedBook.id); setIsUpdateBookOpen(false) }} selectedBook={props.selectedBook} />
+                <ModalBook onSuccess={() => { props.fetchChapters(props.selectedTome?.id); setIsUpdateBookOpen(false) }} selectedBook={props.selectedBook} />
+            </Modal>
+            <Modal isOpen={isTomeOpen} onClose={() => setIsTomeOpen(false)} size={50}>
+                
+                <ModalTome
+                    onSuccess={() => {
+                        setIsTomeOpen(false)
+                        props.fetchTomes(props.selectedBook.id)
+                        props.fetchChapters(props.selectedTome?.id)
+                    }}
+                    book={props.selectedBook}
+                />
             </Modal>
 
             <ModalDelete
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
-                onSuccess={() => { props.fetchChapters(props.selectedBook.id); setIsConfirmOpen(false) }}
+                onSuccess={() => { props.fetchChapters(props.selectedTome?.id); setIsConfirmOpen(false) }}
                 table="chapter"
                 id={chapterToDelete}
             />
@@ -52,7 +65,7 @@ export default function ChapterLayout(props) {
             <div className='p-4 border-b border-orange-300'>
                 <div className='group flex items-center justify-between gap-2 mb-3'>
 
-                    {/* dropdown custom */}
+                    {/* dropdown livres */}
                     <div className='relative flex-1 min-w-0' onClick={(e) => e.stopPropagation()}>
                         <div
                             className='flex items-center gap-1 cursor-pointer'
@@ -69,7 +82,6 @@ export default function ChapterLayout(props) {
 
                         {bookDropdownOpen && (
                             <div className='absolute top-full left-0 w-64 bg-white rounded-xl shadow-lg z-50 p-2 flex flex-col gap-1'>
-                                {/* recherche */}
                                 <input
                                     type='text'
                                     placeholder='Rechercher...'
@@ -78,9 +90,7 @@ export default function ChapterLayout(props) {
                                     className='w-full px-2 py-1 text-sm border border-orange-200 rounded-lg outline-none text-orange-600'
                                     onClick={(e) => e.stopPropagation()}
                                 />
-                                {/* filtre archivé */}
                                 <div>
-
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setShowArchived(!showArchived) }}
                                         className={`text-xs px-2 py-1 rounded-lg text-left transition-colors ${showArchived ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-50'}`}
@@ -89,15 +99,14 @@ export default function ChapterLayout(props) {
                                     </button>
                                 </div>
                                 <hr className='border-orange-100' />
-                                {/* liste */}
                                 <div className='overflow-y-auto max-h-48'>
                                     {filteredBooks?.map(book => (
                                         <div
                                             key={book.id}
                                             onClick={() => { props.setSelectedBook(book); setBookDropdownOpen(false); setBookSearch('') }}
                                             className={`px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors flex items-center gap-2 ${book.id === props.selectedBook?.id
-                                                    ? 'bg-orange-300 text-white font-bold'
-                                                    : 'hover:bg-orange-50 text-orange-800'
+                                                ? 'bg-orange-300 text-white font-bold'
+                                                : 'hover:bg-orange-50 text-orange-800'
                                                 }`}
                                         >
                                             {book.archived ? <span className='text-xs'>📦</span> : null}
@@ -122,6 +131,33 @@ export default function ChapterLayout(props) {
                         <BadgePlus size={20} />
                     </button>
                 </div>
+
+                {/* select tome */}
+                {/* select tome */}
+                {props.tomes && props.tomes.length > 0 && (
+                    <div className='flex items-center gap-2'>
+                        <select
+                            value={props.selectedTome?.id || ''}
+                            onChange={(e) => {
+                                const tome = props.tomes.find(t => t.id == e.target.value)
+                                props.setSelectedTome(tome)
+                            }}
+                            className='flex-1 bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-sm text-orange-600 outline-none cursor-pointer'
+                        >
+                            {props.tomes.map(tome => (
+                                <option key={tome.id} value={tome.id}>{tome.title}</option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={() => setIsTomeOpen(true)}
+                            className='text-orange-400 hover:text-orange-600 transition-colors flex-shrink-0'
+                        >
+                            <BadgePlus size={18} />
+                        </button>
+                    </div>
+                )}
+
+
             </div>
 
             {/* liste chapitres */}
@@ -137,8 +173,8 @@ export default function ChapterLayout(props) {
                         <div
                             key={chapter.id}
                             className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${props.selectedChapter?.id == chapter.id
-                                    ? 'bg-orange-300 text-white font-bold'
-                                    : 'hover:bg-orange-100 text-orange-800'
+                                ? 'bg-orange-300 text-white font-bold'
+                                : 'hover:bg-orange-100 text-orange-800'
                                 }`}
                         >
                             <button

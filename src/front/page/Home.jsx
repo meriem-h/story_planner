@@ -5,7 +5,7 @@ import Modal from '../component/modal/Modal'
 import ModalBook from '../component/modal/ModalBook'
 import ModalChapter from '../component/modal/ModalChapter'
 import Editor from "../component/Editor"
-import FormField from "../component/FormField";
+import FormField from "../component/FormField"
 
 export default function Home() {
     const api = useApi()
@@ -13,17 +13,32 @@ export default function Home() {
     const [isChapterOpen, setIsChapterOpen] = useState(false)
     const [books, setBooks] = useState([])
     const [selectedBook, setSelectedBook] = useState(null)
+    const [tomes, setTomes] = useState([])
+    const [selectedTome, setSelectedTome] = useState(null)
     const [chapters, setChapters] = useState([])
     const [selectedChapter, setSelectedChapter] = useState(null)
     const [chapterListeField, setChapterListeField] = useState(null)
+    const [tomeListeField, setTomeListeField] = useState(null)
     const [content, setContent] = useState([])
     const [saved, setSaved] = useState(false)
 
-    // Au démarrage → charge les livres  Quand selectedBook change → charge les chapitres
     useEffect(() => {
-        !selectedBook ? fetchBooks()
-        : fetchChapters(selectedBook.id)
+        !selectedBook ? fetchBooks() : fetchTomes(selectedBook.id)
     }, [selectedBook])
+
+    useEffect(() => {
+        if (selectedTome) fetchChapters(selectedTome.id)
+    }, [selectedTome])
+
+    useEffect(() => {
+        if (!tomes.length) return
+        const fildListe = tomes.map(t => ({
+            value: t.id,
+            text: t.title,
+            selected: t.id == selectedTome?.id
+        }))
+        setTomeListeField([{ name: 'tome', type: 'select', value: selectedTome?.id || '', data: fildListe }])
+    }, [tomes, selectedTome])
 
     useEffect(() => {
         if (!chapters.length) return
@@ -32,22 +47,20 @@ export default function Home() {
             text: element.title,
             selected: element.id == selectedChapter?.id
         }))
-        setChapterListeField([{ name: 'chapter', type: 'select', data: fildListe }])
-    }, [selectedChapter])
+        setChapterListeField([{ name: 'chapter', type: 'select', value: selectedChapter?.id || '', data: fildListe }])
+    }, [selectedChapter, chapters])
 
-    // sauvegarde le livre sélectionné
     useEffect(() => {
-        if (selectedBook) {
-            localStorage.setItem('lastBookId', selectedBook.id)
-        }
+        if (selectedBook) localStorage.setItem('lastBookId', selectedBook.id)
     }, [selectedBook])
 
-    // sauvegarde le chapitre sélectionné
     useEffect(() => {
-        if (selectedChapter) {
-            localStorage.setItem('lastChapterId', selectedChapter.id)
-        }
+        if (selectedChapter) localStorage.setItem('lastChapterId', selectedChapter.id)
     }, [selectedChapter])
+
+    useEffect(() => {
+        if (selectedTome) localStorage.setItem('lastTomeId', selectedTome.id)
+    }, [selectedTome])
 
     const fetchBooks = async () => {
         const result = await api('book:findAll')
@@ -63,30 +76,31 @@ export default function Home() {
         }
     }
 
-    const fetchChapters = async (bookId) => {
-        const result = await api('chapter:findBy', { book_id: bookId })
-        const fildListe = []
+    const fetchTomes = async (bookId) => {
+        const result = await api('tome:findBy', { book_id: bookId })
+        if (result.data && result.data.length > 0) {
+            setTomes(result.data)
+            const lastTomeId = localStorage.getItem('lastTomeId')
+            const lastTome = lastTomeId
+                ? result.data.find(t => t.id == lastTomeId) || result.data[0]
+                : result.data[0]
+            setSelectedTome(lastTome)
+        } else {
+            setTomes([])
+            setSelectedTome(null)
+        }
+    }
+
+    const fetchChapters = async (tomeId) => {
+        const result = await api('chapter:findBy', { tome_id: tomeId })
 
         if (result.data && result.data.length > 0) {
             setChapters(result.data)
             const lastChapterId = localStorage.getItem('lastChapterId')
             const lastChapter = lastChapterId
-                ? result.data.find(c => c.id == lastChapterId) || result.data.reduce((a, b) =>
-                    new Date(a.updated_at) > new Date(b.updated_at) ? a : b)
-                : result.data.reduce((a, b) =>
-                    new Date(a.updated_at) > new Date(b.updated_at) ? a : b)
+                ? result.data.find(c => c.id == lastChapterId) || result.data[0]
+                : result.data[0]
             setSelectedChapter(lastChapter)
-
-            result.data.forEach(element => {
-                element.id == lastChapter.id ?
-                    fildListe.push({ value: element.id, text: element.title, selected: true })
-                    :
-                    fildListe.push({ value: element.id, text: element.title })
-            });
-            setChapterListeField([{
-                name: 'chapter', type: 'select', data: fildListe
-            }])
-
         } else {
             setChapters([])
             setSelectedChapter(null)
@@ -100,11 +114,16 @@ export default function Home() {
 
     const handleChapterCreated = () => {
         setIsChapterOpen(false)
-        fetchChapters(selectedBook.id)
+        fetchChapters(selectedTome.id)
     }
 
     const handleContentChange = (content) => {
         setContent(content)
+    }
+
+    const handleTomeChange = (e) => {
+        const tome = tomes.find(t => t.id == e.target.value)
+        setSelectedTome(tome)
     }
 
     const handleChapterChange = (e) => {
@@ -134,7 +153,7 @@ export default function Home() {
         })
         if (updateResult.success == true) {
             setSaved(true)
-            fetchChapters(selectedBook.id)
+            fetchChapters(selectedTome.id)
             setTimeout(() => setSaved(false), 2000)
         }
     }
@@ -148,15 +167,19 @@ export default function Home() {
                 setSelectedBook={setSelectedBook}
                 selectedChapter={selectedChapter}
                 setSelectedChapter={setSelectedChapter}
+                tomes={tomes}
+                selectedTome={selectedTome}
+                setSelectedTome={setSelectedTome}
                 addChapter={setIsChapterOpen}
                 addBook={setIsOpen}
                 fetchChapters={fetchChapters}
+                fetchTomes={fetchTomes}
             >
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size={50}>
                     <ModalBook onSuccess={handleBookCreated} />
                 </Modal>
                 <Modal isOpen={isChapterOpen} onClose={() => setIsChapterOpen(false)} size={50}>
-                    <ModalChapter onSuccess={handleChapterCreated} book={selectedBook} />
+                    <ModalChapter onSuccess={handleChapterCreated} book={selectedBook} tome={selectedTome} />
                 </Modal>
 
                 {books.length <= 0 ? (
@@ -171,7 +194,7 @@ export default function Home() {
                 ) : (
                     <div className='flex flex-col h-screen'>
 
-                        {/* titre + sous titre */}
+                        {/* titre */}
                         <div className="text-center py-6 border-b border-orange-200">
                             <h1
                                 className='text-3xl font-bold text-orange-300 cursor-text outline-none'
@@ -193,7 +216,16 @@ export default function Home() {
 
                         {/* barre d'actions */}
                         <div className='flex justify-between items-center px-4 py-2 bg-white shadow-sm'>
-                            <div>
+                            <div className='flex items-center gap-4'>
+                                {/* select tome */}
+                                {tomeListeField &&
+                                    <FormField
+                                        fields={tomeListeField}
+                                        onChange={handleTomeChange}
+                                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-sm text-orange-400 hover:text-orange-300 transition-colors"}
+                                    />
+                                }
+                                {/* select chapitre */}
                                 {chapterListeField &&
                                     <FormField
                                         fields={chapterListeField}
