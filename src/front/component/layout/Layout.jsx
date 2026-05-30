@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images } from 'lucide-react'
+import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download } from 'lucide-react'
 
+import ModalExport from '../modal/ModalExport'
 import Chapter from "./ChapterLayout";
 import Character from "./CharacterLayout";
 import Snippet from "./SnippetLayout";
@@ -13,8 +14,9 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
+    const [isExportOpen, setIsExportOpen] = useState(false)
 
-     const chapterProps = {
+    const chapterProps = {
         chapters, selectedChapter, setSelectedChapter,
         books, selectedBook, setSelectedBook,
         addChapter, addBook, fetchChapters,
@@ -58,6 +60,14 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
             <Modal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} size={60}>
                 <ModalGallery book={selectedBook} />
+            </Modal>
+            <Modal isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} size={50}>
+                <ModalExport
+                    book={selectedBook}
+                    tome={selectedTome}
+                    chapters={chapters}
+                    selectedChapter={selectedChapter}
+                />
             </Modal>
 
             {/* Sidebar ouverte */}
@@ -119,9 +129,19 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             <button
                 onClick={() => setIsGalleryOpen(true)}
                 title="Galerie"
-                className='fixed bottom-6 right-6 z-50 bg-orange-400 hover:bg-orange-500 text-white rounded-full p-4 shadow-lg transition-colors'
+                className='fixed bottom-6 right-24 z-50 bg-orange-400 hover:bg-orange-500 text-white rounded-full p-4 shadow-lg transition-colors'
             >
                 <Images size={22} />
+            </button>
+
+            {/* Bouton download flottant */}
+            <button
+                onClick={() => setIsExportOpen(true)}
+                title="Exporter"
+                className='fixed bottom-6 right-6 z-50 bg-orange-400 hover:bg-orange-500 text-white rounded-full p-4 shadow-lg transition-colors'
+
+            >
+                <Download size={22} />
             </button>
 
         </div>
