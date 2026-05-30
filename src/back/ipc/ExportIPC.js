@@ -1,10 +1,11 @@
 const { ipcMain, dialog } = require('electron')
-const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak } = require('docx')
-const fs = require('fs')
 const path = require('path')
 const os = require('os')
-const JSZip = require('jszip')
+const fs = require('fs')
 const db = require('../database/db')
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak } = require('docx')
+const zlib = require('zlib')
+const { execSync } = require('child_process')
 
 function htmlToText(html) {
     if (!html) return ''
@@ -26,7 +27,6 @@ function htmlToText(html) {
 async function buildDocx(title, chapters) {
     const children = []
 
-    // Titre seulement si plusieurs chapitres
     if (chapters.length > 1) {
         children.push(new Paragraph({
             heading: HeadingLevel.HEADING_1,
@@ -109,7 +109,6 @@ async function buildPdfBuffer(title, chapters, showTitle) {
 
 ipcMain.handle('export:chapters', async (event, { bookId, tomeId, chapterIds, format, mode }) => {
     try {
-        // Récupère les chapitres
         let query = `SELECT * FROM chapter WHERE book_id = ?`
         let params = [bookId]
 
@@ -124,8 +123,34 @@ ipcMain.handle('export:chapters', async (event, { bookId, tomeId, chapterIds, fo
         const [books] = await db.query(`SELECT title FROM book WHERE id = ?`, [bookId])
         const bookTitle = books[0]?.title || 'Mon livre'
 
+        // if (mode === 'zip') {
+        //     const { canceled, filePath } = await dialog.showSaveDialog({
+        //         title: 'Exporter en ZIP',
+        //         defaultPath: path.join(os.homedir(), `${bookTitle}.zip`),
+        //         filters: [{ name: 'ZIP', extensions: ['zip'] }]
+        //     })
+        //     if (canceled || !filePath) return { success: false, message: 'Annulé' }
+
+        //     const zip = new JSZip()
+
+        //     for (const chapter of chapters) {
+        //         const safeName = chapter.title.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim() || `chapitre_${chapter.id}`
+
+        //         if (format === 'docx') {
+        //             const buffer = await buildDocx(chapter.title, [chapter])
+        //             zip.file(`${safeName}.docx`, buffer)
+        //         } else {
+        //             const buffer = await buildPdfBuffer(chapter.title, [chapter], false)
+        //             zip.file(`${safeName}.pdf`, buffer)
+        //         }
+        //     }
+
+        //     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
+        //     fs.writeFileSync(filePath, zipBuffer)
+
+        // } 
+
         if (mode === 'zip') {
-            // ZIP avec un fichier par chapitre
             const { canceled, filePath } = await dialog.showSaveDialog({
                 title: 'Exporter en ZIP',
                 defaultPath: path.join(os.homedir(), `${bookTitle}.zip`),
@@ -133,25 +158,27 @@ ipcMain.handle('export:chapters', async (event, { bookId, tomeId, chapterIds, fo
             })
             if (canceled || !filePath) return { success: false, message: 'Annulé' }
 
-            const zip = new JSZip()
+            // Crée un dossier temporaire
+            const tmpDir = path.join(os.tmpdir(), `export_${Date.now()}`)
+            fs.mkdirSync(tmpDir)
 
             for (const chapter of chapters) {
                 const safeName = chapter.title.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim() || `chapitre_${chapter.id}`
-
                 if (format === 'docx') {
                     const buffer = await buildDocx(chapter.title, [chapter])
-                    zip.file(`${safeName}.docx`, buffer)
+                    fs.writeFileSync(path.join(tmpDir, `${safeName}.docx`), buffer)
                 } else {
                     const buffer = await buildPdfBuffer(chapter.title, [chapter], false)
-                    zip.file(`${safeName}.pdf`, buffer)
+                    fs.writeFileSync(path.join(tmpDir, `${safeName}.pdf`), buffer)
                 }
             }
 
-            const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
-            fs.writeFileSync(filePath, zipBuffer)
-
-        } else {
-            // Fichier unique
+            // Crée le zip avec la commande système
+            const { execSync } = require('child_process')
+            execSync(`cd "${tmpDir}" && zip -r "${filePath}" .`)
+            fs.rmSync(tmpDir, { recursive: true })
+        }
+        else {
             const { canceled, filePath } = await dialog.showSaveDialog({
                 title: 'Exporter',
                 defaultPath: path.join(os.homedir(), `${bookTitle}.${format}`),
