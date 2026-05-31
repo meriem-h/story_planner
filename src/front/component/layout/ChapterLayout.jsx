@@ -15,6 +15,9 @@ export default function ChapterLayout(props) {
     const [bookDropdownOpen, setBookDropdownOpen] = useState(false)
     const [showArchived, setShowArchived] = useState(false)
     const [isTomeOpen, setIsTomeOpen] = useState(false)
+    const [tomeToEdit, setTomeToEdit] = useState(null)
+    const [isViewTomeOpen, setIsViewTomeOpen] = useState(false)
+    const [tomeToView, setTomeToView] = useState(null)
 
     useEffect(() => {
         const close = () => setBookDropdownOpen(false)
@@ -41,15 +44,20 @@ export default function ChapterLayout(props) {
             <Modal isOpen={isUpdateBookOpen} onClose={() => setIsUpdateBookOpen(false)} size={50}>
                 <ModalBook onSuccess={() => { props.fetchChapters(props.selectedTome?.id); setIsUpdateBookOpen(false) }} selectedBook={props.selectedBook} />
             </Modal>
-            <Modal isOpen={isTomeOpen} onClose={() => setIsTomeOpen(false)} size={50}>
-                
+
+            <Modal isOpen={isViewTomeOpen} onClose={() => setIsViewTomeOpen(false)} size={50}>
+                <ModalView item={tomeToView} type="tome" />
+            </Modal>
+
+            <Modal isOpen={isTomeOpen} onClose={() => { setIsTomeOpen(false); setTomeToEdit(null) }} size={50}>
                 <ModalTome
                     onSuccess={() => {
                         setIsTomeOpen(false)
+                        setTomeToEdit(null)
                         props.fetchTomes(props.selectedBook.id)
-                        props.fetchChapters(props.selectedTome?.id)
                     }}
                     book={props.selectedBook}
+                    selectedTome={tomeToEdit}
                 />
             </Modal>
 
@@ -132,10 +140,9 @@ export default function ChapterLayout(props) {
                     </button>
                 </div>
 
-                {/* select tome */}
-                {/* select tome */}
+                {/* select tome + actions */}
                 {props.tomes && props.tomes.length > 0 && (
-                    <div className='flex items-center gap-2'>
+                    <div className='group flex items-center gap-2'>
                         <select
                             value={props.selectedTome?.id || ''}
                             onChange={(e) => {
@@ -148,16 +155,28 @@ export default function ChapterLayout(props) {
                                 <option key={tome.id} value={tome.id}>{tome.title}</option>
                             ))}
                         </select>
+                        <div className='hidden group-hover:flex gap-1'>
+                            <button
+                                onClick={() => { setTomeToView(props.selectedTome); setIsViewTomeOpen(true) }}
+                                className='text-orange-400 hover:text-orange-600 transition-colors'
+                            >
+                                <Eye size={16} />
+                            </button>
+                            <button
+                                onClick={() => { setTomeToEdit(props.selectedTome); setIsTomeOpen(true) }}
+                                className='text-orange-400 hover:text-orange-600 transition-colors'
+                            >
+                                <Pen size={16} />
+                            </button>
+                        </div>
                         <button
-                            onClick={() => setIsTomeOpen(true)}
+                            onClick={() => { setTomeToEdit(null); setIsTomeOpen(true) }}
                             className='text-orange-400 hover:text-orange-600 transition-colors flex-shrink-0'
                         >
                             <BadgePlus size={18} />
                         </button>
                     </div>
                 )}
-
-
             </div>
 
             {/* liste chapitres */}

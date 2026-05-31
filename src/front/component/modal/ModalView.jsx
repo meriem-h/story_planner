@@ -24,6 +24,7 @@ const TYPE_ICONS = {
     note: <NotebookPen size={24} className='text-white' />,
     snippet: <Lightbulb size={24} className='text-white' />,
     book: <BookOpen size={24} className='text-white' />,
+    tome: <BookOpen size={24} className='text-white' />,
 }
 
 export default function ModalView({ item, type }) {
@@ -43,6 +44,7 @@ export default function ModalView({ item, type }) {
                         {type === 'lore' && 'Lore'}
                         {type === 'note' && 'Note'}
                         {type === 'book' && 'Livre'}
+                        {type === 'tome' && 'Tome'}
                     </p>
                     <h2 className='text-xl font-bold text-orange-800'>
                         {item.title || 'Sans titre'}
@@ -78,7 +80,7 @@ export default function ModalView({ item, type }) {
                 {item.content || item.description ? (
                     <div>
                         <p className='text-xs font-bold text-orange-400 uppercase tracking-wider mb-3'>
-                            {type === 'book' ? 'Description' : 'Contenu'}
+                            {type === 'book' || type === 'tome' ? 'Description' : 'Contenu'}
                         </p>
                         <p className='text-orange-800 leading-relaxed whitespace-pre-wrap'>
                             {item.content || item.description}

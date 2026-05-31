@@ -28,10 +28,6 @@ export default function ModalTome({ onSuccess, book, selectedTome }) {
             return
         }
 
-        // const result = selectedTome
-        //     ? await api('tome:update', { id: selectedTome.id, data: tome })
-        //     : await api('tome:create', tome)
-        
         const result = selectedTome
             ? await api('tome:update', { id: selectedTome.id, data: tome })
             : await api('tome:createWithChapter', tome)
@@ -41,6 +37,11 @@ export default function ModalTome({ onSuccess, book, selectedTome }) {
         } else {
             setError({ all: result.message })
         }
+    }
+
+    const handleDelete = async () => {
+        await api('tome:delete', selectedTome.id)
+        onSuccess()
     }
 
     return (
@@ -55,7 +56,10 @@ export default function ModalTome({ onSuccess, book, selectedTome }) {
             </div>
             <form className='flex flex-col gap-4'>
                 <FormField
-                    fields={[{ label: 'Titre *', name: 'title', type: 'text', value: tome.title || '', placeholder: 'ex: Tome 2' }]}
+                    fields={[
+                        { label: 'Titre *', name: 'title', type: 'text', value: tome.title || '', placeholder: 'ex: Tome 2' },
+                        { label: 'Description', name: 'description', type: 'textarea', value: tome.description || '', placeholder: 'Résumé du tome...' },
+                    ]}
                     onChange={handleChange}
                     errors={error}
                 />
@@ -70,6 +74,16 @@ export default function ModalTome({ onSuccess, book, selectedTome }) {
                 >
                     {selectedTome ? 'Modifier' : 'Créer le tome'}
                 </button>
+
+                {selectedTome && (
+                    <button
+                        type='button'
+                        onClick={handleDelete}
+                        className='w-full py-2 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 text-sm transition-colors'
+                    >
+                        🗑️ Supprimer ce tome
+                    </button>
+                )}
             </form>
         </div>
     )
