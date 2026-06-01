@@ -20,12 +20,12 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
     const api = useApi()
     const [error, setError] = useState(null)
     const [snippet, setSnippet] = useState(
-        selectedSnippet || { 
-            book_id: book.id, 
+        selectedSnippet || {
+            book_id: book.id,
             tome_id: tome?.id || null,
-            type: 'autre', 
-            pinned: 0, 
-            used: 'disponible' 
+            type: 'autre',
+            pinned: 0,
+            used: 'disponible'
         }
     )
 
@@ -46,12 +46,12 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
 
     useEffect(() => {
         if (!selectedSnippet) {
-            setSnippet({ 
-                book_id: book.id, 
+            setSnippet({
+                book_id: book.id,
                 tome_id: tome?.id || null,
-                type: 'autre', 
-                pinned: 0, 
-                used: 'disponible' 
+                type: 'autre',
+                pinned: 0,
+                used: 'disponible'
             })
             setFieldSnippet(prev => prev.map(f => ({ ...f, value: undefined })))
             return
@@ -76,6 +76,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
         }))
     }
 
+    // ModalSnippet.jsx — dans handleClick
     const handleClick = async (e) => {
         e.preventDefault()
         setError('')
@@ -87,8 +88,11 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
             return
         }
 
+        // On exclut position pour ne pas écraser le réordonnancement
+        const { position, ...snippetData } = snippet
+
         const result = selectedSnippet
-            ? await api('snippet:update', { id: selectedSnippet.id, data: snippet })
+            ? await api('snippet:update', { id: selectedSnippet.id, data: snippetData })
             : await api('snippet:create', snippet)
 
         if (result.success) {
