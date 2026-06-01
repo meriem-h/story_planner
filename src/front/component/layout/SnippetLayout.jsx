@@ -68,8 +68,10 @@ export default function SnippetLayout({ selectedBook, selectedTome }) {
         await api('snippet:reorder', newList.map(s => ({ id: s.id })))
     }
 
-    const isFiltering = search || filterType !== 'tous' || filterPinned || filterUsed !== 'tous'
+    // isFiltering ne tient PAS compte de filterUsed
+    const isFiltering = !!search || filterType !== 'tous' || filterPinned
 
+    // filtered tient compte de TOUT y compris filterUsed
     const filtered = snippets
         .filter(s => filterType === 'tous' || s.type === filterType)
         .filter(s => !filterPinned || s.pinned)
@@ -221,7 +223,7 @@ export default function SnippetLayout({ selectedBook, selectedTome }) {
                             ghostClass='opacity-30'
                             className='flex flex-col gap-3'
                         >
-                            {snippets.map(snippet => renderSnippet(snippet))}
+                            {filtered.map(snippet => renderSnippet(snippet))}
                         </ReactSortable>
                     )}
                 </div>
