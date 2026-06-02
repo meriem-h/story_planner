@@ -58,6 +58,7 @@ export default function ModalTome({ onSuccess, book, selectedTome }) {
                 <FormField
                     fields={[
                         { label: 'Titre *', name: 'title', type: 'text', value: tome.title || '', placeholder: 'ex: Tome 2' },
+                        { label: 'Tome *', name: 'number', type: 'number',value: tome.number || '', placeholder: 'ex: 2' },
                         { label: 'Description', name: 'description', type: 'textarea', value: tome.description || '', placeholder: 'Résumé du tome...' },
                     ]}
                     onChange={handleChange}

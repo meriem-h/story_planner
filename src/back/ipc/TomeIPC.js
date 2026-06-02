@@ -19,6 +19,7 @@ class TomeIPC extends BaseIPC {
                     tome_id: tomeId,
                     title: 'Chapitre 1',
                     position: 1
+                   
                 })
                 return { success: true, id: tomeId }
             } catch (err) {

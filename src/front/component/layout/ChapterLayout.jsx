@@ -152,7 +152,7 @@ export default function ChapterLayout(props) {
                             className='flex-1 bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-sm text-orange-600 outline-none cursor-pointer'
                         >
                             {props.tomes.map(tome => (
-                                <option key={tome.id} value={tome.id}>{tome.title}</option>
+                                <option key={tome.id} value={tome.id}>Tome {tome.number} : {tome.title}</option>
                             ))}
                         </select>
                         <div className='hidden group-hover:flex gap-1'>
