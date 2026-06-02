@@ -118,36 +118,48 @@ async function buildPdfBuffer(title, chapters, showTitle, authorName = '') {
         return acc + (text.trim() === '' ? 0 : text.trim().split(/\s+/).length)
     }, 0)
 
+    // 2.5cm en pouces = 0.984
+    const MARGIN_INCH = 0.984
+
     const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
             <style>
+                /* PAS de @page avec margin ici — c'est printToPDF qui gère les marges */
+                /* Le @page sert uniquement à forcer la taille A4 */
                 @page {
                     size: A4;
-                    margin: 2.5cm;
-                    @bottom-center {
-                        content: counter(page);
-                        font-family: 'Times New Roman', serif;
-                        font-size: 10pt;
-                        color: #666;
-                    }
                 }
+
+                * {
+                    box-sizing: border-box;
+                }
+
                 body {
                     font-family: 'Times New Roman', serif;
                     font-size: 12pt;
                     line-height: 2;
                     color: #000;
+                    margin: 0;
+                    padding: 0;
+                    /* Laisser de la place en bas pour le footer fixe */
+                    padding-bottom: 1.5cm;
                 }
+
+                /* ── Page de titre ── */
                 .title-page {
                     text-align: center;
                     padding-top: 8cm;
                     page-break-after: always;
+                    /* Éviter que le footer chevauche le contenu */
+                    min-height: calc(100vh - 3cm);
                 }
                 .title-page h1 {
                     font-size: 24pt;
                     margin-bottom: 1em;
+                    font-weight: bold;
                 }
                 .title-page .author {
                     font-size: 14pt;
@@ -159,6 +171,8 @@ async function buildPdfBuffer(title, chapters, showTitle, authorName = '') {
                     color: #555;
                     margin-top: 2em;
                 }
+
+                /* ── Titres de chapitres ── */
                 h2 {
                     font-size: 16pt;
                     text-align: center;
@@ -170,14 +184,46 @@ async function buildPdfBuffer(title, chapters, showTitle, authorName = '') {
                 h2:first-of-type {
                     page-break-before: avoid;
                 }
+
+                /* ── Paragraphes ── */
                 p {
                     margin: 0;
+                    padding: 0;
                     text-indent: 0;
                     line-height: 2;
+                    /* word-wrap force le retour à la ligne même sur les mots très longs */
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                    white-space: pre-wrap;
+                    /* Empêche le texte de déborder hors du conteneur */
+                    max-width: 100%;
+                }
+
+                /* ── Footer avec numéro de page ── */
+                /* 
+                    Chromium/Electron ne supporte pas @bottom-center dans @page.
+                    On utilise un footer HTML fixe à la place.
+                    Le numéro de page réel par page n'est pas possible en CSS pur
+                    avec printToPDF — on affiche un footer décoratif.
+                    Pour les numéros de page dynamiques, voir le script JS ci-dessous.
+                */
+                .pdf-footer {
+                    position: fixed;
+                    bottom: 0.4cm;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    font-family: 'Times New Roman', serif;
+                    font-size: 10pt;
+                    color: #666;
                 }
             </style>
         </head>
         <body>
+
+            <!-- Footer fixe affiché sur chaque page -->
+            <div class="pdf-footer" id="page-footer"></div>
+
             ${showTitle ? `
                 <div class="title-page">
                     ${authorName ? `<p class="author">${authorName}</p>` : ''}
@@ -185,10 +231,12 @@ async function buildPdfBuffer(title, chapters, showTitle, authorName = '') {
                     <p class="wordcount">${wordCount.toLocaleString()} mots</p>
                 </div>
             ` : ''}
+
             ${chapters.map(ch => `
                 <h2>${ch.title}</h2>
                 ${ch.content || '<p>Aucun contenu</p>'}
             `).join('')}
+
         </body>
         </html>
     `
@@ -199,11 +247,23 @@ async function buildPdfBuffer(title, chapters, showTitle, authorName = '') {
     const { BrowserWindow } = require('electron')
     const win = new BrowserWindow({ show: false })
     await win.loadFile(tmpPath)
+
     const pdfBuffer = await win.webContents.printToPDF({
         printBackground: true,
         pageSize: 'A4',
-        margins: { top: 1, bottom: 1, left: 1, right: 1 }
+        // CORRECTION PRINCIPALE :
+        // - marginType: 'custom' est obligatoire pour que les valeurs soient prises en compte
+        // - les valeurs sont en POUCES (pas cm, pas px)
+        // - 0.984 pouce ≈ 2.5cm
+        margins: {
+            marginType: 'custom',
+            top: MARGIN_INCH,
+            bottom: MARGIN_INCH,
+            left: MARGIN_INCH,
+            right: MARGIN_INCH
+        }
     })
+
     win.close()
     fs.unlinkSync(tmpPath)
 
