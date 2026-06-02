@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 
@@ -18,15 +18,33 @@ const modules = {
 
 const PAGE_HEIGHT = 2244
 
-export default function Editor({ content, onChange }) {
+function getPlainText(html) {
+    if (!html) return ''
+    const tmp = document.createElement('div')
+    tmp.innerHTML = html
+    return tmp.innerText || tmp.textContent || ''
+}
+
+function countWords(text) {
+    return text.trim() === '' ? 0 : text.trim().split(/\s+/).length
+}
+
+export default function Editor({ content, onChange, chapters, selectedChapter }) {
     const [value, setValue] = useState(content || '')
     const [pageCount, setPageCount] = useState(1)
+    const [wordCount, setWordCount] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [gotoPage, setGotoPage] = useState('')
+    const scrollRef = useRef(null)
+    const [locked, setLocked] = useState(false)
 
     useEffect(() => {
         setValue(content || '')
     }, [content])
 
     useEffect(() => {
+        const text = getPlainText(value)
+        setWordCount(countWords(text))
         setTimeout(() => {
             const editor = document.querySelector('.ql-editor')
             if (editor) {
@@ -34,6 +52,18 @@ export default function Editor({ content, onChange }) {
             }
         }, 500)
     }, [value])
+
+    useEffect(() => {
+        const container = scrollRef.current
+        if (!container) return
+        const handleScroll = () => {
+            const scrollTop = container.scrollTop
+            const page = Math.floor(scrollTop / PAGE_HEIGHT) + 1
+            setCurrentPage(Math.min(page, pageCount))
+        }
+        container.addEventListener('scroll', handleScroll)
+        return () => container.removeEventListener('scroll', handleScroll)
+    }, [pageCount])
 
     const handleChange = (newValue) => {
         setValue(newValue)
@@ -46,42 +76,49 @@ export default function Editor({ content, onChange }) {
         }, 100)
     }
 
+    const goToPage = (n) => {
+        const page = Math.max(1, Math.min(n, pageCount))
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: (page - 1) * PAGE_HEIGHT, behavior: 'smooth' })
+        }
+        setCurrentPage(page)
+    }
+
+    const totalWords = (chapters || []).reduce((acc, ch) => {
+        if (ch.id === selectedChapter?.id) return acc + wordCount
+        return acc + countWords(getPlainText(ch.content || ''))
+    }, 0)
+
     const pageMarkers = []
     for (let i = 1; i < pageCount; i++) {
         pageMarkers.push(
-            <div
-                key={i}
-                style={{
-                    position: 'absolute',
-                    top: `${i * PAGE_HEIGHT + 42}px`,
-                    left: 0,
-                    right: 0,
-                    zIndex: 10,
-                    pointerEvents: 'none',
-                    padding: '12px 0',
-                }}
-            >
-                <div style={{
-                    borderTop: '2px solid #fdba74',
-                    width: '800px',
-                    margin: '0 auto',
-                }} />
-                <div style={{
-                    textAlign: 'center',
-                    fontSize: '11px',
-                    color: '#fdba74',
-                    padding: '4px 0',
-                    userSelect: 'none',
-                    fontWeight: 'bold',
-                }}>
-                    — Page {i + 1} —
+            <div key={i}>
+                {/* Gauche avec numéro */}
+                <div
+                    className="absolute z-10 pointer-events-none flex items-center gap-1.5"
+                    style={{ top: `${i * PAGE_HEIGHT + 42}px`, left: 'calc(50% - 440px)' }}
+                >
+                    <div className="w-6 h-0.5 bg-orange-300 rounded" />
+                    <span className="text-orange-300 text-[9px] font-bold tracking-widest select-none">
+                        {i + 1}
+                    </span>
+                </div>
+                {/* Droite sans numéro */}
+                <div
+                    className="absolute z-10 pointer-events-none flex items-center gap-1.5"
+                    style={{ top: `${i * PAGE_HEIGHT + 42}px`, right: 'calc(50% - 440px)' }}
+                >
+                    <span className="text-white text-[9px] font-bold tracking-widest select-none">
+                        {i + 1}
+                    </span>
+                    <div className="w-6 h-0.5 bg-orange-300 rounded" />
                 </div>
             </div>
         )
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 250px)' }}>
+        <div className="flex flex-col h-full">
             <style>{`
                 .ql-toolbar {
                     position: sticky !important;
@@ -103,21 +140,120 @@ export default function Editor({ content, onChange }) {
                     line-height: 2 !important;
                     max-width: 880px !important;
                     margin: 0 auto !important;
-                    margin-top : 20px !important;
+                    margin-top: 20px !important;
                     padding: 80px !important;
-                    min-height: 500px !important;
+                    min-height: ${PAGE_HEIGHT}px !important;
                     background: white;
                     box-shadow: 0 0 10px rgba(0,0,0,0.08);
                 }
+                .hide-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .hide-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
             `}</style>
-            <div style={{ position: 'relative', flex: 1, overflowY: 'auto' }}>
-                {pageMarkers}
-                <ReactQuill
-                    theme="snow"
-                    value={value}
-                    onChange={handleChange}
-                    modules={modules}
-                />
+
+            <div className="flex flex-1 overflow-hidden">
+
+                {/* Éditeur */}
+                {/* <div ref={scrollRef} className="relative flex-1 overflow-y-auto"> */}
+                <div ref={scrollRef} className="relative flex-1 overflow-y-auto hide-scrollbar">
+                    {pageMarkers}
+                    <ReactQuill
+                        theme="snow"
+                        value={value}
+                        onChange={handleChange}
+                        modules={modules}
+                        readOnly={locked}
+                    />
+                </div>
+
+                {/* Minimap */}
+                <div className="flex flex-col w-[70px] bg-orange-50 overflow-y-auto">
+                    {/*Div du dessus — même hauteur que la toolbar */}
+                    {/* <div className="h-[42px] w-full border-b-2 bg-white border-orange-300 flex-shrink-0" /> */}
+                    <div className="h-[42px] w-full border-b-2 bg-white border-orange-300 flex-shrink-0 flex items-center justify-center">
+                        <button
+                            onClick={() => setLocked(!locked)}
+                            title={locked ? 'Déverrouiller' : 'Verrouiller'}
+                            className={`text-lg transition-colors ${locked ? 'text-orange-400' : 'text-orange-200 hover:text-orange-300'}`}
+                        >
+                            {locked ? '🔒' : '🔓'}
+                        </button>
+                    </div>
+
+                    {/* Boutons pages */}
+                    <div className="flex flex-col items-center gap-1 py-3 flex-1">
+                        <span className="text-[9px] text-orange-300 font-bold tracking-widest mb-1">PG</span>
+                        {Array.from({ length: pageCount }, (_, i) => i + 1).map(p => (
+                            <button
+                                key={p}
+                                onClick={() => goToPage(p)}
+                                title={`Page ${p}`}
+                                className={`w-[50px] h-[67px] rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 transition-all
+                                    ${p === currentPage
+                                        ? 'border-2 border-orange-400 text-orange-400 bg-orange-50'
+                                        : 'border border-orange-200 text-orange-300 bg-white hover:bg-orange-50'
+                                    }`}
+                            >
+                                {p}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
+
+            {/* Barre de stats */}
+            <div className="flex justify-center items-center gap-6 px-6 py-2 border-t-2 border-orange-300 bg-white text-sm font-medium text-orange-900 select-none flex-shrink-0">
+
+                {/* Navigation */}
+                <div className="flex items-center gap-1.5">
+                    <button
+                        onClick={() => goToPage(currentPage - 1)}
+                        disabled={currentPage <= 1}
+                        className="text-orange-300 hover:text-orange-400 disabled:opacity-30 text-lg px-0.5"
+                    >‹</button>
+                    <span className="text-orange-500">Page {currentPage}</span>
+                    <span className="text-orange-200">/ {pageCount}</span>
+                    <button
+                        onClick={() => goToPage(currentPage + 1)}
+                        disabled={currentPage >= pageCount}
+                        className="text-orange-300 hover:text-orange-400 disabled:opacity-30 text-lg px-0.5"
+                    >›</button>
+                    <input
+                        type='number'
+                        min={1}
+                        max={pageCount}
+                        value={gotoPage}
+                        onChange={e => setGotoPage(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { goToPage(parseInt(gotoPage)); setGotoPage('') } }}
+                        placeholder='aller à…'
+                        className="w-16 px-2 py-0.5 border border-orange-300 rounded-md text-xs text-orange-900 outline-none"
+                    />
+                </div>
+
+                <span className="text-orange-200">|</span>
+
+                <span className={wordCount >= 4000 ? 'text-green-500' : wordCount >= 2000 ? 'text-orange-400' : 'text-gray-400'}>
+                    ✍️ {wordCount.toLocaleString()} mots
+                    {wordCount >= 4000 ? ' ✅' : wordCount >= 2000 ? ' 👍' : ' (min 2000)'}
+                </span>
+
+                <span className="text-orange-200">|</span>
+
+                <span>📄 {pageCount} page{pageCount > 1 ? 's' : ''}</span>
+
+                <span className="text-orange-200">|</span>
+
+                <span>📚 {totalWords.toLocaleString()} mots</span>
+
+                <span className={totalWords >= 90000 ? 'text-green-500' : 'text-gray-400'}>
+                    {totalWords >= 90000 ? '🎉 Objectif atteint !' : `📊 ${Math.round((totalWords / 90000) * 100)}% vers 90 000 mots`}
+                </span>
+
             </div>
         </div>
     )

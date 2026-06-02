@@ -252,7 +252,13 @@ export default function Home() {
 
                         {/* éditeur */}
                         <div className='flex-1 overflow-hidden'>
-                            <Editor content={selectedChapter?.content} onChange={handleContentChange} />
+                            {/* <Editor content={selectedChapter?.content} onChange={handleContentChange} /> */}
+                            <Editor
+                                content={selectedChapter?.content}
+                                onChange={handleContentChange}
+                                chapters={chapters}
+                                selectedChapter={selectedChapter}
+                            />
                         </div>
 
                     </div>
