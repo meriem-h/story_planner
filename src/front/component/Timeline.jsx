@@ -3,7 +3,8 @@ import { useApi } from '../context/ApiContext'
 import { ReactSortable } from 'react-sortablejs'
 import Modal from './modal/Modal'
 import ModalTimeline from './modal/ModalTimeline'
-import { BadgePlus } from 'lucide-react'
+import ModalTimelineFullscreen from './modal/ModalTimelineFullscreen'
+import { BadgePlus, Maximize2 } from 'lucide-react'
 
 export default function Timeline({ selectedTome, chapters }) {
     const api = useApi()
@@ -12,6 +13,7 @@ export default function Timeline({ selectedTome, chapters }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
+    const [isFullscreen, setIsFullscreen] = useState(false)
 
     const handleSuccess = () => {
         setIsModalOpen(false)
@@ -135,22 +137,22 @@ export default function Timeline({ selectedTome, chapters }) {
     )
 
     const renderSortable = (list, chapterId) => (
-    <ReactSortable
-        list={list.filter(item => item && item.id)}
-        setList={(newList) => handleReorder(newList.filter(item => item && item.id), chapterId)}
-        animation={200}
-        ghostClass='opacity-30'
-        group="timeline"
-        className="flex items-center gap-1"
-    >
-        {list.filter(item => item && item.id).map((item) => (
-            <div key={item.id} className="flex items-center">
-                {renderItem(item)}
-                <div className="w-5 h-[2px] bg-orange-300 shrink-0 mx-1 last:hidden" />
-            </div>
-        ))}
-    </ReactSortable>
-)
+        <ReactSortable
+            list={list.filter(item => item && item.id)}
+            setList={(newList) => handleReorder(newList.filter(item => item && item.id), chapterId)}
+            animation={200}
+            ghostClass='opacity-30'
+            group="timeline"
+            className="flex items-center gap-1"
+        >
+            {list.filter(item => item && item.id).map((item) => (
+                <div key={item.id} className="flex items-center">
+                    {renderItem(item)}
+                    <div className="w-5 h-[2px] bg-orange-300 shrink-0 mx-1 last:hidden" />
+                </div>
+            ))}
+        </ReactSortable>
+    )
 
 
 
@@ -193,12 +195,22 @@ export default function Timeline({ selectedTome, chapters }) {
                         selectedItem={selectedItem}
                     />
                 </Modal>
+                <Modal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} size={50}>
+                    <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} />
+                </Modal>
                 <button
                     onClick={() => { setSelectedItem(null); setIsModalOpen(true) }}
                     className="text-orange-400 hover:text-orange-600 transition-colors"
                     title="Ajouter"
                 >
                     <BadgePlus size={20} />
+                </button>
+                <button
+                    onClick={() => setIsFullscreen(true)}
+                    className="text-orange-400 hover:text-orange-600 transition-colors"
+                    title="Agrandir"
+                >
+                    <Maximize2 size={20} />
                 </button>
             </div>
 
