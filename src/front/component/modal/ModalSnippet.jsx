@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Lightbulb, Pin } from 'lucide-react'
+import { Lightbulb, Pin, GitBranch } from 'lucide-react'
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
 
@@ -15,10 +15,12 @@ const TYPE_LABELS = {
     autre: 'Autre',
 }
 
-export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet }) {
+export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, chapters }) {
 
     const api = useApi()
     const [error, setError] = useState(null)
+    const [showTimeline, setShowTimeline] = useState(false)
+    const [timelineChapterId, setTimelineChapterId] = useState(null)
     const [snippet, setSnippet] = useState(
         selectedSnippet || {
             book_id: book.id,
@@ -54,6 +56,8 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
                 used: 'disponible'
             })
             setFieldSnippet(prev => prev.map(f => ({ ...f, value: undefined })))
+            setShowTimeline(false)
+            setTimelineChapterId(null)
             return
         }
         setSnippet(selectedSnippet)
@@ -64,7 +68,18 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
                 data: f.data.map(d => ({ ...d, selected: d.value === selectedSnippet[f.name] }))
             })
         })))
+
+        // vérifie si snippet déjà lié à un item timeline
+        checkTimelineItem(selectedSnippet.id)
     }, [selectedSnippet])
+
+    const checkTimelineItem = async (snippetId) => {
+        const result = await api('timeline:findBy', { snippet_id: snippetId })
+        if (result.success && result.data.length > 0) {
+            setShowTimeline(true)
+            setTimelineChapterId(result.data[0].chapter_id)
+        }
+    }
 
     const handleChange = (e) => {
         setSnippet(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -76,7 +91,6 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
         }))
     }
 
-    // ModalSnippet.jsx — dans handleClick
     const handleClick = async (e) => {
         e.preventDefault()
         setError('')
@@ -88,19 +102,52 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
             return
         }
 
-        // On exclut position pour ne pas écraser le réordonnancement
         const { position, ...snippetData } = snippet
 
         const result = selectedSnippet
             ? await api('snippet:update', { id: selectedSnippet.id, data: snippetData })
             : await api('snippet:create', snippet)
 
-        if (result.success) {
-            onSuccess(result)
-        } else {
+        if (!result.success) {
             errorListe.all = result.message
             setError(errorListe)
+            return
         }
+
+        const snippetId = selectedSnippet ? selectedSnippet.id : result.id
+
+        // gestion timeline
+        const existing = await api('timeline:findBy', { snippet_id: snippetId })
+        const hasTimelineItem = existing.success && existing.data.length > 0
+
+        if (showTimeline) {
+            if (hasTimelineItem) {
+                // met à jour le chapter_id si changé
+                await api('timeline:update', {
+                    id: existing.data[0].id,
+                    data: { chapter_id: timelineChapterId ?? null }
+                })
+            } else {
+                // crée un nouvel item timeline
+                const test = await api('timeline:create', {
+                    tome_id: tome?.id || null,
+                    chapter_id: timelineChapterId ?? null,
+                    snippet_id: snippetId,
+                    title: snippet.title || snippet.type,
+                    status: false,
+                })
+
+                console.log(test);
+                
+            }
+        } else {
+            // décoché → supprime l'item timeline si existant
+            if (hasTimelineItem) {
+                await api('timeline:delete', existing.data[0].id)
+            }
+        }
+
+        onSuccess(result)
     }
 
     return (
@@ -154,6 +201,33 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet })
                     >
                         ❌ Abandonné
                     </button>
+                </div>
+
+                {/* timeline toggle */}
+                <div className='flex flex-col gap-2'>
+                    <button
+                        type='button'
+                        onClick={() => setShowTimeline(prev => !prev)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm ${showTimeline ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200'}`}
+                    >
+                        <GitBranch size={14} />
+                        Afficher dans la timeline
+                    </button>
+
+
+                    {/* select chapitre si timeline activée */}
+                    {showTimeline && chapters?.length > 0 && (
+                        <select
+                            value={timelineChapterId ?? ''}
+                            onChange={(e) => setTimelineChapterId(e.target.value || null)}
+                            className='border border-orange-200 rounded-lg px-3 py-2 text-sm text-orange-600 outline-none'
+                        >
+                            <option value=''>— Chapitre (optionnel) —</option>
+                            {chapters.map(ch => (
+                                <option key={ch.id} value={ch.id}>{ch.title}</option>
+                            ))}
+                        </select>
+                    )}
                 </div>
 
                 {error?.all && (

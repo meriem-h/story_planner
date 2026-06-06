@@ -31,7 +31,7 @@ const TYPE_LABELS = {
     autre: 'Autre',
 }
 
-export default function SnippetLayout({ selectedBook, selectedTome }) {
+export default function SnippetLayout({ selectedBook, selectedTome, chapters }) {
 
     const api = useApi()
     const [snippets, setSnippets] = useState([])
@@ -131,7 +131,7 @@ export default function SnippetLayout({ selectedBook, selectedTome }) {
     return (
         <>
             <Modal isOpen={isOpen} onClose={() => { setIsOpen(false); setSnippetToEdit(null) }} size={50}>
-                <ModalSnippet onSuccess={handleSnippetCreated} book={selectedBook} tome={selectedTome} selectedSnippet={snippetToEdit} />
+                <ModalSnippet onSuccess={handleSnippetCreated} book={selectedBook} tome={selectedTome} selectedSnippet={snippetToEdit} chapters={chapters} />
             </Modal>
             <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
                 <ModalView item={itemToView} type="snippet" />

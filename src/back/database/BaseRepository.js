@@ -1,4 +1,3 @@
-// src/back/database/BaseRepository.js
 const db = require('./db')
 
 class BaseRepository {

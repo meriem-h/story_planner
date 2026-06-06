@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download } from 'lucide-react'
+import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch } from 'lucide-react'
 
 import ModalExport from '../modal/ModalExport'
 import Chapter from "./ChapterLayout";
@@ -10,7 +10,7 @@ import Lore from "./LoreLayout";
 import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -27,10 +27,13 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [content, setContent] = useState(<Chapter {...chapterProps} />)
 
     useEffect(() => {
-        if (activeView === 'chapter') {
-            setContent(<Chapter {...chapterProps} />)
-        }
-    }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
+    if (activeView === 'chapter') {
+        setContent(<Chapter {...chapterProps} />)
+    }
+    if (activeView === 'snippet') {
+        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
+    }
+}, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
 
     const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-orange-600 text-orange-100' : 'bg-orange-400 text-orange-100 hover:bg-orange-500'}`
 
@@ -48,7 +51,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
     const showSnippet = () => {
         setActiveView('snippet')
-        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} />)
+        // setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} />)
+        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
     }
     const showNote = () => {
         setActiveView('note')
@@ -121,11 +125,12 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             </div>
 
             {/* Page */}
-            <div className="flex-1 px-40">
+            <div className="flex-1 min-w-0 overflow-hidden px-40">
                 {children}
             </div>
 
             {/* Bouton galerie flottant */}
+
             <button
                 onClick={() => setIsGalleryOpen(true)}
                 title="Galerie"
@@ -142,6 +147,14 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
             >
                 <Download size={22} />
+            </button>
+
+            <button
+                onClick={() => setShowTimeline(!showTimeline)}
+                title="Timeline"
+                className={`fixed bottom-6 right-44 z-50 text-white rounded-full p-4 shadow-lg transition-colors ${showTimeline ? 'bg-orange-600' : 'bg-orange-400 hover:bg-orange-500'}`}
+            >
+                <GitBranch size={22} />
             </button>
 
         </div>

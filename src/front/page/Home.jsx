@@ -6,6 +6,7 @@ import ModalBook from '../component/modal/ModalBook'
 import ModalChapter from '../component/modal/ModalChapter'
 import Editor from "../component/Editor"
 import FormField from "../component/FormField"
+import Timeline from '../component/Timeline'
 
 export default function Home() {
     const api = useApi()
@@ -21,6 +22,7 @@ export default function Home() {
     const [tomeListeField, setTomeListeField] = useState(null)
     const [content, setContent] = useState([])
     const [saved, setSaved] = useState(false)
+    const [showTimeline, setShowTimeline] = useState(false)
 
     useEffect(() => {
         !selectedBook ? fetchBooks() : fetchTomes(selectedBook.id)
@@ -93,7 +95,6 @@ export default function Home() {
 
     const fetchChapters = async (tomeId) => {
         const result = await api('chapter:findBy', { tome_id: tomeId })
-
         if (result.data && result.data.length > 0) {
             setChapters(result.data)
             const lastChapterId = localStorage.getItem('lastChapterId')
@@ -174,6 +175,8 @@ export default function Home() {
                 addBook={setIsOpen}
                 fetchChapters={fetchChapters}
                 fetchTomes={fetchTomes}
+                showTimeline={showTimeline}
+                setShowTimeline={setShowTimeline}
             >
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size={50}>
                     <ModalBook onSuccess={handleBookCreated} />
@@ -192,32 +195,37 @@ export default function Home() {
                         </button>
                     </div>
                 ) : (
-                    <div className='flex flex-col h-screen'>
+                    <div className='flex flex-col h-screen overflow-hidden'>
 
-                        {/* titre */}
-                        <div className="text-center py-6 border-b border-orange-200">
-                            <h1
-                                className='text-3xl font-bold text-orange-300 cursor-text outline-none'
-                                contentEditable
-                                suppressContentEditableWarning
-                                onInput={changeBookTitle}
-                            >
-                                {selectedBook?.title || 'Aucun livre'}
-                            </h1>
-                            <p
-                                className='text-lg text-orange-200 cursor-text outline-none mt-1'
-                                contentEditable
-                                suppressContentEditableWarning
-                                onInput={changeChapterTitle}
-                            >
-                                {selectedChapter?.title || ''}
-                            </p>
-                        </div>
+                        {/* titre / timeline */}
+                        {showTimeline ? (
+                            <div className="flex items-center w-full overflow-hidden px-4 py-2">
+                                <Timeline selectedTome={selectedTome} chapters={chapters} />
+                            </div>
+                        ) : (
+                            <div className="text-center py-6 border-b border-orange-200">
+                                <h1
+                                    className='text-3xl font-bold text-orange-300 cursor-text outline-none'
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onInput={changeBookTitle}
+                                >
+                                    {selectedBook?.title || 'Aucun livre'}
+                                </h1>
+                                <p
+                                    className='text-lg text-orange-200 cursor-text outline-none mt-1'
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onInput={changeChapterTitle}
+                                >
+                                    {selectedChapter?.title || ''}
+                                </p>
+                            </div>
+                        )}
 
                         {/* barre d'actions */}
                         <div className='flex justify-between items-center px-4 py-2 bg-white shadow-sm'>
                             <div className='flex items-center gap-4'>
-                                {/* select tome */}
                                 {tomeListeField &&
                                     <FormField
                                         fields={tomeListeField}
@@ -225,7 +233,6 @@ export default function Home() {
                                         selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-sm text-orange-400 hover:text-orange-300 transition-colors"}
                                     />
                                 }
-                                {/* select chapitre */}
                                 {chapterListeField &&
                                     <FormField
                                         fields={chapterListeField}
@@ -252,7 +259,6 @@ export default function Home() {
 
                         {/* éditeur */}
                         <div className='flex-1 overflow-hidden'>
-                            {/* <Editor content={selectedChapter?.content} onChange={handleContentChange} /> */}
                             <Editor
                                 content={selectedChapter?.content}
                                 onChange={handleContentChange}
@@ -263,7 +269,6 @@ export default function Home() {
 
                     </div>
                 )}
-
             </Layout>
         </div>
     )

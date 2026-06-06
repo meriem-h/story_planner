@@ -1,4 +1,3 @@
-// src/back/ipc/BaseIPC.js
 const { ipcMain } = require('electron')
 
 class BaseIPC {
