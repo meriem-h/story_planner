@@ -127,8 +127,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline }) {
             )}
 
             {/* Bulle */}
-            <div
-                id={`bubble-${item.id}`}
+            <div id={`bubble-${item.id}`}
                 className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${getBubbleClass(item)}`}
                 onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
             />
@@ -163,7 +162,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline }) {
         <div className="flex items-center w-full px-4 py-2">
 
             {/* Non placés */}
-            <div className="flex flex-col items-start shrink-0 border-e border-orange-300 pr-3 mr-2">
+            {/* <div className="flex flex-col items-start shrink-0 border-e border-orange-300 pr-3 mr-2">
                 <button
                     onClick={() => setShowUnplaced(!showUnplaced)}
                     className="text-xs text-orange-300 font-semibold mb-2 hover:text-orange-500 transition-colors whitespace-nowrap"
@@ -171,7 +170,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline }) {
                     ? {unplaced.length > 0 && <span className="bg-orange-200 rounded-full px-1">{unplaced.length}</span>} {showUnplaced ? '▲' : '▼'}
                 </button>
                 {showUnplaced && renderSortable(unplaced, null)}
-            </div>
+            </div> */}
 
             {/* Zone chapitres scrollable */}
             <div className="flex-1 min-w-0 overflow-x-auto hide-scrollbar">
@@ -196,22 +195,26 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline }) {
                     />
                 </Modal>
                 <Modal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} size={50}>
-                    <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline}/>
+                    <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline} />
                 </Modal>
-                <button
-                    onClick={() => { setSelectedItem(null); setIsModalOpen(true) }}
-                    className="text-orange-400 hover:text-orange-600 transition-colors"
-                    title="Ajouter"
-                >
-                    <BadgePlus size={20} />
-                </button>
-                <button
-                    onClick={() => setIsFullscreen(true)}
-                    className="text-orange-400 hover:text-orange-600 transition-colors"
-                    title="Agrandir"
-                >
-                    <Maximize2 size={20} />
-                </button>
+
+                <div className='flex flex-col gap-4 ml-2'>
+
+                    <button
+                        onClick={() => { setSelectedItem(null); setIsModalOpen(true) }}
+                        className="text-orange-400 hover:text-orange-600 transition-colors"
+                        title="Ajouter"
+                    >
+                        <BadgePlus size={20} />
+                    </button>
+                    <button
+                        onClick={() => setIsFullscreen(true)}
+                        className="text-orange-400 hover:text-orange-600 transition-colors"
+                        title="Agrandir"
+                    >
+                        <Maximize2 size={20} />
+                    </button>
+                </div>
             </div>
 
         </div>

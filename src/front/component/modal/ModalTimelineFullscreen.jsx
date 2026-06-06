@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useApi } from '../../context/ApiContext'
 import { ReactSortable } from 'react-sortablejs'
-import ModalTimeline from './ModalTimeline'
 import Modal from './Modal'
+import ModalView from './ModalView'
+import ModalTimeline from './ModalTimeline'
 import { BadgePlus } from 'lucide-react'
 
 export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate }) {
@@ -12,6 +13,9 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
+    const [isViewOpen, setIsViewOpen] = useState(false)
+    const [snippetToView, setSnippetToView] = useState(null)
+    const [showUnplaced, setShowUnplaced] = useState(true)
 
     const buildGrouped = (list) => {
         const g = { null: [] }
@@ -44,7 +48,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
         setIsModalOpen(false)
         setSelectedItem(null)
         fetchItems()
-         if (onUpdate) onUpdate()
+        if (onUpdate) onUpdate()
     }
 
     const getBubbleClass = (item) => {
@@ -65,21 +69,21 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
             chapter_id: chapterId ?? null
         }))
         await api('timeline:reorder', updated)
-         if (onUpdate) onUpdate()
+        if (onUpdate) onUpdate()
     }
 
     const handleToggleStatus = async (item) => {
         await api('timeline:update', { id: item.id, data: { status: !item.status } })
         fetchItems()
         setOpenPopover(null)
-         if (onUpdate) onUpdate()
+        if (onUpdate) onUpdate()
     }
 
     const handleDelete = async (id) => {
         await api('timeline:delete', id)
         fetchItems()
         setOpenPopover(null)
-         if (onUpdate) onUpdate()
+        if (onUpdate) onUpdate()
     }
 
     const toggleChapter = (id) => {
@@ -91,8 +95,11 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const toggleAll = () => {
         if (selectedChapters.length === chapters.length) {
             setSelectedChapters([])
+            setShowUnplaced(false)
         } else {
             setSelectedChapters(chapters.map(ch => ch.id))
+            setShowUnplaced(true)
+
         }
     }
 
@@ -128,7 +135,19 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 className={`w-6 h-6 rounded-full border-2 shrink-0 hover:scale-110 transition-transform cursor-pointer ${getBubbleClass(item)}`}
                 onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
             />
-            <span className="text-sm text-orange-500 font-medium">{item.title}</span>
+            <span
+                className={`text-sm text-orange-500 font-medium ${item.snippet_id ? 'cursor-pointer hover:text-orange-700 hover:underline' : ''}`}
+                onClick={async () => {
+                    if (!item.snippet_id) return
+                    const result = await api('snippet:findById', item.snippet_id)
+                    if (result.success) {
+                        setSnippetToView(result.data)
+                        setIsViewOpen(true)
+                    }
+                }}
+            >
+                {item.title}
+            </span>
         </div>
     )
 
@@ -160,6 +179,9 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                     selectedItem={selectedItem}
                 />
             </Modal>
+            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
+                <ModalView item={snippetToView} type="snippet" />
+            </Modal>
 
             {/* Header filtre multi-select + bouton ajouter */}
             <div className="flex items-center justify-between gap-2">
@@ -169,6 +191,12 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.length === chapters.length ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
                     >
                         Tous
+                    </button>
+                    <button
+                        onClick={() => setShowUnplaced(prev => !prev)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${showUnplaced ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                    >
+                        Non placés
                     </button>
                     {chapters.map(ch => (
                         <button
@@ -193,28 +221,30 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
             <div className="flex gap-4 flex-1 overflow-hidden">
 
                 {/* Non placés */}
-                <div className="w-48 shrink-0 border-e border-orange-200 pr-4 flex flex-col gap-2 overflow-y-auto">
-                    <p className="text-xs text-orange-400 font-semibold">? Non placés ({unplaced.length})</p>
-                    <ReactSortable
-                        list={unplaced}
-                        setList={(newList) => handleReorder(newList, null)}
-                        animation={200}
-                        ghostClass='opacity-30'
-                        group="timeline-fs"
-                        className="flex flex-col gap-3 min-h-[40px]"
-                    >
-                        {unplaced.map(item => (
-                            <div key={item.id} className="flex items-center gap-2 cursor-grab">
-                                <div
-                                    id={`bubble-fs-${item.id}`}
-                                    className={`w-4 h-4 rounded-full border-2 shrink-0 ${getBubbleClass(item)}`}
-                                    onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
-                                />
-                                <span className="text-xs text-orange-500">{item.title}</span>
-                            </div>
-                        ))}
-                    </ReactSortable>
-                </div>
+                {showUnplaced && (
+                    <div className="w-48 shrink-0 border-e border-orange-200 pr-4 flex flex-col gap-2 overflow-y-auto">
+                        <p className="text-xs text-orange-400 font-semibold">Non placés ({unplaced.length})</p>
+                        <ReactSortable
+                            list={unplaced}
+                            setList={(newList) => handleReorder(newList, null)}
+                            animation={200}
+                            ghostClass='opacity-30'
+                            group="timeline-fs"
+                            className="flex flex-col gap-3 min-h-[40px]"
+                        >
+                            {unplaced.map(item => (
+                                <div key={item.id} className="flex items-center gap-2 cursor-grab">
+                                    <div
+                                        id={`bubble-fs-${item.id}`}
+                                        className={`w-4 h-4 rounded-full border-2 shrink-0 ${getBubbleClass(item)}`}
+                                        onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
+                                    />
+                                    <span className="text-xs text-orange-500">{item.title}</span>
+                                </div>
+                            ))}
+                        </ReactSortable>
+                    </div>
+                )}
 
                 {/* Timeline verticale */}
                 <div className="flex-1 min-w-0 overflow-x-auto overflow-y-hidden">
