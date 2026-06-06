@@ -22,11 +22,13 @@ export default function Timeline({ selectedTome, chapters }) {
     const buildGrouped = (list) => {
         const g = { null: [] }
         chapters.forEach(ch => g[ch.id] = [])
-        list.forEach(item => {
-            const key = item.chapter_id ?? 'null'
-            if (!g[key]) g[key] = []
-            g[key].push(item)
-        })
+        list
+            .filter(item => item && item.id) // filtre les items vides
+            .forEach(item => {
+                const key = item.chapter_id ?? 'null'
+                if (!g[key]) g[key] = []
+                g[key].push(item)
+            })
         return g
     }
     const [grouped, setGrouped] = useState(() => buildGrouped([]))
@@ -38,7 +40,11 @@ export default function Timeline({ selectedTome, chapters }) {
 
     useEffect(() => {
         setGrouped(buildGrouped(items))
-    }, [items, chapters])
+    }, [items.length, chapters])
+
+    // useEffect(() => {
+    //     setGrouped(buildGrouped(items))
+    // }, [items, chapters])
 
     const fetchItems = async () => {
         const result = await api('timeline:findBy', { tome_id: selectedTome.id })
@@ -52,13 +58,22 @@ export default function Timeline({ selectedTome, chapters }) {
     }
 
     const handleReorder = async (newList, chapterId) => {
-        // force le chapter_id sur tous les items de la nouvelle liste
-        const listWithChapter = newList.map(item => ({ ...item, chapter_id: chapterId ?? null }))
 
+        const listWithChapter = newList
+            .filter(item => item && item.id)
+            .map(item => ({ ...item, chapter_id: chapterId ?? null }))
+
+        // Met à jour grouped directement
         setGrouped(prev => ({
             ...prev,
             [chapterId ?? 'null']: listWithChapter
         }))
+
+        // Met à jour items pour garder la cohérence
+        setItems(prev => {
+            const others = prev.filter(i => (i.chapter_id ?? null) !== (chapterId ?? null))
+            return [...others, ...listWithChapter]
+        })
 
         const updated = listWithChapter.map((item, index) => ({
             id: item.id,
@@ -84,60 +99,58 @@ export default function Timeline({ selectedTome, chapters }) {
     }
 
     const renderItem = (item) => (
-    <div key={item.id} className="relative flex flex-col items-center gap-1 cursor-grab">
+        <div key={item.id} className="relative flex flex-col items-center gap-1 cursor-grab">
 
-        {/* Popover */}
-        {openPopover === item.id && (
-            <>
-                <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
-                <div className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
-                    style={{
-                        top: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().bottom + 8,
-                        left: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().left - 40,
-                    }}
-                >
-                    <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
-                        {item.status ? '↩️ Dévalider' : '✅ Valider'}
-                    </button>
-                    <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
-                        ✏️ Modifier
-                    </button>
-                    <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
-                        🗑️ Supprimer
-                    </button>
-                </div>
-            </>
-        )}
+            {/* Popover */}
+            {openPopover === item.id && (
+                <>
+                    <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
+                    <div className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
+                        style={{
+                            top: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().bottom + 8,
+                            left: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().left - 40,
+                        }}
+                    >
+                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                            {item.status ? '↩️ Dévalider' : '✅ Valider'}
+                        </button>
+                        <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                            ✏️ Modifier
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </>
+            )}
 
-        {/* Bulle */}
-        <div
-            id={`bubble-${item.id}`}
-            className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${getBubbleClass(item)}`}
-            onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
-        />
-        <span className="text-xs text-orange-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span>
-    </div>
-)
+            {/* Bulle */}
+            <div
+                id={`bubble-${item.id}`}
+                className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${getBubbleClass(item)}`}
+                onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
+            />
+            <span className="text-xs text-orange-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span>
+        </div>
+    )
 
     const renderSortable = (list, chapterId) => (
-        <ReactSortable
-            list={list}
-            setList={(newList) => handleReorder(newList, chapterId)}
-            animation={200}
-            ghostClass='opacity-30'
-            group="timeline"
-            className="flex items-center"
-        >
-            {list.map((item, i) => (
-                <React.Fragment key={item.id}>
-                    {renderItem(item)}
-                    {i < list.length - 1 && (
-                        <div className="w-5 h-[2px] bg-orange-300 shrink-0 mx-1" />
-                    )}
-                </React.Fragment>
-            ))}
-        </ReactSortable>
-    )
+    <ReactSortable
+        list={list.filter(item => item && item.id)}
+        setList={(newList) => handleReorder(newList.filter(item => item && item.id), chapterId)}
+        animation={200}
+        ghostClass='opacity-30'
+        group="timeline"
+        className="flex items-center gap-1"
+    >
+        {list.filter(item => item && item.id).map((item) => (
+            <div key={item.id} className="flex items-center">
+                {renderItem(item)}
+                <div className="w-5 h-[2px] bg-orange-300 shrink-0 mx-1 last:hidden" />
+            </div>
+        ))}
+    </ReactSortable>
+)
 
 
 
