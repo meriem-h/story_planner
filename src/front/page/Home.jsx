@@ -23,6 +23,7 @@ export default function Home() {
     const [content, setContent] = useState([])
     const [saved, setSaved] = useState(false)
     const [showTimeline, setShowTimeline] = useState(false)
+    const [timelineKey, setTimelineKey] = useState(0)
 
     useEffect(() => {
         !selectedBook ? fetchBooks() : fetchTomes(selectedBook.id)
@@ -177,6 +178,7 @@ export default function Home() {
                 fetchTomes={fetchTomes}
                 showTimeline={showTimeline}
                 setShowTimeline={setShowTimeline}
+                refreshTimeline={() => setTimelineKey(k => k + 1)}
             >
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size={50}>
                     <ModalBook onSuccess={handleBookCreated} />
@@ -200,7 +202,7 @@ export default function Home() {
                         {/* titre / timeline */}
                         {showTimeline ? (
                             <div className="flex items-center w-full overflow-hidden px-4 py-2">
-                                <Timeline selectedTome={selectedTome} chapters={chapters} />
+                                <Timeline key={timelineKey} selectedTome={selectedTome} chapters={chapters} />
                             </div>
                         ) : (
                             <div className="text-center py-6 border-b border-orange-200">

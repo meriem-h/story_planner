@@ -31,7 +31,7 @@ const TYPE_LABELS = {
     autre: 'Autre',
 }
 
-export default function SnippetLayout({ selectedBook, selectedTome, chapters }) {
+export default function SnippetLayout({ selectedBook, selectedTome, chapters, refreshTimeline }) {
 
     const api = useApi()
     const [snippets, setSnippets] = useState([])
@@ -61,6 +61,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters }) 
     const handleSnippetCreated = () => {
         fetchSnippets()
         setIsOpen(false)
+        if (refreshTimeline) refreshTimeline()
     }
 
     const handleReorder = async (newList) => {
@@ -86,11 +87,10 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters }) 
     const renderSnippet = (snippet) => (
         <div
             key={snippet.id}
-            className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${
-                snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
-                : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
-                : 'bg-white border-orange-200 hover:bg-orange-50'
-            }`}
+            className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
+                    : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
+                        : 'bg-white border-orange-200 hover:bg-orange-50'
+                }`}
             onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
         >
             <div className='flex justify-between items-start mb-2'>
@@ -118,11 +118,10 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters }) 
             {snippet.title && (
                 <p className='font-bold text-orange-800 text-sm mb-1'>{snippet.title}</p>
             )}
-            <p className={`text-xs line-clamp-2 ${
-                snippet.used === 'abandonne' ? 'text-red-300 line-through'
-                : snippet.used === 'utilise' ? 'text-gray-400'
-                : 'text-orange-400'
-            }`}>
+            <p className={`text-xs line-clamp-2 ${snippet.used === 'abandonne' ? 'text-red-300 line-through'
+                    : snippet.used === 'utilise' ? 'text-gray-400'
+                        : 'text-orange-400'
+                }`}>
                 {snippet.content}
             </p>
         </div>

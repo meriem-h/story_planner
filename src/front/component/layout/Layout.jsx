@@ -10,7 +10,7 @@ import Lore from "./LoreLayout";
 import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -27,13 +27,13 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [content, setContent] = useState(<Chapter {...chapterProps} />)
 
     useEffect(() => {
-    if (activeView === 'chapter') {
-        setContent(<Chapter {...chapterProps} />)
-    }
-    if (activeView === 'snippet') {
-        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
-    }
-}, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
+        if (activeView === 'chapter') {
+            setContent(<Chapter {...chapterProps} />)
+        }
+        if (activeView === 'snippet') {
+            setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
+        }
+    }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
 
     const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-orange-600 text-orange-100' : 'bg-orange-400 text-orange-100 hover:bg-orange-500'}`
 
@@ -51,8 +51,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
     const showSnippet = () => {
         setActiveView('snippet')
-        // setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} />)
-        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
+        setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} refreshTimeline={refreshTimeline} />)
     }
     const showNote = () => {
         setActiveView('note')
