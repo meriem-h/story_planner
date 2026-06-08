@@ -9,12 +9,11 @@ class SnippetIPC extends BaseIPC {
     }
 
     custom() {
-        // supprime le create de base si je veut le remplacer par un create custom
-        // ipcMain.removeHandler('task:create')
-
-        // //exemple pour des requette custom et hor base
-        // ipcMain.handle('task:create', async (event, {}) => {
-        // })
+        ipcMain.handle('snippet:findWithoutTimeline', async (_, tomeId) => {
+            // const result = await snippetRepo.findWithoutTimeline(tomeId)
+            const result = await this.repo.findWithoutTimeline(tomeId)
+            return { success: true, data: result }
+        })
 
     }
 }

@@ -10,6 +10,12 @@ class TimelineRepository extends BaseRepository {
                 alias: 'c',
                 on: { foreign: 'id', local: 'chapter_id' },
                 fields: ['title']
+            },
+            {
+                table: 'snippet',
+                alias: 's',
+                on: { foreign: 'id', local: 'snippet_id' },
+                fields: ['title']
             }
         ]
     }
@@ -17,6 +23,7 @@ class TimelineRepository extends BaseRepository {
     async findBy(conditions) {
         return super.findBy(conditions, this.joins)
     }
+
 
     async reorder(items) {
         const promises = items.map((item) =>

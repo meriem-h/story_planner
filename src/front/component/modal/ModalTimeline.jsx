@@ -1,123 +1,336 @@
 import React, { useState, useEffect } from 'react'
-import { GitBranch } from 'lucide-react'
-import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
+import { ReactSortable } from 'react-sortablejs'
+import Modal from './Modal'
+import ModalView from './ModalView'
+import ModalTimeline from './ModalTimeline'
+import ModalSnippet from './ModalSnippet'
+import { BadgePlus } from 'lucide-react'
 
-export default function ModalTimeline({ onSuccess, selectedTome, chapters, selectedItem }) {
+export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate, book }) {
     const api = useApi()
-    const [error, setError] = useState(null)
-    const [item, setItem] = useState(
-        selectedItem || {
-            tome_id: selectedTome?.id || null,
-            chapter_id: chapters?.[0]?.id || null,
-            snippet_id: null,
-            title: '',
-            status: false,
-        }
-    )
+    const [items, setItems] = useState([])
+    const [selectedChapters, setSelectedChapters] = useState([])
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedItem, setSelectedItem] = useState(null)
+    const [openPopover, setOpenPopover] = useState(null)
+    const [isViewOpen, setIsViewOpen] = useState(false)
+    const [snippetToView, setSnippetToView] = useState(null)
+    const [showUnplaced, setShowUnplaced] = useState(true)
+    const [isCreateSnippetOpen, setIsCreateSnippetOpen] = useState(false)
+    const [isLinkOpen, setIsLinkOpen] = useState(false)
+    const [snippetActionItem, setSnippetActionItem] = useState(null)
+    const [availableSnippets, setAvailableSnippets] = useState([])
 
-    const [fields, setFields] = useState([
-        { label: 'Titre *', name: 'title', type: 'text', placeholder: 'Titre de la scène / idée' },
-        {
-            label: 'Chapitre',
-            name: 'chapter_id',
-            type: 'select',
-            data: chapters.map((ch, i) => ({
-                value: ch.id,
-                text: ch.title,
-                selected: i === 0
-            }))
-        }
-    ])
+    const buildGrouped = (list) => {
+        const g = { null: [] }
+        chapters.forEach(ch => g[ch.id] = [])
+        list.forEach(item => {
+            const key = item.chapter_id ?? 'null'
+            if (!g[key]) g[key] = []
+            g[key].push(item)
+        })
+        return g
+    }
+
+    const [grouped, setGrouped] = useState(() => buildGrouped([]))
 
     useEffect(() => {
-        if (!selectedItem) {
-            setItem({
-                tome_id: selectedTome?.id || null,
-                chapter_id: chapters?.[0]?.id || null,
-                snippet_id: null,
-                title: '',
-                status: false,
-            })
-            setFields(prev => prev.map(f => ({ ...f, value: undefined })))
-            return
-        }
-        setItem(selectedItem)
-        setFields(prev => prev.map(f => ({
-            ...f,
-            value: selectedItem[f.name],
-            ...(f.type === 'select' && {
-                data: f.data.map(d => ({ ...d, selected: d.value == selectedItem[f.name] }))
-            })
-        })))
-    }, [selectedItem])
+        if (selectedTome) fetchItems()
+        setSelectedChapters(chapters.map(ch => ch.id))
+    }, [selectedTome, chapters])
 
-    const handleChange = (e) => {
-        setItem(prev => ({ ...prev, [e.target.name]: e.target.value }))
-        setFields(prev => prev.map(f => {
-            if (f.name === e.target.name && f.type === 'select') {
-                return {
-                    ...f,
-                    value: e.target.value,
-                    data: f.data.map(d => ({ ...d, selected: d.value == e.target.value }))
-                }
-            }
-            return f.name === e.target.name ? { ...f, value: e.target.value } : f
+    useEffect(() => {
+        setGrouped(buildGrouped(items))
+    }, [items, chapters])
+
+    const fetchItems = async () => {
+        const result = await api('timeline:findBy', { tome_id: selectedTome.id })
+        if (result.success) setItems(result.data)
+    }
+
+    const handleSuccess = () => {
+        setIsModalOpen(false)
+        setSelectedItem(null)
+        fetchItems()
+        if (onUpdate) onUpdate()
+    }
+
+    const getBubbleClass = (item) => {
+        if (item.status) return 'bg-green-400 border-green-500'
+        if (item.snippet_id) return 'bg-orange-400 border-orange-500'
+        return 'bg-white border-orange-300'
+    }
+
+    const handleReorder = async (newList, chapterId) => {
+        const listWithChapter = newList.map(item => ({ ...item, chapter_id: chapterId ?? null }))
+        setGrouped(prev => ({
+            ...prev,
+            [chapterId ?? 'null']: listWithChapter
         }))
+        const updated = listWithChapter.map((item, index) => ({
+            id: item.id,
+            position: index + 1,
+            chapter_id: chapterId ?? null
+        }))
+        await api('timeline:reorder', updated)
+        if (onUpdate) onUpdate()
     }
 
-    const handleClick = async (e) => {
-        e.preventDefault()
-        setError(null)
+    const handleToggleStatus = async (item) => {
+        await api('timeline:update', { id: item.id, data: { status: !item.status } })
+        fetchItems()
+        setOpenPopover(null)
+        if (onUpdate) onUpdate()
+    }
 
-        if (!item.title) {
-            setError({ all: 'Le titre est obligatoire' })
-            return
+    const handleDelete = async (id) => {
+        await api('timeline:delete', id)
+        fetchItems()
+        setOpenPopover(null)
+        if (onUpdate) onUpdate()
+    }
+
+    const toggleChapter = (id) => {
+        setSelectedChapters(prev =>
+            prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+        )
+    }
+
+    const toggleAll = () => {
+        if (selectedChapters.length === chapters.length) {
+            setSelectedChapters([])
+            setShowUnplaced(false)
+        } else {
+            setSelectedChapters(chapters.map(ch => ch.id))
+            setShowUnplaced(true)
         }
-
-        const { position, ...itemData } = item
-
-        console.log(item);
-        
-
-        // const result = selectedItem
-        //     ? await api('timeline:update', { id: selectedItem.id, data: itemData })
-        //     : await api('timeline:create', itemData)
-
-        // if (result.success) {
-        //     onSuccess(result)
-        // } else {
-        //     setError({ all: result.message })
-        // }
     }
+
+    const handleOpenLink = async (item) => {
+        const result = await api('snippet:findWithoutTimeline', selectedTome.id)
+        if (result.success) setAvailableSnippets(result.data)
+        setSnippetActionItem(item)
+        setIsLinkOpen(true)
+        setOpenPopover(null)
+    }
+
+    const handleLinkSnippet = async (snippetId) => {
+        await api('timeline:update', { id: snippetActionItem.id, data: { snippet_id: snippetId } })
+        setIsLinkOpen(false)
+        setSnippetActionItem(null)
+        fetchItems()
+        if (onUpdate) onUpdate()
+    }
+
+    const handleSnippetCreated = async (result) => {
+        await api('timeline:update', { id: snippetActionItem.id, data: { snippet_id: result.id } })
+        setIsCreateSnippetOpen(false)
+        setSnippetActionItem(null)
+        fetchItems()
+        if (onUpdate) onUpdate()
+    }
+
+    const unplaced = grouped['null'] || []
+    const filteredChapters = chapters.filter(ch => selectedChapters.includes(ch.id))
+
+    const renderItem = (item) => (
+        <div key={item.id} className="relative flex items-center gap-3 cursor-grab">
+            {openPopover === item.id && (
+                <>
+                    <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
+                    <div
+                        className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
+                        style={{
+                            top: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().bottom + 8,
+                            left: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().left - 40,
+                        }}
+                    >
+                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                            {item.status ? '↩️ Dévalider' : '✅ Valider'}
+                        </button>
+                        <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                            ✏️ Modifier
+                        </button>
+                        {!item.snippet_id && (
+                            <>
+                                <hr className="border-orange-100 my-1" />
+                                <button
+                                    onClick={() => { setSnippetActionItem(item); setIsCreateSnippetOpen(true); setOpenPopover(null) }}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap"
+                                >
+                                    ✨ Créer un snippet
+                                </button>
+                                <button
+                                    onClick={() => handleOpenLink(item)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap"
+                                >
+                                    🔗 Lier un snippet
+                                </button>
+                            </>
+                        )}
+                        <hr className="border-orange-100 my-1" />
+                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </>
+            )}
+            <div
+                id={`bubble-fs-${item.id}`}
+                className={`w-6 h-6 rounded-full border-2 shrink-0 hover:scale-110 transition-transform cursor-pointer ${getBubbleClass(item)}`}
+                onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
+            />
+            <span
+                className={`text-sm text-orange-500 font-medium ${item.snippet_id ? 'cursor-pointer hover:text-orange-700 hover:underline' : ''}`}
+                onClick={async () => {
+                    if (!item.snippet_id) return
+                    const result = await api('snippet:findById', item.snippet_id)
+                    if (result.success) {
+                        setSnippetToView(result.data)
+                        setIsViewOpen(true)
+                    }
+                }}
+            >
+                {item.s_title ?? item.title}
+            </span>
+        </div>
+    )
+
+    const renderSortable = (list, chapterId) => (
+        <ReactSortable
+            list={list}
+            setList={(newList) => handleReorder(newList, chapterId)}
+            animation={200}
+            ghostClass='opacity-30'
+            group="timeline-fs"
+            className="flex flex-col gap-3 min-h-[40px]"
+        >
+            {list.map((item) => (
+                <div key={item.id}>
+                    {renderItem(item)}
+                </div>
+            ))}
+        </ReactSortable>
+    )
 
     return (
-        <div className='p-4 flex flex-col gap-6'>
-            <div className='flex flex-col items-center gap-2'>
-                <div className='w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center'>
-                    <GitBranch className='text-white' size={32} />
+        <div className="flex flex-col gap-4" style={{ height: '70vh' }}>
+
+            <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedItem(null) }} size={50}>
+                <ModalTimeline
+                    onSuccess={handleSuccess}
+                    selectedTome={selectedTome}
+                    chapters={chapters}
+                    selectedItem={selectedItem}
+                />
+            </Modal>
+
+            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
+                <ModalView item={snippetToView} type="snippet" />
+            </Modal>
+
+            <Modal isOpen={isCreateSnippetOpen} onClose={() => { setIsCreateSnippetOpen(false); setSnippetActionItem(null) }} size={50}>
+                <ModalSnippet
+                    onSuccess={handleSnippetCreated}
+                    book={book}
+                    tome={selectedTome}
+                    chapters={chapters}
+                    selectedSnippet={null}
+                />
+            </Modal>
+
+            <Modal isOpen={isLinkOpen} onClose={() => { setIsLinkOpen(false); setSnippetActionItem(null) }} size={40}>
+                <div className="p-4 flex flex-col gap-4">
+                    <p className="text-orange-800 font-bold text-lg text-center">Lier un snippet</p>
+                    <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+                        {availableSnippets.length === 0
+                            ? <p className="text-sm text-gray-400 text-center py-4">Aucun snippet disponible</p>
+                            : availableSnippets.map(s => (
+                                <button
+                                    key={s.id}
+                                    onClick={() => handleLinkSnippet(s.id)}
+                                    className="text-left px-3 py-2 rounded-lg hover:bg-orange-50 text-sm text-orange-600 border border-orange-100 transition-colors"
+                                >
+                                    {s.title || s.type}
+                                </button>
+                            ))
+                        }
+                    </div>
                 </div>
-                <p className='text-orange-800 font-bold text-lg'>
-                    {item.title || 'Nouvel élément'}
-                </p>
+            </Modal>
+
+            {/* Header filtre multi-select + bouton ajouter */}
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex gap-2 flex-wrap">
+                    <button
+                        onClick={toggleAll}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.length === chapters.length ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                    >
+                        Tous
+                    </button>
+                    <button
+                        onClick={() => setShowUnplaced(prev => !prev)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${showUnplaced ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                    >
+                        Non placés
+                    </button>
+                    {chapters.map(ch => (
+                        <button
+                            key={ch.id}
+                            onClick={() => toggleChapter(ch.id)}
+                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.includes(ch.id) ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                        >
+                            {ch.title}
+                        </button>
+                    ))}
+                </div>
+                <button
+                    onClick={() => { setSelectedItem(null); setIsModalOpen(true) }}
+                    className="text-orange-400 hover:text-orange-600 transition-colors shrink-0"
+                    title="Ajouter"
+                >
+                    <BadgePlus size={20} />
+                </button>
             </div>
 
-            <form className='flex flex-col gap-4'>
-                <FormField fields={fields} onChange={handleChange} errors={error} />
+            {/* Corps */}
+            <div className="flex gap-4 flex-1 overflow-hidden overflow-x-auto hide-scrollbar">
 
-                {error?.all && (
-                    <div className="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm">
-                        {error.all}
+                {/* Non placés */}
+                {showUnplaced && (
+                    <div className="w-48 shrink-0 pr-4 flex flex-col gap-2 overflow-y-auto hide-scrollbar">
+                        <p className="text-xs text-orange-400 font-semibold">Non placés ({unplaced.length})</p>
+                        <ReactSortable
+                            list={unplaced}
+                            setList={(newList) => handleReorder(newList, null)}
+                            animation={200}
+                            ghostClass='opacity-30'
+                            group="timeline-fs"
+                            className="flex flex-col gap-3 min-h-[40px]"
+                        >
+                            {unplaced.map(item => (
+                                <div key={item.id}>
+                                    {renderItem(item)}
+                                </div>
+                            ))}
+                        </ReactSortable>
                     </div>
                 )}
 
-                <button
-                    onClick={handleClick}
-                    className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold mt-2'
-                >
-                    {selectedItem ? 'Modifier' : 'Créer'}
-                </button>
-            </form>
+                {/* Timeline verticale */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex gap-0 h-full" style={{ width: 'max-content' }}>
+                        {filteredChapters.map((chapter) => (
+                            <div key={chapter.id} className="flex flex-col shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar" style={{ minWidth: '180px' }}>
+                                <span className="text-sm text-orange-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">{chapter.title}</span>
+                                {renderSortable(grouped[chapter.id] || [], chapter.id)}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
         </div>
     )
 }

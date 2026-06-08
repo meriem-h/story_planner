@@ -202,7 +202,7 @@ export default function Home() {
                         {/* titre / timeline */}
                         {showTimeline ? (
                             <div className="flex items-center w-full overflow-hidden px-4 py-2">
-                                <Timeline key={timelineKey} selectedTome={selectedTome} chapters={chapters} />
+                                <Timeline key={timelineKey} selectedTome={selectedTome} chapters={chapters} book={selectedBook} />
                             </div>
                         ) : (
                             <div className="text-center py-6 border-b border-orange-200">

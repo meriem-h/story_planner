@@ -4,9 +4,10 @@ import { ReactSortable } from 'react-sortablejs'
 import Modal from './Modal'
 import ModalView from './ModalView'
 import ModalTimeline from './ModalTimeline'
+import ModalSnippet from './ModalSnippet'
 import { BadgePlus } from 'lucide-react'
 
-export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate }) {
+export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate, book }) {
     const api = useApi()
     const [items, setItems] = useState([])
     const [selectedChapters, setSelectedChapters] = useState([])
@@ -16,6 +17,10 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [snippetToView, setSnippetToView] = useState(null)
     const [showUnplaced, setShowUnplaced] = useState(true)
+    const [isCreateSnippetOpen, setIsCreateSnippetOpen] = useState(false)
+    const [isLinkOpen, setIsLinkOpen] = useState(false)
+    const [snippetActionItem, setSnippetActionItem] = useState(null)
+    const [availableSnippets, setAvailableSnippets] = useState([])
 
     const buildGrouped = (list) => {
         const g = { null: [] }
@@ -99,8 +104,31 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
         } else {
             setSelectedChapters(chapters.map(ch => ch.id))
             setShowUnplaced(true)
-
         }
+    }
+
+    const handleOpenLink = async (item) => {
+        const result = await api('snippet:findWithoutTimeline', selectedTome.id)
+        if (result.success) setAvailableSnippets(result.data)
+        setSnippetActionItem(item)
+        setIsLinkOpen(true)
+        setOpenPopover(null)
+    }
+
+    const handleLinkSnippet = async (snippetId) => {
+        await api('timeline:update', { id: snippetActionItem.id, data: { snippet_id: snippetId } })
+        setIsLinkOpen(false)
+        setSnippetActionItem(null)
+        fetchItems()
+        if (onUpdate) onUpdate()
+    }
+
+    const handleSnippetCreated = async (result) => {
+        await api('timeline:update', { id: snippetActionItem.id, data: { snippet_id: result.id } })
+        setIsCreateSnippetOpen(false)
+        setSnippetActionItem(null)
+        fetchItems()
+        if (onUpdate) onUpdate()
     }
 
     const unplaced = grouped['null'] || []
@@ -112,7 +140,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
                     <div
-                        className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
+                        className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
                         style={{
                             top: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().bottom + 8,
                             left: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().left - 40,
@@ -124,6 +152,24 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                         <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
                             ✏️ Modifier
                         </button>
+                        {!item.snippet_id && (
+                            <>
+                                <hr className="border-orange-100 my-1" />
+                                <button
+                                    onClick={() => { setSnippetActionItem(item); setIsCreateSnippetOpen(true); setOpenPopover(null) }}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap"
+                                >
+                                    ✨ Créer un snippet
+                                </button>
+                                <button
+                                    onClick={() => handleOpenLink(item)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap"
+                                >
+                                    🔗 Lier un snippet
+                                </button>
+                            </>
+                        )}
+                        <hr className="border-orange-100 my-1" />
                         <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
                             🗑️ Supprimer
                         </button>
@@ -146,7 +192,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                     }
                 }}
             >
-                {item.title}
+                {item.s_title ?? item.title}
             </span>
         </div>
     )
@@ -179,8 +225,39 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                     selectedItem={selectedItem}
                 />
             </Modal>
+
             <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
                 <ModalView item={snippetToView} type="snippet" />
+            </Modal>
+
+            <Modal isOpen={isCreateSnippetOpen} onClose={() => { setIsCreateSnippetOpen(false); setSnippetActionItem(null) }} size={50}>
+                <ModalSnippet
+                    onSuccess={handleSnippetCreated}
+                    book={book}
+                    tome={selectedTome}
+                    chapters={chapters}
+                    selectedSnippet={null}
+                />
+            </Modal>
+
+            <Modal isOpen={isLinkOpen} onClose={() => { setIsLinkOpen(false); setSnippetActionItem(null) }} size={40}>
+                <div className="p-4 flex flex-col gap-4">
+                    <p className="text-orange-800 font-bold text-lg text-center">Lier un snippet</p>
+                    <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+                        {availableSnippets.length === 0
+                            ? <p className="text-sm text-gray-400 text-center py-4">Aucun snippet disponible</p>
+                            : availableSnippets.map(s => (
+                                <button
+                                    key={s.id}
+                                    onClick={() => handleLinkSnippet(s.id)}
+                                    className="text-left px-3 py-2 rounded-lg hover:bg-orange-50 text-sm text-orange-600 border border-orange-100 transition-colors"
+                                >
+                                    {s.title || s.type}
+                                </button>
+                            ))
+                        }
+                    </div>
+                </div>
             </Modal>
 
             {/* Header filtre multi-select + bouton ajouter */}
@@ -218,11 +295,11 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
             </div>
 
             {/* Corps */}
-            <div className="flex gap-4 flex-1 overflow-hidden">
+            <div className="flex gap-4 flex-1 overflow-hidden overflow-x-auto hide-scrollbar">
 
                 {/* Non placés */}
                 {showUnplaced && (
-                    <div className="w-48 shrink-0 border-e border-orange-200 pr-4 flex flex-col gap-2 overflow-y-auto">
+                    <div className="w-48 shrink-0 pr-4 flex flex-col gap-2 overflow-y-auto hide-scrollbar">
                         <p className="text-xs text-orange-400 font-semibold">Non placés ({unplaced.length})</p>
                         <ReactSortable
                             list={unplaced}
@@ -233,13 +310,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                             className="flex flex-col gap-3 min-h-[40px]"
                         >
                             {unplaced.map(item => (
-                                <div key={item.id} className="flex items-center gap-2 cursor-grab">
-                                    <div
-                                        id={`bubble-fs-${item.id}`}
-                                        className={`w-4 h-4 rounded-full border-2 shrink-0 ${getBubbleClass(item)}`}
-                                        onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
-                                    />
-                                    <span className="text-xs text-orange-500">{item.title}</span>
+                                <div key={item.id}>
+                                    {renderItem(item)}
                                 </div>
                             ))}
                         </ReactSortable>
@@ -247,10 +319,10 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 )}
 
                 {/* Timeline verticale */}
-                <div className="flex-1 min-w-0 overflow-x-auto overflow-y-hidden">
+                <div className="flex-1 min-w-0">
                     <div className="flex gap-0 h-full" style={{ width: 'max-content' }}>
                         {filteredChapters.map((chapter) => (
-                            <div key={chapter.id} className="flex flex-col shrink-0 border-s border-orange-400 px-4 overflow-y-auto" style={{ minWidth: '180px' }}>
+                            <div key={chapter.id} className="flex flex-col shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar" style={{ minWidth: '180px' }}>
                                 <span className="text-sm text-orange-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">{chapter.title}</span>
                                 {renderSortable(grouped[chapter.id] || [], chapter.id)}
                             </div>

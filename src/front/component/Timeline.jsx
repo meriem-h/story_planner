@@ -6,7 +6,7 @@ import ModalTimeline from './modal/ModalTimeline'
 import ModalTimelineFullscreen from './modal/ModalTimelineFullscreen'
 import { BadgePlus, Maximize2 } from 'lucide-react'
 
-export default function Timeline({ selectedTome, chapters, refreshTimeline }) {
+export default function Timeline({ selectedTome, chapters, refreshTimeline, book }) {
     const api = useApi()
     const [items, setItems] = useState([])
     const [showUnplaced, setShowUnplaced] = useState(false)
@@ -195,7 +195,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline }) {
                     />
                 </Modal>
                 <Modal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} size={50}>
-                    <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline} />
+                    <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline} book={book} />
                 </Modal>
 
                 <div className='flex flex-col gap-4 ml-2'>
