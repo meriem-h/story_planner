@@ -149,9 +149,9 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                         <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
                             {item.status ? '↩️ Dévalider' : '✅ Valider'}
                         </button>
-                        <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                        {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
                             ✏️ Modifier
-                        </button>
+                        </button> */}
                         {!item.snippet_id && (
                             <>
                                 <hr className="border-orange-100 my-1" />
