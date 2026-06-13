@@ -134,57 +134,14 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                 {children}
             </div>
 
-            {/* 
-            <section>
-                 Bouton galerie flottant
-                <button
-                    onClick={() => setIsGalleryOpen(true)}
-                    title="Galerie"
-                    className='fixed bottom-6 right-24 z-50 bg-primary-400 hover:bg-primary-500 text-white rounded-full p-4 shadow-lg transition-colors'
-                >
-                    <Images size={22} />
-                </button>
 
-                 Bouton download flottant
-                <button
-                    onClick={() => setIsExportOpen(true)}
-                    title="Exporter"
-                    className='fixed bottom-6 right-6 z-50 bg-primary-400 hover:bg-primary-500 text-white rounded-full p-4 shadow-lg transition-colors'
-
-                >
-                    <Download size={22} />
-                </button>
-
-                 Bouton Timeline flottant
-                <button
-                    onClick={() => setShowTimeline(!showTimeline)}
-                    title="Timeline"
-                    className={`fixed bottom-6 right-44 z-50 text-white rounded-full p-4 shadow-lg transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
-                >
-                    <GitBranch size={22} />
-                </button>
-            </section>
-            */}
 
 
             <section className="fixed bottom-6 right-0 z-50 flex items-end gap-2">
 
                 {/* Popover couleurs */}
-                {isThemeOpen && (
-                    // <>
-                    //     <div className="fixed inset-0 z-10" onClick={() => setIsThemeOpen(false)} />
-                    //     <div className="absolute bottom-0 right-full mr-2 z-20 bg-primary-50 border border-primary-200 rounded-2xl shadow-lg p-3 flex flex-wrap gap-2 w-64">
-                    //         {THEME_NAMES.map(name => (
-                    //             <button
-                    //                 key={name}
-                    //                 onClick={() => { changeTheme(name); setIsThemeOpen(false) }}
-                    //                 title={name}
-                    //                 className={`w-7 h-7 rounded-full transition-transform hover:scale-110 ${theme === name ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
-                    //                 style={{ backgroundColor: THEMES[name][400] }}
-                    //             />
-                    //         ))}
-                    //     </div>
-                    // </>
+                {isThemeOpen && isFloatingOpen &&(
+
                     <div className="absolute bottom-0 right-full mr-2 z-20 bg-primary-50 border border-primary-200 rounded-2xl shadow-lg p-3 flex flex-col gap-3 w-64">
 
                         {/* Toggle dark mode */}
@@ -213,9 +170,11 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                     </div>
                 )}
 
-                {/* Barre flottante */}
-                {isFloatingOpen && (
-                    <div className="flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg">
+
+                <div className='flex flex-col'>
+                    {/* Barre flottante */}
+
+                    <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
                         <button
                             onClick={() => setIsThemeOpen(prev => !prev)}
                             title="Thème"
@@ -245,18 +204,18 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             <GitBranch size={20} />
                         </button>
                     </div>
-                )}
 
-                {/* Bouton toggle */}
-                <button
-                    onClick={() => setIsFloatingOpen(prev => !prev)}
-                    className="bg-primary-400 hover:bg-primary-500 text-white rounded-l-full p-2 shadow-lg transition-colors mb-3 mr-0"
-                >
-                    {isFloatingOpen ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-                </button>
+                    {/* Bouton toggle */}
+                    <button
+                        onClick={() => setIsFloatingOpen(prev => !prev)}
+                        className="bg-primary-400 hover:bg-primary-500 text-white rounded-l-full p-2 shadow-lg transition-colors mb-3 mr-0"
+                    >
+                        {isFloatingOpen ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                    </button>
 
+                </div>
             </section>
 
-        </div>
+        </div >
     )
 }
