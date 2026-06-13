@@ -195,7 +195,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                     />
                 </Modal>
                 {/* <Modal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} size={50}> */}
-                <Modal isOpen={isFullscreen} onClose={() => { setIsFullscreen(false); fetchItems() }} size={50}>
+                <Modal isOpen={isFullscreen} onClose={() => { setIsFullscreen(false); fetchItems() }} >
                     <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline} book={book} />
                 </Modal>
 

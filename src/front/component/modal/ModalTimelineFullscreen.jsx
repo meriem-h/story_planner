@@ -295,12 +295,12 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
             </div>
 
             {/* Corps */}
-            <div className="flex gap-4 flex-1 overflow-hidden overflow-x-auto hide-scrollbar">
+            <div className="flex flex-1 overflow-hidden overflow-x-auto hide-scrollbar">
 
                 {/* Non placés */}
                 {showUnplaced && (
-                    <div className="w-48 shrink-0 pr-4 flex flex-col gap-2 overflow-y-auto hide-scrollbar">
-                        <p className="text-xs text-orange-400 font-semibold">Non placés ({unplaced.length})</p>
+                    <div className="flex flex-col w-[400px] shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar">
+                        <span className="text-sm text-orange-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">Non placés ({unplaced.length})</span>
                         <ReactSortable
                             list={unplaced}
                             setList={(newList) => handleReorder(newList, null)}
@@ -322,7 +322,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <div className="flex-1 min-w-0">
                     <div className="flex gap-0 h-full" style={{ width: 'max-content' }}>
                         {filteredChapters.map((chapter) => (
-                            <div key={chapter.id} className="flex flex-col shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar" style={{ minWidth: '180px' }}>
+                            <div key={chapter.id} className="flex flex-col w-[400px] shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar " >
                                 <span className="text-sm text-orange-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">{chapter.title}</span>
                                 {renderSortable(grouped[chapter.id] || [], chapter.id)}
                             </div>
