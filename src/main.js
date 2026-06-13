@@ -14,6 +14,7 @@ const createWindow = () => {
         icon: path.join(__dirname, '../assets/icon.ico'),
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+            webSecurity: false,
         },
     });
 
@@ -21,7 +22,7 @@ const createWindow = () => {
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
-                'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:"]
+                'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https: file:"]
             }
         })
     })
