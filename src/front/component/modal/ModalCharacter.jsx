@@ -94,7 +94,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
 
             {/* avatar live */}
             <div className='flex justify-center'>
-                <div className='w-16 h-16 rounded-full bg-orange-300 flex items-center justify-center text-white text-2xl font-bold overflow-hidden'>
+                <div className='w-16 h-16 rounded-full bg-primary-300 flex items-center justify-center text-white text-2xl font-bold overflow-hidden'>
                     {character.image_url
                         ? <img src={character.image_url} alt='aperçu' className='w-full h-full object-cover' onError={(e) => e.target.style.display = 'none'} />
                         : character.name?.[0]?.toUpperCase() || '?'
@@ -103,15 +103,15 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
             </div>
 
             {/* onglets */}
-            <div className='flex gap-1 border-b border-orange-100'>
+            <div className='flex gap-1 border-b border-primary-100'>
                 {TABS.map(tab => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`px-3 py-2 text-sm font-medium transition-colors rounded-t-lg
                             ${activeTab === tab.key
-                                ? 'text-orange-600 border-b-2 border-orange-400 bg-orange-50'
-                                : 'text-orange-300 hover:text-orange-500'
+                                ? 'text-primary-600 border-b-2 border-primary-400 bg-primary-50'
+                                : 'text-primary-300 hover:text-primary-500'
                             }`}
                     >
                         {tab.label}
@@ -138,7 +138,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                         placeholder='Description du personnage...'
                         value={character.description || ''}
                         onChange={handleChange}
-                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-orange-800 placeholder:text-orange-300 focus:ring-orange-300 focus:border-orange-300 outline-none resize-none'
+                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                     />
                 )}
 
@@ -148,7 +148,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                         placeholder='Personnalité du personnage...'
                         value={character.personality || ''}
                         onChange={handleChange}
-                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-orange-800 placeholder:text-orange-300 focus:ring-orange-300 focus:border-orange-300 outline-none resize-none'
+                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                     />
                 )}
 
@@ -158,7 +158,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                         placeholder='Notes diverses...'
                         value={character.notes || ''}
                         onChange={handleChange}
-                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-orange-800 placeholder:text-orange-300 focus:ring-orange-300 focus:border-orange-300 outline-none resize-none'
+                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                     />
                 )}
 
@@ -173,7 +173,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                 )}
                 <button
                     onClick={handleClick}
-                    className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold'
+                    className='w-full py-3 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg font-bold'
                 >
                     {selectedCharacter ? "Modifier le personnage" : "Créer le personnage"}
                 </button>

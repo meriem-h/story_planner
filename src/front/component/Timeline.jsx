@@ -55,8 +55,8 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
 
     const getBubbleClass = (item) => {
         if (item.status) return 'bg-green-400 border-green-500'
-        if (item.snippet_id) return 'bg-orange-400 border-orange-500'
-        return 'bg-white border-orange-300'
+        if (item.snippet_id) return 'bg-primary-400 border-primary-500'
+        return 'bg-white border-primary-300'
     }
 
     const handleReorder = async (newList, chapterId) => {
@@ -107,16 +107,16 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
             {openPopover === item.id && (
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
-                    <div className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
+                    <div className="fixed z-20 bg-white border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
                         style={{
                             top: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().bottom + 8,
                             left: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().left - 40,
                         }}
                     >
-                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             {item.status ? '↩️ Dévalider' : '✅ Valider'}
                         </button>
-                        <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                        <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             ✏️ Modifier
                         </button>
                         <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
@@ -131,7 +131,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                 className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${getBubbleClass(item)}`}
                 onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
             />
-            <span className="text-xs text-orange-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span>
+            <span className="text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span>
         </div>
     )
 
@@ -147,7 +147,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
             {list.filter(item => item && item.id).map((item) => (
                 <div key={item.id} className="flex items-center">
                     {renderItem(item)}
-                    <div className="w-5 h-[2px] bg-orange-300 shrink-0 mx-1 last:hidden" />
+                    <div className="w-5 h-[2px] bg-primary-300 shrink-0 mx-1 last:hidden" />
                 </div>
             ))}
         </ReactSortable>
@@ -162,12 +162,12 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
         <div className="flex items-center w-full px-4 py-2">
 
             {/* Non placés */}
-            {/* <div className="flex flex-col items-start shrink-0 border-e border-orange-300 pr-3 mr-2">
+            {/* <div className="flex flex-col items-start shrink-0 border-e border-primary-300 pr-3 mr-2">
                 <button
                     onClick={() => setShowUnplaced(!showUnplaced)}
-                    className="text-xs text-orange-300 font-semibold mb-2 hover:text-orange-500 transition-colors whitespace-nowrap"
+                    className="text-xs text-primary-300 font-semibold mb-2 hover:text-primary-500 transition-colors whitespace-nowrap"
                 >
-                    ? {unplaced.length > 0 && <span className="bg-orange-200 rounded-full px-1">{unplaced.length}</span>} {showUnplaced ? '▲' : '▼'}
+                    ? {unplaced.length > 0 && <span className="bg-primary-200 rounded-full px-1">{unplaced.length}</span>} {showUnplaced ? '▲' : '▼'}
                 </button>
                 {showUnplaced && renderSortable(unplaced, null)}
             </div> */}
@@ -176,8 +176,8 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
             <div className="flex-1 min-w-0 overflow-x-auto hide-scrollbar">
                 <div className="flex items-start py-1" style={{ width: 'max-content' }}>
                     {chapters.map((chapter) => (
-                        <div key={chapter.id} className="flex flex-col items-center shrink-0 border-s border-orange-400 px-3">
-                            <span className="text-xs text-orange-500 font-semibold mb-2 whitespace-nowrap">{chapter.title}</span>
+                        <div key={chapter.id} className="flex flex-col items-center shrink-0 border-s border-primary-400 px-3">
+                            <span className="text-xs text-primary-500 font-semibold mb-2 whitespace-nowrap">{chapter.title}</span>
                             {renderSortable(grouped[chapter.id] || [], chapter.id)}
                         </div>
                     ))}
@@ -185,7 +185,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
             </div>
 
             {/* Bouton actions */}
-            <div className="shrink-0 ml-2 pl-2 border-s border-orange-300">
+            <div className="shrink-0 ml-2 pl-2 border-s border-primary-300">
                 <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedItem(null) }} size={50}>
                     <ModalTimeline
                         onSuccess={handleSuccess}
@@ -203,14 +203,14 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
 
                     <button
                         onClick={() => { setSelectedItem(null); setIsModalOpen(true) }}
-                        className="text-orange-400 hover:text-orange-600 transition-colors"
+                        className="text-primary-400 hover:text-primary-600 transition-colors"
                         title="Ajouter"
                     >
                         <BadgePlus size={20} />
                     </button>
                     <button
                         onClick={() => setIsFullscreen(true)}
-                        className="text-orange-400 hover:text-orange-600 transition-colors"
+                        className="text-primary-400 hover:text-primary-600 transition-colors"
                         title="Agrandir"
                     >
                         <Maximize2 size={20} />

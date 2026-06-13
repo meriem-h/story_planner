@@ -25,8 +25,8 @@ export default function Timeline({ selectedTome, chapters }) {
     const getBubbleClass = (item) => {
         const status = getStatus(item)
         if (status === 'placed') return 'bg-green-400 border-green-500'
-        if (status === 'written') return 'bg-orange-400 border-orange-500'
-        return 'bg-white border-orange-200'
+        if (status === 'written') return 'bg-primary-400 border-primary-500'
+        return 'bg-white border-primary-200'
     }
 
     const handleClick = async (item) => {
@@ -109,7 +109,7 @@ export default function Timeline({ selectedTome, chapters }) {
                 onDragOver={e => e.preventDefault()}
                 onDrop={handleDropOnUnplaced}
             >
-                <span className="text-xs text-orange-300 font-semibold mb-2 whitespace-nowrap">? Non placés</span>
+                <span className="text-xs text-primary-300 font-semibold mb-2 whitespace-nowrap">? Non placés</span>
                 <div className="flex items-center gap-1">
                     {unplaced.map((item, i) => (
                         <React.Fragment key={item.id}>
@@ -125,9 +125,9 @@ export default function Timeline({ selectedTome, chapters }) {
                                     className={`w-4 h-4 rounded-full border-2 cursor-pointer hover:scale-110 transition-transform ${getBubbleClass(item)}`}
                                     title={item.title}
                                 />
-                                <span className="text-[10px] text-orange-400 whitespace-nowrap max-w-[60px] truncate text-center">{item.title}</span>
+                                <span className="text-[10px] text-primary-400 whitespace-nowrap max-w-[60px] truncate text-center">{item.title}</span>
                             </div>
-                            {i < unplaced.length - 1 && <div className="w-4 h-[2px] bg-orange-200 shrink-0" />}
+                            {i < unplaced.length - 1 && <div className="w-4 h-[2px] bg-primary-200 shrink-0" />}
                         </React.Fragment>
                     ))}
                 </div>
@@ -136,8 +136,8 @@ export default function Timeline({ selectedTome, chapters }) {
             {/* Séparateur */}
             {unplaced.length > 0 && chapters.length > 0 && (
                 <div className="flex items-center mx-2 mt-6">
-                    <div className="w-6 h-[2px] bg-orange-300" />
-                    <div className="w-[2px] h-6 bg-orange-300" />
+                    <div className="w-6 h-[2px] bg-primary-300" />
+                    <div className="w-[2px] h-6 bg-primary-300" />
                 </div>
             )}
 
@@ -151,10 +151,10 @@ export default function Timeline({ selectedTome, chapters }) {
                             onDragOver={e => e.preventDefault()}
                             onDrop={() => handleDropOnChapter(chapter.id)}
                         >
-                            <span className="text-xs text-orange-500 font-semibold mb-2 whitespace-nowrap">{chapter.title}</span>
+                            <span className="text-xs text-primary-500 font-semibold mb-2 whitespace-nowrap">{chapter.title}</span>
                             <div className="flex items-center gap-1">
                                 {chapterItems.length === 0 && (
-                                    <div className="w-8 h-[2px] bg-orange-100" />
+                                    <div className="w-8 h-[2px] bg-primary-100" />
                                 )}
                                 {chapterItems.map((item, i) => (
                                     <React.Fragment key={item.id}>
@@ -170,9 +170,9 @@ export default function Timeline({ selectedTome, chapters }) {
                                                 className={`w-4 h-4 rounded-full border-2 cursor-pointer hover:scale-110 transition-transform ${getBubbleClass(item)}`}
                                                 title={item.title}
                                             />
-                                            <span className="text-[10px] text-orange-400 whitespace-nowrap max-w-[60px] truncate text-center">{item.title}</span>
+                                            <span className="text-[10px] text-primary-400 whitespace-nowrap max-w-[60px] truncate text-center">{item.title}</span>
                                         </div>
-                                        {i < chapterItems.length - 1 && <div className="w-4 h-[2px] bg-orange-200 shrink-0" />}
+                                        {i < chapterItems.length - 1 && <div className="w-4 h-[2px] bg-primary-200 shrink-0" />}
                                     </React.Fragment>
                                 ))}
                             </div>
@@ -181,8 +181,8 @@ export default function Timeline({ selectedTome, chapters }) {
                         {/* Séparateur entre chapitres */}
                         {chIndex < chapters.length - 1 && (
                             <div className="flex items-center mx-2 mt-6">
-                                <div className="w-6 h-[2px] bg-orange-300" />
-                                <div className="w-[2px] h-6 bg-orange-300" />
+                                <div className="w-6 h-[2px] bg-primary-300" />
+                                <div className="w-[2px] h-6 bg-primary-300" />
                             </div>
                         )}
                     </React.Fragment>

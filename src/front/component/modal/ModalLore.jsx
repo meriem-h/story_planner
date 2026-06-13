@@ -60,14 +60,14 @@ export default function ModalLore({ onSuccess, book, selectedLore }) {
 
             {/* icône live */}
             <div className='flex flex-col items-center gap-2'>
-                <div className='w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center'>
+                <div className='w-16 h-16 rounded-2xl bg-primary-300 flex items-center justify-center'>
                     <ScrollText className='text-white' size={32} />
                 </div>
-                <p className='text-orange-800 font-bold text-lg'>
+                <p className='text-primary-800 font-bold text-lg'>
                     {lore.title || 'Nouvelle entrée'}
                 </p>
                 {lore.category && (
-                    <span className='text-xs bg-orange-200 text-orange-600 px-2 py-0.5 rounded-full'>
+                    <span className='text-xs bg-primary-200 text-primary-600 px-2 py-0.5 rounded-full'>
                         {lore.category}
                     </span>
                 )}
@@ -84,7 +84,7 @@ export default function ModalLore({ onSuccess, book, selectedLore }) {
 
                 <button
                     onClick={handleClick}
-                    className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold mt-2'
+                    className='w-full py-3 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg font-bold mt-2'
                 >
                     {selectedLore ? 'Modifier' : 'Créer'}
                 </button>

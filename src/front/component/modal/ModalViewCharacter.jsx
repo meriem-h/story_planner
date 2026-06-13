@@ -20,7 +20,7 @@ const ROLE_LABEL = {
 
 const TYPE_ICON = {
     wand: { icon: <Wand2 size={12} />, color: "bg-purple-100 text-purple-500" },
-    user: { icon: <User size={12} />, color: "bg-orange-100 text-orange-500" },
+    user: { icon: <User size={12} />, color: "bg-primary-100 text-primary-500" },
     sparkles: { icon: <Swords size={12} />, color: "bg-red-100 text-red-500" }
 }
 
@@ -38,19 +38,19 @@ export default function ModalViewCharacter({ character }) {
 
             {/* avatar + nom + badges */}
             <div className='flex gap-4'>
-                <div className='w-32 h-32 rounded-xl bg-orange-300 flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0'>
+                <div className='w-32 h-32 rounded-xl bg-primary-300 flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0'>
                     {character.image_url
                         ? <img src={character.image_url} alt={character.name} className='w-full h-full object-cover' />
                         : character.name[0]
                     }
                 </div>
                 <div className='flex flex-col gap-2 flex-1 min-w-0'>
-                    <h2 className='text-2xl font-bold text-orange-800'>{character.name}</h2>
+                    <h2 className='text-2xl font-bold text-primary-800'>{character.name}</h2>
 
                     {/* badges role + type + age */}
                     <div className='flex flex-wrap gap-2'>
                         {character.age && (
-                            <span className={`text-xs bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-medium`}>
+                            <span className={`text-xs bg-primary-100 text-primary-600 px-3 py-1 rounded-full font-medium`}>
                                 {character.age} ans
                             </span>
                         )}
@@ -67,13 +67,13 @@ export default function ModalViewCharacter({ character }) {
                             </span>
                         )}
                         {character.precision && (
-                            // <span className='text-xs bg-orange-50 text-orange-400 px-3 py-1 rounded-full italic'>
+                            // <span className='text-xs bg-primary-50 text-primary-400 px-3 py-1 rounded-full italic'>
 
                             //     
                             //     {character.precision}
                             // </span>
 
-                            <span className={`flex items-center gap-1 text-xs ${PRECISION_ICON[character.precision]?.color || 'bg-orange-50 text-orange-400'}  px-3 py-1 rounded-full font-medium`}>
+                            <span className={`flex items-center gap-1 text-xs ${PRECISION_ICON[character.precision]?.color || 'bg-primary-50 text-primary-400'}  px-3 py-1 rounded-full font-medium`}>
                                 {PRECISION_ICON[character.precision]?.icon}
                                 {character.precision}
                             </span>
@@ -81,29 +81,29 @@ export default function ModalViewCharacter({ character }) {
                     </div>
 
                     {character.description && (
-                        <p className='text-sm text-orange-500 italic line-clamp-3'>{character.description}</p>
+                        <p className='text-sm text-primary-500 italic line-clamp-3'>{character.description}</p>
                     )}
                 </div>
             </div>
 
-            <hr className='border-orange-100' />
+            <hr className='border-primary-100' />
 
             {/* infos */}
             <div className='flex flex-col gap-4 min-h-[150px]'>
                 {character.personality && (
                     <div>
-                        <p className='text-xs font-bold text-orange-400 uppercase tracking-wider mb-1'>Personnalité</p>
-                        <p className='text-orange-800'>{character.personality}</p>
+                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-1'>Personnalité</p>
+                        <p className='text-primary-800'>{character.personality}</p>
                     </div>
                 )}
                 {character.notes && (
                     <div>
-                        <p className='text-xs font-bold text-orange-400 uppercase tracking-wider mb-1'>Notes</p>
-                        <p className='text-orange-800'>{character.notes}</p>
+                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-1'>Notes</p>
+                        <p className='text-primary-800'>{character.notes}</p>
                     </div>
                 )}
                 {!character.personality && !character.notes && (
-                    <p className='text-center text-orange-300 italic pt-8'>Aucune information supplémentaire</p>
+                    <p className='text-center text-primary-300 italic pt-8'>Aucune information supplémentaire</p>
                 )}
             </div>
 

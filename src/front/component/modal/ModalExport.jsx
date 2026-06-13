@@ -35,21 +35,21 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
         <div className='p-4 flex flex-col gap-6'>
 
             <div className='flex flex-col items-center gap-2'>
-                <div className='w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center'>
+                <div className='w-16 h-16 rounded-2xl bg-primary-300 flex items-center justify-center'>
                     <Download className='text-white' size={32} />
                 </div>
-                <p className='text-orange-800 font-bold text-lg'>Exporter</p>
+                <p className='text-primary-800 font-bold text-lg'>Exporter</p>
             </div>
 
             {/* mode */}
             <div className='flex flex-col gap-2'>
-                <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>Que voulez-vous exporter ?</p>
+                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Que voulez-vous exporter ?</p>
                 <div className='flex flex-col gap-2'>
 
                     {/* tome entier */}
                     <button
                         onClick={() => setMode('tome')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'tome' ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'tome' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
                     >
                         <FileText size={16} />
                         <div>
@@ -61,7 +61,7 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                     {/* un chapitre */}
                     <button
                         onClick={() => setMode('chapitre')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'chapitre' ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'chapitre' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
                     >
                         <File size={16} />
                         <div>
@@ -73,7 +73,7 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                     {/* zip */}
                     <button
                         onClick={() => setMode('zip')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'zip' ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'zip' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
                     >
                         <FolderArchive size={16} />
                         <div>
@@ -88,11 +88,11 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
             {/* select chapitre si mode chapitre */}
             {mode === 'chapitre' && (
                 <div className='flex flex-col gap-2'>
-                    <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>Chapitre</p>
+                    <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Chapitre</p>
                     <select
                         value={chapterId}
                         onChange={(e) => setChapterId(e.target.value)}
-                        className='w-full px-3 py-2 border border-orange-200 rounded-lg text-sm text-orange-600 outline-none bg-orange-50'
+                        className='w-full px-3 py-2 border border-primary-200 rounded-lg text-sm text-primary-600 outline-none bg-primary-50'
                     >
                         {chapters.map(ch => (
                             <option key={ch.id} value={ch.id}>{ch.title}</option>
@@ -103,17 +103,17 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
 
             {/* format */}
             <div className='flex flex-col gap-2'>
-                <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>Format</p>
+                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Format</p>
                 <div className='flex gap-2'>
                     <button
                         onClick={() => setFormat('docx')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${format === 'docx' ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${format === 'docx' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400'}`}
                     >
                         <FileText size={14} /> Word (.docx)
                     </button>
                     <button
                         onClick={() => setFormat('pdf')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${format === 'pdf' ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition-colors ${format === 'pdf' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400'}`}
                     >
                         <File size={14} /> PDF
                     </button>
@@ -129,7 +129,7 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
             <button
                 onClick={handleExport}
                 disabled={loading}
-                className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold mt-2 disabled:opacity-50'
+                className='w-full py-3 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg font-bold mt-2 disabled:opacity-50'
             >
                 {loading ? 'Export en cours...' : `Exporter (${format.toUpperCase()}${mode === 'zip' ? ' + ZIP' : ''})`}
             </button>

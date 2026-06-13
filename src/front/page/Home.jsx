@@ -161,7 +161,7 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-orange-50">
+        <div className="min-h-screen bg-primary-50">
             <Layout
                 chapters={chapters}
                 books={books}
@@ -191,7 +191,7 @@ export default function Home() {
                     <div className='flex justify-center pt-12'>
                         <button
                             onClick={() => setIsOpen(true)}
-                            className='border-4 border-orange-200 rounded-xl w-[50%] text-center p-8 text-orange-300 hover:bg-orange-100 transition-colors'
+                            className='border-4 border-primary-200 rounded-xl w-[50%] text-center p-8 text-primary-300 hover:bg-primary-100 transition-colors'
                         >
                             + Créer un nouveau livre
                         </button>
@@ -205,9 +205,9 @@ export default function Home() {
                                 <Timeline key={timelineKey} selectedTome={selectedTome} chapters={chapters} book={selectedBook} />
                             </div>
                         ) : (
-                            <div className="text-center py-6 border-b border-orange-200">
+                            <div className="text-center py-6 border-b border-primary-200">
                                 <h1
-                                    className='text-3xl font-bold text-orange-300 cursor-text outline-none'
+                                    className='text-3xl font-bold text-primary-300 cursor-text outline-none'
                                     contentEditable
                                     suppressContentEditableWarning
                                     onInput={changeBookTitle}
@@ -215,7 +215,7 @@ export default function Home() {
                                     {selectedBook?.title || 'Aucun livre'}
                                 </h1>
                                 <p
-                                    className='text-lg text-orange-200 cursor-text outline-none mt-1'
+                                    className='text-lg text-primary-200 cursor-text outline-none mt-1'
                                     contentEditable
                                     suppressContentEditableWarning
                                     onInput={changeChapterTitle}
@@ -232,27 +232,27 @@ export default function Home() {
                                     <FormField
                                         fields={tomeListeField}
                                         onChange={handleTomeChange}
-                                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-sm text-orange-400 hover:text-orange-300 transition-colors"}
+                                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-sm text-primary-400 hover:text-primary-300 transition-colors"}
                                     />
                                 }
                                 {chapterListeField &&
                                     <FormField
                                         fields={chapterListeField}
                                         onChange={handleChapterChange}
-                                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-orange-500 hover:text-orange-300 transition-colors"}
+                                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-primary-500 hover:text-primary-300 transition-colors"}
                                     />
                                 }
                             </div>
                             <div className='flex gap-2'>
                                 <button
                                     onClick={() => setIsChapterOpen(true)}
-                                    className='flex items-center gap-2 px-4 py-2 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg text-sm font-bold'
+                                    className='flex items-center gap-2 px-4 py-2 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg text-sm font-bold'
                                 >
                                     + Chapitre
                                 </button>
                                 <button
                                     onClick={saveChapter}
-                                    className={`flex items-center gap-2 px-4 py-2 transition-colors text-white rounded-lg text-sm font-bold ${saved ? 'bg-green-400' : 'bg-orange-300 hover:bg-orange-400'}`}
+                                    className={`flex items-center gap-2 px-4 py-2 transition-colors text-white rounded-lg text-sm font-bold ${saved ? 'bg-green-400' : 'bg-primary-300 hover:bg-primary-400'}`}
                                 >
                                     {saved ? '✅ Sauvegardé !' : 'Enregistrer'}
                                 </button>

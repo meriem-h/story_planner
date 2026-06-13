@@ -98,8 +98,8 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     className="absolute z-10 pointer-events-none flex items-center gap-1.5"
                     style={{ top: `${i * PAGE_HEIGHT + 42}px`, left: 'calc(50% - 440px)' }}
                 >
-                    <div className="w-6 h-0.5 bg-orange-300 rounded" />
-                    <span className="text-orange-300 text-[9px] font-bold tracking-widest select-none">
+                    <div className="w-6 h-0.5 bg-primary-300 rounded" />
+                    <span className="text-primary-300 text-[9px] font-bold tracking-widest select-none">
                         {i + 1}
                     </span>
                 </div>
@@ -111,7 +111,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     <span className="text-white text-[9px] font-bold tracking-widest select-none">
                         {i + 1}
                     </span>
-                    <div className="w-6 h-0.5 bg-orange-300 rounded" />
+                    <div className="w-6 h-0.5 bg-primary-300 rounded" />
                 </div>
             </div>
         )
@@ -129,7 +129,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     justify-content: center !important;
                     flex-wrap: wrap !important;
                     border: none !important;
-                    border-bottom: 2px solid #fdba74 !important;
+                    border-bottom: 2px solid var(--primary-300) !important;
                 }
                 .ql-container {
                     border: none !important;
@@ -171,14 +171,14 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                 </div>
 
                 {/* Minimap */}
-                <div className="flex flex-col w-[70px] bg-orange-50 overflow-y-auto">
+                <div className="flex flex-col w-[70px] bg-primary-50 overflow-y-auto">
                     {/*Div du dessus — même hauteur que la toolbar */}
-                    {/* <div className="h-[42px] w-full border-b-2 bg-white border-orange-300 flex-shrink-0" /> */}
-                    <div className="h-[42px] w-full border-b-2 bg-white border-orange-300 flex-shrink-0 flex items-center justify-center">
+                    {/* <div className="h-[42px] w-full border-b-2 bg-white border-primary-300 flex-shrink-0" /> */}
+                    <div className="h-[42px] w-full border-b-2 bg-white border-primary-300 flex-shrink-0 flex items-center justify-center">
                         <button
                             onClick={() => setLocked(!locked)}
                             title={locked ? 'Déverrouiller' : 'Verrouiller'}
-                            className={`text-lg transition-colors ${locked ? 'text-orange-400' : 'text-orange-200 hover:text-orange-300'}`}
+                            className={`text-lg transition-colors ${locked ? 'text-primary-400' : 'text-primary-200 hover:text-primary-300'}`}
                         >
                             {locked ? '🔒' : '🔓'}
                         </button>
@@ -186,7 +186,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
 
                     {/* Boutons pages */}
                     <div className="flex flex-col items-center gap-1 py-3 flex-1">
-                        <span className="text-[9px] text-orange-300 font-bold tracking-widest mb-1">PG</span>
+                        <span className="text-[9px] text-primary-300 font-bold tracking-widest mb-1">PG</span>
                         {Array.from({ length: pageCount }, (_, i) => i + 1).map(p => (
                             <button
                                 key={p}
@@ -194,8 +194,8 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                                 title={`Page ${p}`}
                                 className={`w-[50px] h-[67px] rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 transition-all
                                     ${p === currentPage
-                                        ? 'border-2 border-orange-400 text-orange-400 bg-orange-50'
-                                        : 'border border-orange-200 text-orange-300 bg-white hover:bg-orange-50'
+                                        ? 'border-2 border-primary-400 text-primary-400 bg-primary-50'
+                                        : 'border border-primary-200 text-primary-300 bg-white hover:bg-primary-50'
                                     }`}
                             >
                                 {p}
@@ -207,21 +207,21 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
             </div>
 
             {/* Barre de stats */}
-            <div className="flex justify-center items-center gap-6 px-6 py-2 border-t-2 border-orange-300 bg-white text-sm font-medium text-orange-900 select-none flex-shrink-0">
+            <div className="flex justify-center items-center gap-6 px-6 py-2 border-t-2 border-primary-300 bg-white text-sm font-medium text-primary-900 select-none flex-shrink-0">
 
                 {/* Navigation */}
                 <div className="flex items-center gap-1.5">
                     <button
                         onClick={() => goToPage(currentPage - 1)}
                         disabled={currentPage <= 1}
-                        className="text-orange-300 hover:text-orange-400 disabled:opacity-30 text-lg px-0.5"
+                        className="text-primary-300 hover:text-primary-400 disabled:opacity-30 text-lg px-0.5"
                     >‹</button>
-                    <span className="text-orange-500">Page {currentPage}</span>
-                    <span className="text-orange-200">/ {pageCount}</span>
+                    <span className="text-primary-500">Page {currentPage}</span>
+                    <span className="text-primary-200">/ {pageCount}</span>
                     <button
                         onClick={() => goToPage(currentPage + 1)}
                         disabled={currentPage >= pageCount}
-                        className="text-orange-300 hover:text-orange-400 disabled:opacity-30 text-lg px-0.5"
+                        className="text-primary-300 hover:text-primary-400 disabled:opacity-30 text-lg px-0.5"
                     >›</button>
                     <input
                         type='number'
@@ -231,22 +231,22 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                         onChange={e => setGotoPage(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { goToPage(parseInt(gotoPage)); setGotoPage('') } }}
                         placeholder='aller à…'
-                        className="w-16 px-2 py-0.5 border border-orange-300 rounded-md text-xs text-orange-900 outline-none"
+                        className="w-16 px-2 py-0.5 border border-primary-300 rounded-md text-xs text-primary-900 outline-none"
                     />
                 </div>
 
-                <span className="text-orange-200">|</span>
+                <span className="text-primary-200">|</span>
 
-                <span className={wordCount >= 4000 ? 'text-green-500' : wordCount >= 2000 ? 'text-orange-400' : 'text-gray-400'}>
+                <span className={wordCount >= 4000 ? 'text-green-500' : wordCount >= 2000 ? 'text-primary-400' : 'text-gray-400'}>
                     ✍️ {wordCount.toLocaleString()} mots
                     {wordCount >= 4000 ? ' ✅' : wordCount >= 2000 ? ' 👍' : ' (min 2000)'}
                 </span>
 
-                <span className="text-orange-200">|</span>
+                <span className="text-primary-200">|</span>
 
                 <span>📄 {pageCount} page{pageCount > 1 ? 's' : ''}</span>
 
-                <span className="text-orange-200">|</span>
+                <span className="text-primary-200">|</span>
 
                 <span>📚 {totalWords.toLocaleString()} mots</span>
 

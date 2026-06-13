@@ -57,10 +57,10 @@ export default function ModalBook({ onSuccess, selectedBook }) {
     return (
         <div className='p-4 flex flex-col gap-6'>
             <div className='flex flex-col items-center gap-2'>
-                <div className='w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center'>
+                <div className='w-16 h-16 rounded-2xl bg-primary-300 flex items-center justify-center'>
                     <Book className='text-white' size={32} />
                 </div>
-                <p className='text-orange-800 font-bold text-lg'>
+                <p className='text-primary-800 font-bold text-lg'>
                     {book.title || 'Nouveau livre'}
                 </p>
             </div>
@@ -76,7 +76,7 @@ export default function ModalBook({ onSuccess, selectedBook }) {
 
     <button
         onClick={handleClick}
-        className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold mt-2'
+        className='w-full py-3 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg font-bold mt-2'
     >
         {selectedBook ? 'Modifier' : 'Créer le livre'}
     </button>
@@ -89,7 +89,7 @@ export default function ModalBook({ onSuccess, selectedBook }) {
                 await api('book:update', { id: selectedBook.id, data: { archived: selectedBook.archived ? 0 : 1 } })
                 onSuccess()
             }}
-            className={`w-full py-2 rounded-lg border text-sm transition-colors ${selectedBook.archived ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-red-200 hover:text-red-400'}`}
+            className={`w-full py-2 rounded-lg border text-sm transition-colors ${selectedBook.archived ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-red-200 hover:text-red-400'}`}
         >
             {selectedBook.archived ? '📦 Désarchiver' : '📦 Archiver ce livre'}
         </button>

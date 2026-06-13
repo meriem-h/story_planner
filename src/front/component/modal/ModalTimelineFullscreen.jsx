@@ -79,8 +79,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
 
     const getBubbleClass = (item) => {
         if (item.status) return 'bg-green-400 border-green-500'
-        if (item.snippet_id) return 'bg-orange-400 border-orange-500'
-        return 'bg-white border-orange-300'
+        if (item.snippet_id) return 'bg-primary-400 border-primary-500'
+        return 'bg-white border-primary-300'
     }
 
     const handleReorder = async (newList, chapterId) => {
@@ -161,36 +161,36 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
                     <div
-                        className="fixed z-20 bg-white border border-orange-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
+                        className="fixed z-20 bg-white border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
                         style={{
                             top: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().bottom + 8,
                             left: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().left - 40,
                         }}
                     >
-                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             {item.status ? '↩️ Dévalider' : '✅ Valider'}
                         </button>
-                        {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap">
+                        {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             ✏️ Modifier
                         </button> */}
                         {!item.snippet_id && (
                             <>
-                                <hr className="border-orange-100 my-1" />
+                                <hr className="border-primary-100 my-1" />
                                 <button
                                     onClick={() => { setSnippetActionItem(item); setIsCreateSnippetOpen(true); setOpenPopover(null) }}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap"
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
                                 >
                                     ✨ Créer un snippet
                                 </button>
                                 <button
                                     onClick={() => handleOpenLink(item)}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-orange-50 text-xs text-orange-600 whitespace-nowrap"
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
                                 >
                                     🔗 Lier un snippet
                                 </button>
                             </>
                         )}
-                        <hr className="border-orange-100 my-1" />
+                        <hr className="border-primary-100 my-1" />
                         <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
                             🗑️ Supprimer
                         </button>
@@ -203,7 +203,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
             />
             <span
-                className={`text-sm text-orange-500 font-medium ${item.snippet_id ? 'cursor-pointer hover:text-orange-700 hover:underline' : ''}`}
+                className={`text-sm text-primary-500 font-medium ${item.snippet_id ? 'cursor-pointer hover:text-primary-700 hover:underline' : ''}`}
                 onClick={async () => {
                     if (!item.snippet_id) return
                     const result = await api('snippet:findById', item.snippet_id)
@@ -264,7 +264,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
 
             <Modal isOpen={isLinkOpen} onClose={() => { setIsLinkOpen(false); setSnippetActionItem(null) }} size={40}>
                 <div className="p-4 flex flex-col gap-4">
-                    <p className="text-orange-800 font-bold text-lg text-center">Lier un snippet</p>
+                    <p className="text-primary-800 font-bold text-lg text-center">Lier un snippet</p>
                     <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
                         {availableSnippets.length === 0
                             ? <p className="text-sm text-gray-400 text-center py-4">Aucun snippet disponible</p>
@@ -272,7 +272,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                                 <button
                                     key={s.id}
                                     onClick={() => handleLinkSnippet(s.id)}
-                                    className="text-left px-3 py-2 rounded-lg hover:bg-orange-50 text-sm text-orange-600 border border-orange-100 transition-colors"
+                                    className="text-left px-3 py-2 rounded-lg hover:bg-primary-50 text-sm text-primary-600 border border-primary-100 transition-colors"
                                 >
                                     {s.title || s.type}
                                 </button>
@@ -287,13 +287,13 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <div className="flex gap-2 flex-wrap">
                     <button
                         onClick={toggleAll}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.length === chapters.length ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.length === chapters.length ? 'bg-primary-400 text-white' : 'bg-primary-100 text-primary-400 hover:bg-primary-200'}`}
                     >
                         Tous
                     </button>
                     <button
                         onClick={() => setShowUnplaced(prev => !prev)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${showUnplaced ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${showUnplaced ? 'bg-primary-400 text-white' : 'bg-primary-100 text-primary-400 hover:bg-primary-200'}`}
                     >
                         Non placés
                     </button>
@@ -301,7 +301,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                         <button
                             key={ch.id}
                             onClick={() => toggleChapter(ch.id)}
-                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.includes(ch.id) ? 'bg-orange-400 text-white' : 'bg-orange-100 text-orange-400 hover:bg-orange-200'}`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${selectedChapters.includes(ch.id) ? 'bg-primary-400 text-white' : 'bg-primary-100 text-primary-400 hover:bg-primary-200'}`}
                         >
                             {ch.title}
                         </button>
@@ -309,7 +309,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 </div>
                 <button
                     onClick={() => { setSelectedItem(null); setIsModalOpen(true) }}
-                    className="text-orange-400 hover:text-orange-600 transition-colors shrink-0"
+                    className="text-primary-400 hover:text-primary-600 transition-colors shrink-0"
                     title="Ajouter"
                 >
                     <BadgePlus size={20} />
@@ -321,8 +321,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
 
                 {/* Non placés */}
                 {showUnplaced && (
-                    <div className="flex flex-col w-[400px] shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar">
-                        <span className="text-sm text-orange-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">Non placés ({unplaced.length})</span>
+                    <div className="flex flex-col w-[400px] shrink-0 border-s border-primary-400 px-4 overflow-y-auto hide-scrollbar">
+                        <span className="text-sm text-primary-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">Non placés ({unplaced.length})</span>
                         <ReactSortable
                             list={unplaced}
                             setList={(newList) => handleReorder(newList, null)}
@@ -344,8 +344,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <div className="flex-1 min-w-0">
                     <div className="flex gap-0 h-full" style={{ width: 'max-content' }}>
                         {filteredChapters.map((chapter) => (
-                            <div key={chapter.id} className="flex flex-col w-[400px] shrink-0 border-s border-orange-400 px-4 overflow-y-auto hide-scrollbar " >
-                                <span className="text-sm text-orange-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">{chapter.title}</span>
+                            <div key={chapter.id} className="flex flex-col w-[400px] shrink-0 border-s border-primary-400 px-4 overflow-y-auto hide-scrollbar " >
+                                <span className="text-sm text-primary-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">{chapter.title}</span>
                                 {renderSortable(grouped[chapter.id] || [], chapter.id)}
                             </div>
                         ))}

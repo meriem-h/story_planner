@@ -14,7 +14,7 @@ const TYPE_LABELS = {
 }
 
 const USED_LABELS = {
-    disponible: { label: 'Disponible', class: 'bg-orange-100 text-orange-600' },
+    disponible: { label: 'Disponible', class: 'bg-primary-100 text-primary-600' },
     utilise: { label: '✅ Utilisé', class: 'bg-green-100 text-green-600' },
     abandonne: { label: '❌ Abandonné', class: 'bg-red-100 text-red-600' },
 }
@@ -35,18 +35,18 @@ export default function ModalView({ item, type }) {
 
             {/* header */}
             <div className='flex items-center gap-3'>
-                <div className='w-12 h-12 rounded-2xl bg-orange-300 flex items-center justify-center flex-shrink-0'>
+                <div className='w-12 h-12 rounded-2xl bg-primary-300 flex items-center justify-center flex-shrink-0'>
                     {TYPE_ICONS[type]}
                 </div>
                 <div>
-                    <p className='text-xs text-orange-400 uppercase tracking-wider font-bold mb-1'>
+                    <p className='text-xs text-primary-400 uppercase tracking-wider font-bold mb-1'>
                         {type === 'snippet' && (TYPE_LABELS[item.type] || item.type)}
                         {type === 'lore' && 'Lore'}
                         {type === 'note' && 'Note'}
                         {type === 'book' && 'Livre'}
                         {type === 'tome' && 'Tome'}
                     </p>
-                    <h2 className='text-xl font-bold text-orange-800'>
+                    <h2 className='text-xl font-bold text-primary-800'>
                         {item.title || 'Sans titre'}
                     </h2>
                 </div>
@@ -55,7 +55,7 @@ export default function ModalView({ item, type }) {
             {/* badges */}
             <div className='flex gap-2 flex-wrap'>
                 {type === 'lore' && item.category && (
-                    <span className='text-xs bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-medium'>
+                    <span className='text-xs bg-primary-100 text-primary-600 px-3 py-1 rounded-full font-medium'>
                         {item.category}
                     </span>
                 )}
@@ -65,29 +65,29 @@ export default function ModalView({ item, type }) {
                     </span>
                 )}
                 {type === 'snippet' && !!item.pinned && (
-                    <span className='text-xs bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-medium flex items-center gap-1'>
+                    <span className='text-xs bg-primary-100 text-primary-600 px-3 py-1 rounded-full font-medium flex items-center gap-1'>
                         <Pin size={10} className='fill-orange-400' /> Épinglé
                     </span>
                 )}
             </div>
 
             {/* séparateur */}
-            <hr className='border-orange-100' />
+            <hr className='border-primary-100' />
 
             {/* contenu */}
             {/* contenu */}
             <div className='min-h-[200px] pb-4'>
                 {item.content || item.description ? (
                     <div>
-                        <p className='text-xs font-bold text-orange-400 uppercase tracking-wider mb-3'>
+                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-3'>
                             {type === 'book' || type === 'tome' ? 'Description' : 'Contenu'}
                         </p>
-                        <p className='text-orange-800 leading-relaxed whitespace-pre-wrap'>
+                        <p className='text-primary-800 leading-relaxed whitespace-pre-wrap'>
                             {item.content || item.description}
                         </p>
                     </div>
                 ) : (
-                    <p className='text-center text-orange-300 italic pt-8'>Aucun contenu</p>
+                    <p className='text-center text-primary-300 italic pt-8'>Aucun contenu</p>
                 )}
             </div>
 

@@ -70,7 +70,7 @@ export default function ChapterLayout(props) {
             />
 
             {/* header livre */}
-            <div className='p-4 border-b border-orange-300'>
+            <div className='p-4 border-b border-primary-300'>
                 <div className='group flex items-center justify-between gap-2 mb-3'>
 
                     {/* dropdown livres */}
@@ -79,11 +79,11 @@ export default function ChapterLayout(props) {
                             className='flex items-center gap-1 cursor-pointer'
                             onClick={() => setBookDropdownOpen(!bookDropdownOpen)}
                         >
-                            <p className='font-bold text-lg text-orange-800 truncate'>
+                            <p className='font-bold text-lg text-primary-800 truncate'>
                                 {props.selectedBook?.title}
                             </p>
                             <ChevronUp
-                                className={`text-orange-400 flex-shrink-0 transition-transform duration-300 ${bookDropdownOpen ? 'rotate-0' : 'rotate-180'}`}
+                                className={`text-primary-400 flex-shrink-0 transition-transform duration-300 ${bookDropdownOpen ? 'rotate-0' : 'rotate-180'}`}
                                 size={14}
                             />
                         </div>
@@ -95,26 +95,26 @@ export default function ChapterLayout(props) {
                                     placeholder='Rechercher...'
                                     value={bookSearch}
                                     onChange={(e) => setBookSearch(e.target.value)}
-                                    className='w-full px-2 py-1 text-sm border border-orange-200 rounded-lg outline-none text-orange-600'
+                                    className='w-full px-2 py-1 text-sm border border-primary-200 rounded-lg outline-none text-primary-600'
                                     onClick={(e) => e.stopPropagation()}
                                 />
                                 <div>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setShowArchived(!showArchived) }}
-                                        className={`text-xs px-2 py-1 rounded-lg text-left transition-colors ${showArchived ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-50'}`}
+                                        className={`text-xs px-2 py-1 rounded-lg text-left transition-colors ${showArchived ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:bg-gray-50'}`}
                                     >
                                         📦 {showArchived ? 'Masquer les archivés' : 'Afficher les archivés'}
                                     </button>
                                 </div>
-                                <hr className='border-orange-100' />
+                                <hr className='border-primary-100' />
                                 <div className='overflow-y-auto max-h-48'>
                                     {filteredBooks?.map(book => (
                                         <div
                                             key={book.id}
                                             onClick={() => { props.setSelectedBook(book); setBookDropdownOpen(false); setBookSearch('') }}
                                             className={`px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors flex items-center gap-2 ${book.id === props.selectedBook?.id
-                                                ? 'bg-orange-300 text-white font-bold'
-                                                : 'hover:bg-orange-50 text-orange-800'
+                                                ? 'bg-primary-300 text-white font-bold'
+                                                : 'hover:bg-primary-50 text-primary-800'
                                                 }`}
                                         >
                                             {book.archived ? <span className='text-xs'>📦</span> : null}
@@ -127,15 +127,15 @@ export default function ChapterLayout(props) {
                     </div>
 
                     <div className='hidden group-hover:flex gap-1'>
-                        <button onClick={() => setIsViewBookOpen(true)} className='text-orange-400 hover:text-orange-600 transition-colors'>
+                        <button onClick={() => setIsViewBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
                             <Eye size={16} />
                         </button>
-                        <button onClick={() => setIsUpdateBookOpen(true)} className='text-orange-400 hover:text-orange-600 transition-colors'>
+                        <button onClick={() => setIsUpdateBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
                             <Pen size={16} />
                         </button>
                     </div>
 
-                    <button onClick={() => props.addBook(true)} className='text-orange-400 hover:text-orange-600 transition-colors flex-shrink-0'>
+                    <button onClick={() => props.addBook(true)} className='text-primary-400 hover:text-primary-600 transition-colors flex-shrink-0'>
                         <BadgePlus size={20} />
                     </button>
                 </div>
@@ -149,7 +149,7 @@ export default function ChapterLayout(props) {
                                 const tome = props.tomes.find(t => t.id == e.target.value)
                                 props.setSelectedTome(tome)
                             }}
-                            className='flex-1 bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-sm text-orange-600 outline-none cursor-pointer'
+                            className='flex-1 bg-primary-50 border border-primary-200 rounded-lg px-2 py-1 text-sm text-primary-600 outline-none cursor-pointer'
                         >
                             {props.tomes.map(tome => (
                                 <option key={tome.id} value={tome.id}>Tome {tome.number} : {tome.title}</option>
@@ -158,20 +158,20 @@ export default function ChapterLayout(props) {
                         <div className='hidden group-hover:flex gap-1'>
                             <button
                                 onClick={() => { setTomeToView(props.selectedTome); setIsViewTomeOpen(true) }}
-                                className='text-orange-400 hover:text-orange-600 transition-colors'
+                                className='text-primary-400 hover:text-primary-600 transition-colors'
                             >
                                 <Eye size={16} />
                             </button>
                             <button
                                 onClick={() => { setTomeToEdit(props.selectedTome); setIsTomeOpen(true) }}
-                                className='text-orange-400 hover:text-orange-600 transition-colors'
+                                className='text-primary-400 hover:text-primary-600 transition-colors'
                             >
                                 <Pen size={16} />
                             </button>
                         </div>
                         <button
                             onClick={() => { setTomeToEdit(null); setIsTomeOpen(true) }}
-                            className='text-orange-400 hover:text-orange-600 transition-colors flex-shrink-0'
+                            className='text-primary-400 hover:text-primary-600 transition-colors flex-shrink-0'
                         >
                             <BadgePlus size={18} />
                         </button>
@@ -182,8 +182,8 @@ export default function ChapterLayout(props) {
             {/* liste chapitres */}
             <div className='flex-1 overflow-hidden flex flex-col p-4'>
                 <div className='flex justify-between items-center mb-3'>
-                    <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>Chapitres</p>
-                    <button onClick={() => props.addChapter(true)} className='text-orange-400 hover:text-orange-600 transition-colors'>
+                    <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Chapitres</p>
+                    <button onClick={() => props.addChapter(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
                         <BadgePlus size={20} />
                     </button>
                 </div>
@@ -192,8 +192,8 @@ export default function ChapterLayout(props) {
                         <div
                             key={chapter.id}
                             className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${props.selectedChapter?.id == chapter.id
-                                ? 'bg-orange-300 text-white font-bold'
-                                : 'hover:bg-orange-100 text-orange-800'
+                                ? 'bg-primary-300 text-white font-bold'
+                                : 'hover:bg-primary-100 text-primary-800'
                                 }`}
                         >
                             <button

@@ -1,16 +1,14 @@
 import React from 'react'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 import Home from './page/Home'
-
+import { ThemeProvider } from './context/ThemeContext'
 
 export default function App() {
-
     return (
         <HashRouter>
-            <Home />
-            
+            <ThemeProvider>
+                <Home />
+            </ThemeProvider>
         </HashRouter>
     )
-
-   
 }

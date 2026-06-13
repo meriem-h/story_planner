@@ -45,22 +45,22 @@ export default function NoteLayout({ selectedBook }) {
     const renderNote = (note) => (
         <div
             key={note.id}
-            className='group p-3 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition-colors'
+            className='group p-3 bg-primary-50 rounded-xl cursor-pointer hover:bg-primary-100 transition-colors'
             onClick={() => { setItemToView(note); setIsViewOpen(true) }}
         >
             <div className='flex items-start gap-3'>
-                <div className='w-8 h-8 rounded-lg bg-orange-300 flex items-center justify-center text-white flex-shrink-0'>
+                <div className='w-8 h-8 rounded-lg bg-primary-300 flex items-center justify-center text-white flex-shrink-0'>
                     <NotebookPen size={14} />
                 </div>
                 <div className='flex-1 min-w-0'>
-                    <p className='font-bold text-orange-800 text-sm'>{note.title || 'Sans titre'}</p>
+                    <p className='font-bold text-primary-800 text-sm'>{note.title || 'Sans titre'}</p>
                     {note.content && (
-                        <p className='text-xs text-orange-400 line-clamp-2 mt-1'>{note.content}</p>
+                        <p className='text-xs text-primary-400 line-clamp-2 mt-1'>{note.content}</p>
                     )}
                 </div>
                 <button
                     onClick={(e) => { e.stopPropagation(); setNoteToEdit(note); setIsOpen(true) }}
-                    className='hidden group-hover:flex text-orange-300 hover:text-orange-500 ml-1'
+                    className='hidden group-hover:flex text-primary-300 hover:text-primary-500 ml-1'
                 >
                     <Pen size={14} />
                 </button>
@@ -93,30 +93,30 @@ export default function NoteLayout({ selectedBook }) {
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>Notes</p>
-                <button onClick={() => { setNoteToEdit(null); setIsOpen(true) }} className='text-orange-400 hover:text-orange-600 transition-colors'>
+                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Notes</p>
+                <button onClick={() => { setNoteToEdit(null); setIsOpen(true) }} className='text-primary-400 hover:text-primary-600 transition-colors'>
                     <BadgePlus size={20} />
                 </button>
             </div>
 
             {/* recherche */}
             <div className='px-3 mb-3'>
-                <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
-                    <Search size={12} className='text-orange-400 flex-shrink-0' />
+                <div className='flex items-center gap-2 bg-primary-50 rounded-lg px-2 py-1'>
+                    <Search size={12} className='text-primary-400 flex-shrink-0' />
                     <input
                         type='text'
                         placeholder='Rechercher...'
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className='w-full bg-transparent border-none outline-none text-sm text-orange-600 placeholder:text-orange-300'
+                        className='w-full bg-transparent border-none outline-none text-sm text-primary-600 placeholder:text-primary-300'
                     />
                 </div>
             </div>
 
             {notes.length === 0 ? (
                 <div className='flex flex-col items-center justify-center p-6 gap-4'>
-                    <p className='text-orange-300 text-center'>Aucune note</p>
-                    <button onClick={() => setIsOpen(true)} className='border border-orange-300 rounded-lg px-4 py-2 text-orange-400 hover:bg-orange-100 transition-colors'>
+                    <p className='text-primary-300 text-center'>Aucune note</p>
+                    <button onClick={() => setIsOpen(true)} className='border border-primary-300 rounded-lg px-4 py-2 text-primary-400 hover:bg-primary-100 transition-colors'>
                         + Ajouter une note
                     </button>
                 </div>

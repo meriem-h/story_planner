@@ -12,7 +12,7 @@ const TYPE_COLORS = {
     scene: 'bg-green-100 text-green-600',
     description: 'bg-purple-100 text-purple-600',
     flashback: 'bg-yellow-100 text-yellow-600',
-    idee: 'bg-orange-100 text-orange-600',
+    idee: 'bg-primary-100 text-primary-600',
     citation: 'bg-pink-100 text-pink-600',
     note_auteur: 'bg-gray-100 text-gray-600',
     transition: 'bg-cyan-100 text-cyan-600',
@@ -89,7 +89,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
             key={snippet.id}
             className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
                     : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
-                        : 'bg-white border-orange-200 hover:bg-orange-50'
+                        : 'bg-white border-primary-200 hover:bg-primary-50'
                 }`}
             onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
         >
@@ -98,12 +98,12 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
                     {TYPE_LABELS[snippet.type] || snippet.type}
                 </span>
                 <div className='flex gap-1 items-center'>
-                    {snippet.pinned == 1 && <Pin size={14} className='text-orange-400 fill-orange-400' />}
+                    {snippet.pinned == 1 && <Pin size={14} className='text-primary-400 fill-orange-400' />}
                     {snippet.used === 'utilise' && <Check size={14} className='text-green-400' />}
                     {snippet.used === 'abandonne' && <span className='text-xs text-red-400'>❌</span>}
                     <button
                         onClick={(e) => { e.stopPropagation(); setSnippetToEdit(snippet); setIsOpen(true) }}
-                        className='hidden group-hover:flex text-orange-300 hover:text-orange-500 ml-1'
+                        className='hidden group-hover:flex text-primary-300 hover:text-primary-500 ml-1'
                     >
                         <Pen size={14} />
                     </button>
@@ -116,11 +116,11 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
                 </div>
             </div>
             {snippet.title && (
-                <p className='font-bold text-orange-800 text-sm mb-1'>{snippet.title}</p>
+                <p className='font-bold text-primary-800 text-sm mb-1'>{snippet.title}</p>
             )}
             <p className={`text-xs line-clamp-2 ${snippet.used === 'abandonne' ? 'text-red-300 line-through'
                     : snippet.used === 'utilise' ? 'text-gray-400'
-                        : 'text-orange-400'
+                        : 'text-primary-400'
                 }`}>
                 {snippet.content}
             </p>
@@ -146,41 +146,41 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                <p className='text-xs font-bold text-orange-400 uppercase tracking-wider'>
+                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>
                     Snippets {selectedTome && <span className='normal-case font-normal'>— {selectedTome.title}</span>}
                 </p>
                 <div className='flex items-center gap-2'>
                     <button
                         onClick={() => setFilterPinned(!filterPinned)}
-                        className={`p-1 rounded-lg transition-colors ${filterPinned ? 'text-orange-500 bg-orange-100' : 'text-orange-300 hover:text-orange-500'}`}
+                        className={`p-1 rounded-lg transition-colors ${filterPinned ? 'text-primary-500 bg-primary-100' : 'text-primary-300 hover:text-primary-500'}`}
                         title="Afficher seulement les épinglés"
                     >
                         <Pin size={16} />
                     </button>
-                    <button onClick={() => { setSnippetToEdit(null); setIsOpen(true) }} className='text-orange-400 hover:text-orange-600 transition-colors'>
+                    <button onClick={() => { setSnippetToEdit(null); setIsOpen(true) }} className='text-primary-400 hover:text-primary-600 transition-colors'>
                         <BadgePlus size={20} />
                     </button>
                 </div>
             </div>
 
             <div className='px-3 mb-2'>
-                <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
-                    <Search size={12} className='text-orange-400 flex-shrink-0' />
+                <div className='flex items-center gap-2 bg-primary-50 rounded-lg px-2 py-1'>
+                    <Search size={12} className='text-primary-400 flex-shrink-0' />
                     <input
                         type='text'
                         placeholder='Rechercher...'
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className='w-full bg-transparent border-none outline-none text-sm text-orange-600 placeholder:text-orange-300'
+                        className='w-full bg-transparent border-none outline-none text-sm text-primary-600 placeholder:text-primary-300'
                     />
                 </div>
             </div>
 
             <div className='px-3 mb-3 flex gap-2'>
-                <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
-                    <Tag size={12} className='text-orange-400 flex-shrink-0' />
+                <div className='flex items-center gap-2 bg-primary-50 rounded-lg px-2 py-1'>
+                    <Tag size={12} className='text-primary-400 flex-shrink-0' />
                     <select
-                        className='w-full bg-transparent border-none outline-none cursor-pointer text-sm text-orange-600 appearance-none'
+                        className='w-full bg-transparent border-none outline-none cursor-pointer text-sm text-primary-600 appearance-none'
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
                     >
@@ -190,10 +190,10 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
                         ))}
                     </select>
                 </div>
-                <div className='flex items-center gap-2 bg-orange-50 rounded-lg px-2 py-1'>
-                    <Filter size={12} className='text-orange-400 flex-shrink-0' />
+                <div className='flex items-center gap-2 bg-primary-50 rounded-lg px-2 py-1'>
+                    <Filter size={12} className='text-primary-400 flex-shrink-0' />
                     <select
-                        className='w-full bg-transparent border-none outline-none cursor-pointer text-sm text-orange-600 appearance-none'
+                        className='w-full bg-transparent border-none outline-none cursor-pointer text-sm text-primary-600 appearance-none'
                         value={filterUsed}
                         onChange={(e) => setFilterUsed(e.target.value)}
                     >
@@ -207,8 +207,8 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
 
             {snippets.length === 0 ? (
                 <div className='flex flex-col items-center justify-center p-6 gap-4'>
-                    <p className='text-orange-300 text-center'>Aucun snippet</p>
-                    <button onClick={() => setIsOpen(true)} className='border border-orange-300 rounded-lg px-4 py-2 text-orange-400 hover:bg-orange-100 transition-colors'>
+                    <p className='text-primary-300 text-center'>Aucun snippet</p>
+                    <button onClick={() => setIsOpen(true)} className='border border-primary-300 rounded-lg px-4 py-2 text-primary-400 hover:bg-primary-100 transition-colors'>
                         + Ajouter un snippet
                     </button>
                 </div>

@@ -152,17 +152,17 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
 
             {/* header */}
             <div className='flex flex-col items-center gap-2'>
-                <div className='w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center'>
+                <div className='w-16 h-16 rounded-2xl bg-primary-300 flex items-center justify-center'>
                     <Lightbulb className='text-white' size={32} />
                 </div>
-                <p className='text-orange-800 font-bold text-lg'>
+                <p className='text-primary-800 font-bold text-lg'>
                     {snippet.title || 'Nouveau snippet'}
                 </p>
-                {tome && <p className='text-xs text-orange-400'>{tome.title}</p>}
+                {tome && <p className='text-xs text-primary-400'>{tome.title}</p>}
             </div>
 
             {/* onglets */}
-            <div className='flex gap-1 border-b border-orange-100'>
+            <div className='flex gap-1 border-b border-primary-100'>
                 {TABS.map(tab => (
                     <button
                         key={tab.key}
@@ -170,8 +170,8 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                         onClick={() => setActiveTab(tab.key)}
                         className={`px-3 py-2 text-sm font-medium transition-colors rounded-t-lg
                             ${activeTab === tab.key
-                                ? 'text-orange-600 border-b-2 border-orange-400 bg-orange-50'
-                                : 'text-orange-300 hover:text-orange-500'
+                                ? 'text-primary-600 border-b-2 border-primary-400 bg-primary-50'
+                                : 'text-primary-300 hover:text-primary-500'
                             }`}
                     >
                         {tab.label}
@@ -190,7 +190,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                         <button
                             type='button'
                             onClick={() => setSnippet(prev => ({ ...prev, pinned: prev.pinned ? 0 : 1 }))}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm ${snippet.pinned ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200'}`}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm ${snippet.pinned ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
                         >
                             <Pin size={14} className={snippet.pinned ? 'fill-orange-400' : ''} />
                             Épingler
@@ -198,7 +198,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
 
                         {/* used */}
                         <div className='flex gap-2'>
-                            <button type='button' onClick={() => setSnippet(prev => ({ ...prev, used: 'disponible' }))} className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${snippet.used === 'disponible' ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400'}`}>
+                            <button type='button' onClick={() => setSnippet(prev => ({ ...prev, used: 'disponible' }))} className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${snippet.used === 'disponible' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400'}`}>
                                 Disponible
                             </button>
                             <button type='button' onClick={() => setSnippet(prev => ({ ...prev, used: 'utilise' }))} className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${snippet.used === 'utilise' ? 'bg-green-100 border-green-300 text-green-600' : 'border-gray-200 text-gray-400'}`}>
@@ -214,7 +214,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                             <button
                                 type='button'
                                 onClick={() => setShowTimeline(prev => !prev)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm ${showTimeline ? 'bg-orange-100 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200'}`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm ${showTimeline ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
                             >
                                 <GitBranch size={14} />
                                 Afficher dans la timeline
@@ -223,7 +223,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                                 <select
                                     value={timelineChapterId ?? ''}
                                     onChange={(e) => setTimelineChapterId(e.target.value || null)}
-                                    className='border border-orange-200 rounded-lg px-3 py-2 text-sm text-orange-600 outline-none'
+                                    className='border border-primary-200 rounded-lg px-3 py-2 text-sm text-primary-600 outline-none'
                                 >
                                     <option value=''>— Chapitre (optionnel) —</option>
                                     {chapters.map(ch => (
@@ -241,7 +241,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                         placeholder='Contenu du snippet...'
                         value={snippet.content || ''}
                         onChange={handleChange}
-                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-orange-800 placeholder:text-orange-300 focus:ring-orange-300 focus:border-orange-300 outline-none resize-none'
+                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                     />
                 )}
 
@@ -256,7 +256,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                 )}
                 <button
                     onClick={handleClick}
-                    className='w-full py-3 bg-orange-300 hover:bg-orange-400 transition-colors text-white rounded-lg font-bold'
+                    className='w-full py-3 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg font-bold'
                 >
                     {selectedSnippet ? 'Modifier' : 'Créer'}
                 </button>
