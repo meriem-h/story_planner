@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    background-color: white;
+    color: #111827;
+}
+
+.dark body {
+    background-color: #111827;
+    color: #f3f4f6;
+}
+
+.bg-transparent-5 { background-color: color-mix(in srgb, var(--primary-1) 5%, transparent); }
+.bg-transparent-10 { background-color: color-mix(in srgb, var(--primary-1) 10%, transparent); }
+.bg-transparent-15 { background-color: color-mix(in srgb, var(--primary-1) 15%, transparent); }
+.bg-transparent-20 { background-color: color-mix(in srgb, var(--primary-1) 20%, transparent); }
+.bg-transparent-25 { background-color: color-mix(in srgb, var(--primary-1) 25%, transparent); }
+.bg-transparent-30 { background-color: color-mix(in srgb, var(--primary-1) 30%, transparent); }
+.bg-transparent-35 { background-color: color-mix(in srgb, var(--primary-1) 35%, transparent); }
+.bg-transparent-40 { background-color: color-mix(in srgb, var(--primary-1) 40%, transparent); }
+.bg-transparent-45 { background-color: color-mix(in srgb, var(--primary-1) 45%, transparent); }
+.bg-transparent-50 { background-color: color-mix(in srgb, var(--primary-1) 50%, transparent); }
+.bg-transparent-55 { background-color: color-mix(in srgb, var(--primary-1) 55%, transparent); }
+.bg-transparent-60 { background-color: color-mix(in srgb, var(--primary-1) 60%, transparent); }
+.bg-transparent-65 { background-color: color-mix(in srgb, var(--primary-1) 65%, transparent); }
+.bg-transparent-70 { background-color: color-mix(in srgb, var(--primary-1) 70%, transparent); }
+.bg-transparent-75 { background-color: color-mix(in srgb, var(--primary-1) 75%, transparent); }
+.bg-transparent-80 { background-color: color-mix(in srgb, var(--primary-1) 80%, transparent); }
+.bg-transparent-85 { background-color: color-mix(in srgb, var(--primary-1) 85%, transparent); }
+.bg-transparent-90 { background-color: color-mix(in srgb, var(--primary-1) 90%, transparent); }
+.bg-transparent-95 { background-color: color-mix(in srgb, var(--primary-1) 95%, transparent); }
+
+
+
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
 }

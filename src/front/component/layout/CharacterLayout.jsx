@@ -88,7 +88,7 @@ export default function CharacterLayout({ selectedBook }) {
                             }
                         </div>
                         {character.role && (
-                            <div className='absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm'>
+                            <div className='absolute -bottom-1 -right-1 bg-primary-50 rounded-full p-0.5 shadow-sm'>
                                 {PRECISION_ICON[character.precision] || ROLE_ICON[character.role]}
                             </div>
                         )}
@@ -132,7 +132,7 @@ export default function CharacterLayout({ selectedBook }) {
                                 }
                             </div>
                             {character.role && (
-                                <div className='absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm'>
+                                <div className='absolute -bottom-1 -right-1 bg-primary-50 rounded-full p-0.5 shadow-sm'>
                                     {PRECISION_ICON[character.precision] || ROLE_ICON[character.role]}
                                 </div>
                             )}

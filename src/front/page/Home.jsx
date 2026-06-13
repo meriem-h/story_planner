@@ -8,6 +8,9 @@ import Editor from "../component/Editor"
 import FormField from "../component/FormField"
 import Timeline from '../component/Timeline'
 
+import { useTheme, THEMES } from '../context/ThemeContext'
+
+
 export default function Home() {
     const api = useApi()
     const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +27,9 @@ export default function Home() {
     const [saved, setSaved] = useState(false)
     const [showTimeline, setShowTimeline] = useState(false)
     const [timelineKey, setTimelineKey] = useState(0)
+
+    const { isDark } = useTheme()
+
 
     useEffect(() => {
         !selectedBook ? fetchBooks() : fetchTomes(selectedBook.id)
@@ -226,7 +232,7 @@ export default function Home() {
                         )}
 
                         {/* barre d'actions */}
-                        <div className='flex justify-between items-center px-4 py-2 bg-white shadow-sm'>
+                        <div className={`flex justify-between items-center px-4 py-2 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} shadow-sm`}>
                             <div className='flex items-center gap-4'>
                                 {tomeListeField &&
                                     <FormField

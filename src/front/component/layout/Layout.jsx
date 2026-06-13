@@ -16,7 +16,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
     const [isExportOpen, setIsExportOpen] = useState(false)
-    const { theme, changeTheme, THEME_NAMES } = useTheme()
+    const { theme, changeTheme, THEME_NAMES, isDark, toggleDark } = useTheme()
+
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
     const [isThemeOpen, setIsThemeOpen] = useState(false)
 
@@ -29,6 +30,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
 
     const [content, setContent] = useState(<Chapter {...chapterProps} />)
+
 
     useEffect(() => {
         if (activeView === 'chapter') {
@@ -169,9 +171,35 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
                 {/* Popover couleurs */}
                 {isThemeOpen && (
-                    <>
-                        <div className="fixed inset-0 z-10" onClick={() => setIsThemeOpen(false)} />
-                        <div className="absolute bottom-0 right-full mr-2 z-20 bg-white border border-primary-200 rounded-2xl shadow-lg p-3 flex flex-wrap gap-2 w-64">
+                    // <>
+                    //     <div className="fixed inset-0 z-10" onClick={() => setIsThemeOpen(false)} />
+                    //     <div className="absolute bottom-0 right-full mr-2 z-20 bg-primary-50 border border-primary-200 rounded-2xl shadow-lg p-3 flex flex-wrap gap-2 w-64">
+                    //         {THEME_NAMES.map(name => (
+                    //             <button
+                    //                 key={name}
+                    //                 onClick={() => { changeTheme(name); setIsThemeOpen(false) }}
+                    //                 title={name}
+                    //                 className={`w-7 h-7 rounded-full transition-transform hover:scale-110 ${theme === name ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                    //                 style={{ backgroundColor: THEMES[name][400] }}
+                    //             />
+                    //         ))}
+                    //     </div>
+                    // </>
+                    <div className="absolute bottom-0 right-full mr-2 z-20 bg-primary-50 border border-primary-200 rounded-2xl shadow-lg p-3 flex flex-col gap-3 w-64">
+
+                        {/* Toggle dark mode */}
+                        <button
+                            onClick={toggleDark}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl bg-primary-50 hover:bg-primary-100 transition-colors"
+                        >
+                            <span className="text-sm font-medium text-primary-700">Mode {isDark ? 'claire' : 'sombre'}</span>
+                            <span>{isDark ? '☀️' : '🌙'}</span>
+                        </button>
+
+                        <hr className="border-primary-100" />
+
+                        {/* Couleurs */}
+                        <div className="flex flex-wrap gap-2">
                             {THEME_NAMES.map(name => (
                                 <button
                                     key={name}
@@ -182,7 +210,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                                 />
                             ))}
                         </div>
-                    </>
+                    </div>
                 )}
 
                 {/* Barre flottante */}

@@ -56,7 +56,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     const getBubbleClass = (item) => {
         if (item.status) return 'bg-green-400 border-green-500'
         if (item.snippet_id) return 'bg-primary-400 border-primary-500'
-        return 'bg-white border-primary-300'
+        return 'bg-primary-50 border-primary-300'
     }
 
     const handleReorder = async (newList, chapterId) => {
@@ -107,7 +107,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
             {openPopover === item.id && (
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
-                    <div className="fixed z-20 bg-white border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
+                    <div className="fixed z-20 bg-primary-50 border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
                         style={{
                             top: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().bottom + 8,
                             left: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().left - 40,

@@ -89,7 +89,7 @@ export default function ChapterLayout(props) {
                         </div>
 
                         {bookDropdownOpen && (
-                            <div className='absolute top-full left-0 w-64 bg-white rounded-xl shadow-lg z-50 p-2 flex flex-col gap-1'>
+                            <div className='absolute top-full left-0 w-64 bg-primary-50 rounded-xl shadow-lg z-50 p-2 flex flex-col gap-1'>
                                 <input
                                     type='text'
                                     placeholder='Rechercher...'

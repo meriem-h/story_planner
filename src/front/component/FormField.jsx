@@ -15,7 +15,7 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
             </div>
             <div className={`flex shadow-xs ${hasError ? 'border border-red-500 rounded-lg' : 'border-default-medium'}`}>
                 {Icon && (
-                    <span className="inline-flex items-center px-3 text-sm text-body bg-white border rounded-e-0 border-default-medium border-e-0 rounded-s-lg">
+                    <span className="inline-flex items-center px-3 text-sm text-body bg-primary-50 border rounded-e-0 border-default-medium border-e-0 rounded-s-lg">
                         <Icon className="w-5 h-5 text-gray-400" />
                     </span>
                 )}

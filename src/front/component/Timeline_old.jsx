@@ -26,7 +26,7 @@ export default function Timeline({ selectedTome, chapters }) {
         const status = getStatus(item)
         if (status === 'placed') return 'bg-green-400 border-green-500'
         if (status === 'written') return 'bg-primary-400 border-primary-500'
-        return 'bg-white border-primary-200'
+        return 'bg-primary-50 border-primary-200'
     }
 
     const handleClick = async (item) => {

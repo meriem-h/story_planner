@@ -80,7 +80,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const getBubbleClass = (item) => {
         if (item.status) return 'bg-green-400 border-green-500'
         if (item.snippet_id) return 'bg-primary-400 border-primary-500'
-        return 'bg-white border-primary-300'
+        return 'bg-primary-50 border-primary-300'
     }
 
     const handleReorder = async (newList, chapterId) => {
@@ -161,7 +161,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
                     <div
-                        className="fixed z-20 bg-white border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
+                        className="fixed z-20 bg-primary-50 border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
                         style={{
                             top: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().bottom + 8,
                             left: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().left - 40,
@@ -322,7 +322,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 {/* Non placés */}
                 {showUnplaced && (
                     <div className="flex flex-col w-[400px] shrink-0 border-s border-primary-400 px-4 overflow-y-auto hide-scrollbar">
-                        <span className="text-sm text-primary-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">Non placés ({unplaced.length})</span>
+                        <span className="text-sm text-primary-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-primary-50 py-1">Non placés ({unplaced.length})</span>
                         <ReactSortable
                             list={unplaced}
                             setList={(newList) => handleReorder(newList, null)}
@@ -345,7 +345,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                     <div className="flex gap-0 h-full" style={{ width: 'max-content' }}>
                         {filteredChapters.map((chapter) => (
                             <div key={chapter.id} className="flex flex-col w-[400px] shrink-0 border-s border-primary-400 px-4 overflow-y-auto hide-scrollbar " >
-                                <span className="text-sm text-primary-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-white py-1">{chapter.title}</span>
+                                <span className="text-sm text-primary-500 font-semibold mb-3 whitespace-nowrap sticky top-0 bg-primary-50 py-1">{chapter.title}</span>
                                 {renderSortable(grouped[chapter.id] || [], chapter.id)}
                             </div>
                         ))}

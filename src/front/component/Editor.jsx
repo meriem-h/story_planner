@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
+import { useTheme, THEMES } from '../context/ThemeContext'
 
 const modules = {
     toolbar: [
@@ -15,6 +16,8 @@ const modules = {
         ['clean']
     ]
 }
+
+
 
 const PAGE_HEIGHT = 2244
 
@@ -37,6 +40,9 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
     const [gotoPage, setGotoPage] = useState('')
     const scrollRef = useRef(null)
     const [locked, setLocked] = useState(false)
+
+    const { isDark } = useTheme()
+
 
     useEffect(() => {
         setValue(content || '')
@@ -124,7 +130,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     position: sticky !important;
                     top: 0 !important;
                     z-index: 8 !important;
-                    background: white !important;
+                    background: ${isDark ? 'var(--primary-200)' : 'var(--primary-1)'} !important;
                     display: flex !important;
                     justify-content: center !important;
                     flex-wrap: wrap !important;
@@ -173,8 +179,8 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                 {/* Minimap */}
                 <div className="flex flex-col w-[70px] bg-primary-50 overflow-y-auto">
                     {/*Div du dessus — même hauteur que la toolbar */}
-                    {/* <div className="h-[42px] w-full border-b-2 bg-white border-primary-300 flex-shrink-0" /> */}
-                    <div className="h-[42px] w-full border-b-2 bg-white border-primary-300 flex-shrink-0 flex items-center justify-center">
+                    {/* <div className="h-[42px] w-full border-b-2 bg-primary-50 border-primary-300 flex-shrink-0" /> */}
+                    <div className={`h-[42px] w-full border-b-2 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} border-primary-300 flex-shrink-0 flex items-center justify-center`}>
                         <button
                             onClick={() => setLocked(!locked)}
                             title={locked ? 'Déverrouiller' : 'Verrouiller'}
@@ -195,7 +201,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                                 className={`w-[50px] h-[67px] rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 transition-all
                                     ${p === currentPage
                                         ? 'border-2 border-primary-400 text-primary-400 bg-primary-50'
-                                        : 'border border-primary-200 text-primary-300 bg-white hover:bg-primary-50'
+                                        : `border border-primary-200 text-primary-300 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} hover:bg-primary-50`
                                     }`}
                             >
                                 {p}
@@ -207,7 +213,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
             </div>
 
             {/* Barre de stats */}
-            <div className="flex justify-center items-center gap-6 px-6 py-2 border-t-2 border-primary-300 bg-white text-sm font-medium text-primary-900 select-none flex-shrink-0">
+            <div className={`flex justify-center items-center gap-6 px-6 py-2 border-t-2 border-primary-300 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} text-sm font-medium text-primary-900 select-none flex-shrink-0`}>
 
                 {/* Navigation */}
                 <div className="flex items-center gap-1.5">

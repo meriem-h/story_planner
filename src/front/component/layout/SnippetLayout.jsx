@@ -89,7 +89,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
             key={snippet.id}
             className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
                     : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
-                        : 'bg-white border-primary-200 hover:bg-primary-50'
+                        : 'bg-primary-50 border-primary-200 hover:bg-primary-50'
                 }`}
             onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
         >
