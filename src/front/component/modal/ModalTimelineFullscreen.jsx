@@ -10,17 +10,27 @@ import { BadgePlus } from 'lucide-react'
 export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate, book }) {
     const api = useApi()
     const [items, setItems] = useState([])
-    const [selectedChapters, setSelectedChapters] = useState([])
+    // const [selectedChapters, setSelectedChapters] = useState([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [snippetToView, setSnippetToView] = useState(null)
-    const [showUnplaced, setShowUnplaced] = useState(true)
+    // const [showUnplaced, setShowUnplaced] = useState(true)
     const [isCreateSnippetOpen, setIsCreateSnippetOpen] = useState(false)
     const [isLinkOpen, setIsLinkOpen] = useState(false)
     const [snippetActionItem, setSnippetActionItem] = useState(null)
     const [availableSnippets, setAvailableSnippets] = useState([])
+
+    const [selectedChapters, setSelectedChapters] = useState(() => {
+        const saved = localStorage.getItem(`timeline-chapters-${book?.id}`)
+        return saved ? JSON.parse(saved) : chapters.map(ch => ch.id)
+    })
+    const [showUnplaced, setShowUnplaced] = useState(() => {
+        const saved = localStorage.getItem(`timeline-unplaced-${book?.id}`)
+        return saved !== null ? JSON.parse(saved) : true
+    })
+
 
     const buildGrouped = (list) => {
         const g = { null: [] }
@@ -37,8 +47,19 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
 
     useEffect(() => {
         if (selectedTome) fetchItems()
-        setSelectedChapters(chapters.map(ch => ch.id))
+        const saved = localStorage.getItem(`timeline-chapters-${book?.id}`)
+        if (!saved) setSelectedChapters(chapters.map(ch => ch.id))
     }, [selectedTome, chapters])
+
+
+    useEffect(() => {
+        if (book?.id) localStorage.setItem(`timeline-chapters-${book.id}`, JSON.stringify(selectedChapters))
+    }, [selectedChapters])
+
+    useEffect(() => {
+        if (book?.id) localStorage.setItem(`timeline-unplaced-${book.id}`, JSON.stringify(showUnplaced))
+    }, [showUnplaced])
+
 
     useEffect(() => {
         setGrouped(buildGrouped(items))
@@ -236,7 +257,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                     book={book}
                     tome={selectedTome}
                     chapters={chapters}
-                    selectedSnippet={null}
+                    // selectedSnippet={null}
+                    selectedSnippet={{ title: snippetActionItem?.title ?? '' }}
                 />
             </Modal>
 
