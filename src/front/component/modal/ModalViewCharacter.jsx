@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Wand2, User, Sparkles, Star, Users, Ghost, Moon, Swords, GraduationCap, Skull } from 'lucide-react'
-
+import ModalImage from './ModalImage'
 
 
 const ROLE_ICON = {
@@ -33,80 +33,91 @@ const PRECISION_ICON = {
 export default function ModalViewCharacter({ character }) {
     if (!character) return null
 
+    const [previewSrc, setPreviewSrc] = useState(null)
+
     return (
-        <div className='flex flex-col gap-6 overflow-y-auto max-h-[70vh]'>
 
-            {/* avatar + nom + badges */}
-            <div className='flex gap-4'>
-                <div className='w-32 h-32 rounded-xl bg-primary-300 flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0'>
-                    {character.image_url
-                        ? <img src={character.image_url} alt={character.name} className='w-full h-full object-cover' />
-                        : character.name[0]
-                    }
-                </div>
-                <div className='flex flex-col gap-2 flex-1 min-w-0'>
-                    <h2 className='text-2xl font-bold text-primary-800'>{character.name}</h2>
+        <>
+            <ModalImage
+                src={previewSrc}
+                isOpen={!!previewSrc}
+                onClose={() => setPreviewSrc(null)}
+            />
+            <div className='flex flex-col gap-6 overflow-y-auto max-h-[70vh]'>
 
-                    {/* badges role + type + age */}
-                    <div className='flex flex-wrap gap-2'>
-                        {character.age && (
-                            <span className={`text-xs bg-primary-100 text-primary-600 px-3 py-1 rounded-full font-medium`}>
-                                {character.age} ans
-                            </span>
-                        )}
-                        {character.role && (
-                            <span className={`flex items-center gap-1 text-xs ${ROLE_ICON[character.role].color} px-3 py-1 rounded-full font-medium`}>
-                                {ROLE_ICON[character.role].icon}
-                                {ROLE_LABEL[character.role]}
-                            </span>
-                        )}
-                        {character.ct_label && (
-                            <span className={`flex items-center gap-1 text-xs ${TYPE_ICON[character.ct_icon].color}  px-3 py-1 rounded-full font-medium`}>
-                                {character.ct_icon && TYPE_ICON[character.ct_icon].icon}
-                                {character.ct_label}
-                            </span>
-                        )}
-                        {character.precision && (
-                            // <span className='text-xs bg-primary-50 text-primary-400 px-3 py-1 rounded-full italic'>
+                {/* avatar + nom + badges */}
+                <div className='flex gap-4'>
+                    <div className='w-32 h-32 rounded-xl bg-primary-300 flex items-center justify-center text-white text-3xl font-bold overflow-hidden flex-shrink-0'>
+                        {character.image_url
+                            ? <img onClick={() => setPreviewSrc(character.image_url)} src={character.image_url} alt={character.name} className='w-full h-full object-cover' />
+                            : character.name[0]
+                        }
+                    </div>
+                    <div className='flex flex-col gap-2 flex-1 min-w-0'>
+                        <h2 className='text-2xl font-bold text-primary-800'>{character.name}</h2>
 
-                            //     
-                            //     {character.precision}
-                            // </span>
+                        {/* badges role + type + age */}
+                        <div className='flex flex-wrap gap-2'>
+                            {character.age && (
+                                <span className={`text-xs bg-primary-100 text-primary-600 px-3 py-1 rounded-full font-medium`}>
+                                    {character.age} ans
+                                </span>
+                            )}
+                            {character.role && (
+                                <span className={`flex items-center gap-1 text-xs ${ROLE_ICON[character.role].color} px-3 py-1 rounded-full font-medium`}>
+                                    {ROLE_ICON[character.role].icon}
+                                    {ROLE_LABEL[character.role]}
+                                </span>
+                            )}
+                            {character.ct_label && (
+                                <span className={`flex items-center gap-1 text-xs ${TYPE_ICON[character.ct_icon].color}  px-3 py-1 rounded-full font-medium`}>
+                                    {character.ct_icon && TYPE_ICON[character.ct_icon].icon}
+                                    {character.ct_label}
+                                </span>
+                            )}
+                            {character.precision && (
+                                // <span className='text-xs bg-primary-50 text-primary-400 px-3 py-1 rounded-full italic'>
 
-                            <span className={`flex items-center gap-1 text-xs ${PRECISION_ICON[character.precision]?.color || 'bg-primary-50 text-primary-400'}  px-3 py-1 rounded-full font-medium`}>
-                                {PRECISION_ICON[character.precision]?.icon}
-                                {character.precision}
-                            </span>
+                                //     
+                                //     {character.precision}
+                                // </span>
+
+                                <span className={`flex items-center gap-1 text-xs ${PRECISION_ICON[character.precision]?.color || 'bg-primary-50 text-primary-400'}  px-3 py-1 rounded-full font-medium`}>
+                                    {PRECISION_ICON[character.precision]?.icon}
+                                    {character.precision}
+                                </span>
+                            )}
+                        </div>
+
+                        {character.description && (
+                            <p className='text-sm text-primary-500 italic line-clamp-3'>{character.description}</p>
                         )}
                     </div>
+                </div>
 
-                    {character.description && (
-                        <p className='text-sm text-primary-500 italic line-clamp-3'>{character.description}</p>
+                <hr className='border-primary-100' />
+
+                {/* infos */}
+                <div className='flex flex-col gap-4 min-h-[150px]'>
+                    {character.personality && (
+                        <div>
+                            <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-1'>Personnalité</p>
+                            <p className='text-primary-800'>{character.personality}</p>
+                        </div>
+                    )}
+                    {character.notes && (
+                        <div>
+                            <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-1'>Notes</p>
+                            <p className='text-primary-800'>{character.notes}</p>
+                        </div>
+                    )}
+                    {!character.personality && !character.notes && (
+                        <p className='text-center text-primary-300 italic pt-8'>Aucune information supplémentaire</p>
                     )}
                 </div>
+
             </div>
+        </>
 
-            <hr className='border-primary-100' />
-
-            {/* infos */}
-            <div className='flex flex-col gap-4 min-h-[150px]'>
-                {character.personality && (
-                    <div>
-                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-1'>Personnalité</p>
-                        <p className='text-primary-800'>{character.personality}</p>
-                    </div>
-                )}
-                {character.notes && (
-                    <div>
-                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-1'>Notes</p>
-                        <p className='text-primary-800'>{character.notes}</p>
-                    </div>
-                )}
-                {!character.personality && !character.notes && (
-                    <p className='text-center text-primary-300 italic pt-8'>Aucune information supplémentaire</p>
-                )}
-            </div>
-
-        </div>
     )
 }

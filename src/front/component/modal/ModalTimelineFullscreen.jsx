@@ -10,13 +10,11 @@ import { BadgePlus } from 'lucide-react'
 export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate, book }) {
     const api = useApi()
     const [items, setItems] = useState([])
-    // const [selectedChapters, setSelectedChapters] = useState([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [snippetToView, setSnippetToView] = useState(null)
-    // const [showUnplaced, setShowUnplaced] = useState(true)
     const [isCreateSnippetOpen, setIsCreateSnippetOpen] = useState(false)
     const [isLinkOpen, setIsLinkOpen] = useState(false)
     const [snippetActionItem, setSnippetActionItem] = useState(null)
@@ -79,8 +77,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
 
     const getBubbleClass = (item) => {
         if (item.status) return 'bg-green-400 border-green-500'
-        if (item.snippet_id) return 'bg-primary-400 border-primary-500'
-        return 'bg-primary-50 border-primary-300'
+        if (item.snippet_id) return 'bg-amber-200 border-amber-300'
+        return 'bg-primary-1 border-primary-300'
     }
 
     const handleReorder = async (newList, chapterId) => {

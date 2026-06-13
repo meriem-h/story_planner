@@ -160,7 +160,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             {THEME_NAMES.map(name => (
                                 <button
                                     key={name}
-                                    onClick={() => { changeTheme(name); setIsThemeOpen(false) }}
+                                    onClick={() => { changeTheme(name) }}
                                     title={name}
                                     className={`w-7 h-7 rounded-full transition-transform hover:scale-110 ${theme === name ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
                                     style={{ backgroundColor: THEMES[name][400] }}

@@ -75,7 +75,6 @@ export default function ModalView({ item, type }) {
             <hr className='border-primary-100' />
 
             {/* contenu */}
-            {/* contenu */}
             <div className='min-h-[200px] pb-4'>
                 {item.content || item.description ? (
                     <div>

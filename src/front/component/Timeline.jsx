@@ -55,8 +55,8 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
 
     const getBubbleClass = (item) => {
         if (item.status) return 'bg-green-400 border-green-500'
-        if (item.snippet_id) return 'bg-primary-400 border-primary-500'
-        return 'bg-primary-50 border-primary-300'
+        if (item.snippet_id) return 'bg-amber-200 border-amber-300'
+        return 'bg-primary-1 border-primary-300'
     }
 
     const handleReorder = async (newList, chapterId) => {

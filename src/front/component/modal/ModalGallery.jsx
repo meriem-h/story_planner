@@ -3,6 +3,7 @@ import { Trash2, Pen, Copy, Check, Plus, Images } from 'lucide-react'
 import { ReactSortable } from 'react-sortablejs'
 import { useApi } from '../../context/ApiContext'
 import ModalDelete from './ModalDelete'
+import ModalImage from './ModalImage'
 
 export default function ModalGallery({ book }) {
 
@@ -18,6 +19,7 @@ export default function ModalGallery({ book }) {
     const [editUrl, setEditUrl] = useState('')
     const [assetToDelete, setAssetToDelete] = useState(null)
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+    const [previewSrc, setPreviewSrc] = useState(null)
 
     useEffect(() => {
         fetchAssets()
@@ -84,6 +86,12 @@ export default function ModalGallery({ book }) {
                 id={assetToDelete}
             />
 
+            <ModalImage
+                src={previewSrc}
+                isOpen={!!previewSrc}
+                onClose={() => setPreviewSrc(null)}
+            />
+
             {/* champ ajout */}
             <div className='flex gap-2 flex-shrink-0'>
                 <input
@@ -127,6 +135,7 @@ export default function ModalGallery({ book }) {
                                     src={selected.url}
                                     alt={selected.label || ''}
                                     className='w-full h-full object-contain'
+                                    onClick={() => setPreviewSrc(selected.url)}
                                 />
                             </div>
 

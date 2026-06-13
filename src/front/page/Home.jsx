@@ -211,7 +211,7 @@ export default function Home() {
                                 <Timeline key={timelineKey} selectedTome={selectedTome} chapters={chapters} book={selectedBook} />
                             </div>
                         ) : (
-                            <div className="text-center py-6 border-b border-primary-200">
+                            <div className="text-center py-6 ">
                                 <h1
                                     className='text-3xl font-bold text-primary-300 cursor-text outline-none'
                                     contentEditable
@@ -232,7 +232,7 @@ export default function Home() {
                         )}
 
                         {/* barre d'actions */}
-                        <div className={`flex justify-between items-center px-4 py-2 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} shadow-sm`}>
+                        <div className={`flex justify-between rounded-t-2xl border-t-2 ${isDark ? 'border-primary-300' : 'border-primary-200'} items-center px-4 py-2 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} shadow-sm`}>
                             <div className='flex items-center gap-4'>
                                 {tomeListeField &&
                                     <FormField

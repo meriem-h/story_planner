@@ -1,7 +1,9 @@
 import React from 'react'
+import { useTheme } from '../context/ThemeContext'
 
 const SingleField = ({ field, onChange, errors, selectClass = null }) => {
 
+    const { isDark } = useTheme()
     const Icon = field.icon || false
     const datas = field.data || false
     const hasError = !!errors?.[field.name]
@@ -10,7 +12,7 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
     return (
         <div key={field.name}>
             <div className='flex justify-between'>
-                <label className="block mb-2.5 text-sm font-medium text-heading">{field.label}</label>
+                <label className="block mb-2.5 text-sm text-primary-600 font-medium text-heading">{field.label}</label>
                 {errorMessage && <p className="text-red-500 text-xs mt-1 text-right">{errorMessage}</p>}
             </div>
             <div className={`flex shadow-xs ${hasError ? 'border border-red-500 rounded-lg' : 'border-default-medium'}`}>
@@ -25,7 +27,7 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
                         name={field.name}
                         onChange={onChange}
                         value={field.value !== undefined ? field.value : (datas.find(d => d.selected)?.value || '')}
-                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
+                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} ${selectClass ? selectClass : ""} block w-full ${isDark ? 'text-primary-200' : 'text-primary-800'} px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
                     >
                         {datas.map((data) => (
                             <option key={data.value} value={data.value}>
@@ -34,25 +36,25 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
                         ))}
                     </select>
 
-                : (field.type === 'textarea') ?
-                    <textarea
-                        name={field.name}
-                        placeholder={field.placeholder}
-                        onChange={onChange}
-                        {...(field.value !== undefined && { value: field.value })}
-                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
-                        rows={5}
-                    />
+                    : (field.type === 'textarea') ?
+                        <textarea
+                            name={field.name}
+                            placeholder={field.placeholder}
+                            onChange={onChange}
+                            {...(field.value !== undefined && { value: field.value })}
+                            className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full ${isDark ? 'text-primary-200' : 'text-primary-800'} px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
+                            rows={5}
+                        />
 
-                :
-                    <input
-                        type={field.type || 'text'}
-                        name={field.name}
-                        placeholder={field.placeholder}
-                        onChange={onChange}
-                        {...(field.value !== undefined && { value: field.value })}
-                        className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
-                    />
+                        :
+                        <input
+                            type={field.type || 'text'}
+                            name={field.name}
+                            placeholder={field.placeholder}
+                            onChange={onChange}
+                            {...(field.value !== undefined && { value: field.value })}
+                            className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full ${isDark ? 'text-primary-200' : 'text-primary-800'} px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
+                        />
                 }
             </div>
         </div>

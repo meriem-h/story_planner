@@ -164,7 +164,6 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
             <div className="flex flex-1 overflow-hidden">
 
                 {/* Éditeur */}
-                {/* <div ref={scrollRef} className="relative flex-1 overflow-y-auto"> */}
                 <div ref={scrollRef} className="relative flex-1 overflow-y-auto hide-scrollbar">
                     {pageMarkers}
                     <ReactQuill
@@ -179,7 +178,6 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                 {/* Minimap */}
                 <div className="flex flex-col w-[70px] bg-primary-50 overflow-y-auto">
                     {/*Div du dessus — même hauteur que la toolbar */}
-                    {/* <div className="h-[42px] w-full border-b-2 bg-primary-50 border-primary-300 flex-shrink-0" /> */}
                     <div className={`h-[42px] w-full border-b-2 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} border-primary-300 flex-shrink-0 flex items-center justify-center`}>
                         <button
                             onClick={() => setLocked(!locked)}
@@ -213,7 +211,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
             </div>
 
             {/* Barre de stats */}
-            <div className={`flex justify-center items-center gap-6 px-6 py-2 border-t-2 border-primary-300 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} text-sm font-medium text-primary-900 select-none flex-shrink-0`}>
+            <div className={`flex justify-center items-center gap-6 px-6 py-2 border-t-2 rounded-t-full border-primary-300 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} text-sm font-medium text-primary-900 select-none flex-shrink-0`}>
 
                 {/* Navigation */}
                 <div className="flex items-center gap-1.5">
