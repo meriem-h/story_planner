@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { GitBranch } from 'lucide-react'
 import Layout from '../component/layout/Layout'
 import { useApi } from '../context/ApiContext'
 import Modal from '../component/modal/Modal'
@@ -7,6 +8,7 @@ import ModalChapter from '../component/modal/ModalChapter'
 import Editor from "../component/Editor"
 import FormField from "../component/FormField"
 import Timeline from '../component/Timeline'
+import ModalTimelineFullscreen from '../component/modal/ModalTimelineFullscreen'
 
 import { useTheme, THEMES } from '../context/ThemeContext'
 
@@ -27,6 +29,7 @@ export default function Home() {
     const [saved, setSaved] = useState(false)
     const [showTimeline, setShowTimeline] = useState(false)
     const [timelineKey, setTimelineKey] = useState(0)
+    const [isTimelineFullscreen, setIsTimelineFullscreen] = useState(false)
 
     const { isDark } = useTheme()
 
@@ -185,12 +188,22 @@ export default function Home() {
                 showTimeline={showTimeline}
                 setShowTimeline={setShowTimeline}
                 refreshTimeline={() => setTimelineKey(k => k + 1)}
+                onOpenFullscreen={() => setIsTimelineFullscreen(true)}
             >
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size={50}>
                     <ModalBook onSuccess={handleBookCreated} />
                 </Modal>
                 <Modal isOpen={isChapterOpen} onClose={() => setIsChapterOpen(false)} size={50}>
                     <ModalChapter onSuccess={handleChapterCreated} book={selectedBook} tome={selectedTome} />
+                </Modal>
+
+                <Modal isOpen={isTimelineFullscreen} onClose={() => setIsTimelineFullscreen(false)} size={90}>
+                    <ModalTimelineFullscreen
+                        selectedTome={selectedTome}
+                        chapters={chapters}
+                        book={selectedBook}
+                        onUpdate={() => setTimelineKey(k => k + 1)}
+                    />
                 </Modal>
 
                 {books.length <= 0 ? (
@@ -250,6 +263,13 @@ export default function Home() {
                                 }
                             </div>
                             <div className='flex gap-2'>
+                                <button
+                                    onClick={() => setShowTimeline(!showTimeline)}
+                                    title="Timeline"
+                                    className={`flex items-center gap-2 px-4 py-2 transition-colors text-white rounded-lg text-sm font-bold ${showTimeline ? 'bg-primary-600' : 'bg-primary-300 hover:bg-primary-400'}`}
+                                >
+                                    <GitBranch size={16} />
+                                </button>
                                 <button
                                     onClick={() => setIsChapterOpen(true)}
                                     className='flex items-center gap-2 px-4 py-2 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg text-sm font-bold'

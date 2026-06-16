@@ -35,7 +35,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
             pinned: 0,
             used: 'disponible'
         }
-    )
+    )    
 
     const [fieldSnippet, setFieldSnippet] = useState([
         {
@@ -52,21 +52,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
     ])
 
     useEffect(() => {
-        if (!selectedSnippet) {
-            setSnippet({
-                book_id: book.id,
-                tome_id: tome?.id || null,
-                type: 'autre',
-                pinned: 0,
-                used: 'disponible'
-            })
-            setFieldSnippet(prev => prev.map(f => ({ ...f, value: undefined })))
-            setShowTimeline(false)
-            setTimelineChapterId(null)
-            setActiveTab('infos')
-            return
-        }
-        setSnippet(selectedSnippet)
+
         setFieldSnippet(prev => prev.map(f => ({
             ...f,
             value: selectedSnippet[f.name],
@@ -74,6 +60,25 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                 data: f.data.map(d => ({ ...d, selected: d.value === selectedSnippet[f.name] }))
             })
         })))
+
+        if (!selectedSnippet || (selectedSnippet && ! selectedSnippet?.id)) {
+ 
+            setSnippet({
+                book_id: book.id,
+                tome_id: tome?.id || null,
+                type: 'autre',
+                pinned: 0,
+                used: 'disponible',
+                title: selectedSnippet?.title || ''
+            })
+            // setFieldSnippet(prev => prev.map(f => ({ ...f, value: undefined })))
+            setShowTimeline(false)
+            setTimelineChapterId(null)
+            setActiveTab('infos')
+            return
+        }
+        setSnippet(selectedSnippet)
+        
         checkTimelineItem(selectedSnippet.id)
     }, [selectedSnippet])
 
@@ -109,7 +114,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
 
         const { position, ...snippetData } = snippet
 
-        const result = selectedSnippet
+        const result = selectedSnippet?.id
             ? await api('snippet:update', { id: selectedSnippet.id, data: snippetData })
             : await api('snippet:create', snippet)
 
@@ -258,7 +263,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                     onClick={handleClick}
                     className='w-full py-3 bg-primary-300 hover:bg-primary-400 transition-colors text-white rounded-lg font-bold'
                 >
-                    {selectedSnippet ? 'Modifier' : 'Créer'}
+                    {selectedSnippet?.id ? 'Modifier' : 'Créer'}
                 </button>
             </div>
 

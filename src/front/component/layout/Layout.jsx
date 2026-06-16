@@ -11,7 +11,7 @@ import Lore from "./LoreLayout";
 import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -197,7 +197,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             <Download size={20} />
                         </button>
                         <button
-                            onClick={() => setShowTimeline(!showTimeline)}
+                            // onClick={() => setShowTimeline(!showTimeline)}
+                            onClick={onOpenFullscreen}
                             title="Timeline"
                             className={`text-white rounded-full p-3 transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
                         >
