@@ -197,7 +197,7 @@ export default function Home() {
                     <ModalChapter onSuccess={handleChapterCreated} book={selectedBook} tome={selectedTome} />
                 </Modal>
 
-                <Modal isOpen={isTimelineFullscreen} onClose={() => setIsTimelineFullscreen(false)} size={90}>
+                <Modal isOpen={isTimelineFullscreen} onClose={() => setIsTimelineFullscreen(false)} size={75}>
                     <ModalTimelineFullscreen
                         selectedTome={selectedTome}
                         chapters={chapters}

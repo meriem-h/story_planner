@@ -168,13 +168,15 @@ export default function ChapterLayout(props) {
                             >
                                 <Pen size={16} />
                             </button>
+
+                            <button
+                                onClick={() => { setTomeToEdit(null); setIsTomeOpen(true) }}
+                                className='text-primary-400 hover:text-primary-600 transition-colors'
+                            >
+                                <BadgePlus size={16} />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => { setTomeToEdit(null); setIsTomeOpen(true) }}
-                            className='text-primary-400 hover:text-primary-600 transition-colors flex-shrink-0'
-                        >
-                            <BadgePlus size={18} />
-                        </button>
+
                     </div>
                 )}
             </div>
