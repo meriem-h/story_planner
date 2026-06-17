@@ -55,13 +55,13 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
 
         setFieldSnippet(prev => prev.map(f => ({
             ...f,
-            value: selectedSnippet[f.name],
+            value: selectedSnippet?.[f.name],
             ...(f.type === 'select' && {
-                data: f.data.map(d => ({ ...d, selected: d.value === selectedSnippet[f.name] }))
+                data: f.data.map(d => ({ ...d, selected: d.value === selectedSnippet?.[f.name] }))
             })
         })))
 
-        if (!selectedSnippet || (selectedSnippet && ! selectedSnippet?.id)) {
+        if (!selectedSnippet?.id) {
  
             setSnippet({
                 book_id: book.id,
@@ -71,7 +71,6 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                 used: 'disponible',
                 title: selectedSnippet?.title || ''
             })
-            // setFieldSnippet(prev => prev.map(f => ({ ...f, value: undefined })))
             setShowTimeline(false)
             setTimelineChapterId(null)
             setActiveTab('infos')
