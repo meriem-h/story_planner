@@ -8,7 +8,7 @@ export default function ModalTimeline({ onSuccess, selectedTome, chapters, selec
     const [item, setItem] = useState(
         selectedItem || {
             tome_id: selectedTome?.id || null,
-            chapter_id: chapters?.[0]?.id || null,
+            chapter_id: null,
             snippet_id: null,
             title: '',
             status: false,
@@ -20,18 +20,21 @@ export default function ModalTimeline({ onSuccess, selectedTome, chapters, selec
             label: 'Chapitre',
             name: 'chapter_id',
             type: 'select',
-            data: chapters.map((ch, i) => ({
-                value: ch.id,
-                text: ch.title,
-                selected: i === 0
-            }))
+            data: [
+                { value: '', text: '— Aucun chapitre —' },
+                ...chapters.map((ch) => ({
+                    value: ch.id,
+                    text: ch.title,
+                }))
+            ]
         }
     ])
     useEffect(() => {
         if (!selectedItem) {
             setItem({
                 tome_id: selectedTome?.id || null,
-                chapter_id: chapters?.[0]?.id || null,
+                // chapter_id: chapters?.[0]?.id || null,
+                chapter_id: null,
                 snippet_id: null,
                 title: '',
                 status: false,
@@ -48,6 +51,7 @@ export default function ModalTimeline({ onSuccess, selectedTome, chapters, selec
             })
         })))
     }, [selectedItem])
+
     const handleChange = (e) => {
         setItem(prev => ({ ...prev, [e.target.name]: e.target.value }))
         setFields(prev => prev.map(f => {
