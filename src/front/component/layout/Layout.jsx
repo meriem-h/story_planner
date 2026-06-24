@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch, ChevronRight, ChevronLeft, Palette, CalendarDays } from 'lucide-react'
+import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch, ChevronRight, ChevronLeft, Palette, CalendarDays, Network } from 'lucide-react'
 import { useTheme, THEMES } from '../../context/ThemeContext'
 
 import ModalExport from '../modal/ModalExport'
@@ -11,6 +11,7 @@ import Lore from "./LoreLayout";
 import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
 import ModalSchedule from '../modal/ModalSchedule';
+import ModalOrganization from '../modal/ModalOrganization';
 
 export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -18,6 +19,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
     const [isExportOpen, setIsExportOpen] = useState(false)
     const [isCallandarOpen, setIsCallandarOpen] = useState(false)
+    const [isOrgOpen, setIsOrgOpen] = useState(false)
     const { theme, changeTheme, THEME_NAMES, isDark, toggleDark } = useTheme()
 
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
@@ -74,6 +76,9 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             </Modal>
             <Modal isOpen={isCallandarOpen} onClose={() => setIsCallandarOpen(false)} size={80}>
                 <ModalSchedule book={selectedBook} chapters={chapters} />
+            </Modal>
+            <Modal isOpen={isOrgOpen} onClose={() => setIsOrgOpen(false)} size={80}>
+                <ModalOrganization book={selectedBook} />
             </Modal>
             <Modal isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} size={50}>
                 <ModalExport
@@ -145,7 +150,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             <section className="fixed bottom-6 right-0 z-50 flex items-end gap-2">
 
                 {/* Popover couleurs */}
-                {isThemeOpen && isFloatingOpen &&(
+                {isThemeOpen && isFloatingOpen && (
 
                     <div className="absolute bottom-0 right-full mr-2 z-20 bg-primary-50 border border-primary-200 rounded-2xl shadow-lg p-3 flex flex-col gap-3 w-64">
 
@@ -180,29 +185,10 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                     {/* Barre flottante */}
 
                     <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+                        
+                        
+
                         <button
-                            onClick={() => setIsThemeOpen(prev => !prev)}
-                            title="Thème"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <Palette size={20} />
-                        </button>
-                        <button
-                            onClick={() => setIsGalleryOpen(true)}
-                            title="Galerie"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <Images size={20} />
-                        </button>
-                        <button
-                            onClick={() => setIsExportOpen(true)}
-                            title="Exporter"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <Download size={20} />
-                        </button>
-                        <button
-                            // onClick={() => setShowTimeline(!showTimeline)}
                             onClick={onOpenFullscreen}
                             title="Timeline"
                             className={`text-white rounded-full p-3 transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
@@ -210,13 +196,54 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             <GitBranch size={20} />
                         </button>
                         <button
-                            // onClick={onOpenCallendar}
                             onClick={() => setIsCallandarOpen(true)}
 
-                            title="Timeline"
+                            title="Callandar"
                             className={`text-white rounded-full p-3 transition-colors bg-primary-400 hover:bg-primary-500`}
                         >
                             <CalendarDays size={20} />
+                        </button>
+
+
+
+
+
+
+
+
+                        <button
+                            onClick={() => setIsOrgOpen(true)}
+                            title="Organisation Chart"
+                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                        >
+                            <Network size={20} />
+                        </button>
+
+                        
+                        <button
+                            onClick={() => setIsGalleryOpen(true)}
+                            title="Galerie"
+                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                        >
+                            <Images size={20} />
+                        </button>
+
+
+
+                        <button
+                            onClick={() => setIsThemeOpen(prev => !prev)}
+                            title="Thème"
+                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                        >
+                            <Palette size={20} />
+                        </button>
+
+                        <button
+                            onClick={() => setIsExportOpen(true)}
+                            title="Exporter"
+                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                        >
+                            <Download size={20} />
                         </button>
                     </div>
 
