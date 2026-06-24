@@ -1,6 +1,13 @@
 import React from 'react'
 import { useTheme } from '../context/ThemeContext'
 
+const DEFAULT_COLORS = [
+    '#93c5fd', '#60a5fa', '#86efac', '#4ade80',
+    '#fde68a', '#fbbf24', '#fdba74', '#fb923c',
+    '#fca5a5', '#f87171', '#f9a8d4', '#f472b6',
+    '#c4b5fd', '#a78bfa', '#67e8f9', '#94a3b8',
+]
+
 const SingleField = ({ field, onChange, errors, selectClass = null }) => {
 
     const { isDark } = useTheme()
@@ -8,6 +15,31 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
     const datas = field.data || false
     const hasError = !!errors?.[field.name]
     const errorMessage = typeof errors?.[field.name] === 'string' ? errors[field.name] : null
+
+    // colorPicker : rangée de pastilles cliquables, pas un input classique donc on sort
+    // du conteneur "shadow-xs border" standard pour rester sur un style propre aux pastilles
+    if (field.type === 'colorPicker') {
+        const colors = field.colors || DEFAULT_COLORS
+        return (
+            <div key={field.name}>
+                <div className='flex justify-between'>
+                    <label className="block mb-2.5 text-sm text-primary-600 font-medium text-heading">{field.label}</label>
+                    {errorMessage && <p className="text-red-500 text-xs mt-1 text-right">{errorMessage}</p>}
+                </div>
+                <div className='flex gap-2 flex-wrap'>
+                    {colors.map(c => (
+                        <button
+                            key={c}
+                            type='button'
+                            onClick={() => onChange({ target: { name: field.name, value: c } })}
+                            className={`w-7 h-7 rounded-full transition-transform hover:scale-110 ${field.value === c ? 'ring-2 ring-offset-2 ring-primary-400' : ''}`}
+                            style={{ backgroundColor: c }}
+                        />
+                    ))}
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div key={field.name}>

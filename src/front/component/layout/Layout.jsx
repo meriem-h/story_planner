@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch, ChevronRight, ChevronLeft, Palette } from 'lucide-react'
+import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch, ChevronRight, ChevronLeft, Palette, CalendarDays } from 'lucide-react'
 import { useTheme, THEMES } from '../../context/ThemeContext'
 
 import ModalExport from '../modal/ModalExport'
@@ -10,12 +10,14 @@ import Note from "./NoteLayout";
 import Lore from "./LoreLayout";
 import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
+import ModalSchedule from '../modal/ModalSchedule';
 
 export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
     const [isExportOpen, setIsExportOpen] = useState(false)
+    const [isCallandarOpen, setIsCallandarOpen] = useState(false)
     const { theme, changeTheme, THEME_NAMES, isDark, toggleDark } = useTheme()
 
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
@@ -69,6 +71,9 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
             <Modal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} size={60}>
                 <ModalGallery book={selectedBook} />
+            </Modal>
+            <Modal isOpen={isCallandarOpen} onClose={() => setIsCallandarOpen(false)} size={80}>
+                <ModalSchedule book={selectedBook} chapters={chapters} />
             </Modal>
             <Modal isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} size={50}>
                 <ModalExport
@@ -203,6 +208,15 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             className={`text-white rounded-full p-3 transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
                         >
                             <GitBranch size={20} />
+                        </button>
+                        <button
+                            // onClick={onOpenCallendar}
+                            onClick={() => setIsCallandarOpen(true)}
+
+                            title="Timeline"
+                            className={`text-white rounded-full p-3 transition-colors bg-primary-400 hover:bg-primary-500`}
+                        >
+                            <CalendarDays size={20} />
                         </button>
                     </div>
 
