@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { ChevronUp, BadgePlus, Trash2, Eye, Pen } from 'lucide-react'
+import { ChevronUp, BadgePlus, Trash2, Eye, Pen, Lock } from 'lucide-react'
 import Modal from '../modal/Modal'
 import ModalView from '../modal/ModalView'
 import ModalBook from '../modal/ModalBook'
 import ModalDelete from '../modal/ModalDelete'
 import ModalTome from '../modal/ModalTome'
+import ModalUnlockBook from '../modal/ModalUnlockBook'
 
 export default function ChapterLayout(props) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -19,6 +20,9 @@ export default function ChapterLayout(props) {
     const [isViewTomeOpen, setIsViewTomeOpen] = useState(false)
     const [tomeToView, setTomeToView] = useState(null)
 
+    // livre prive en attente de mot de passe (null = pas de demande en cours)
+    const [bookToUnlock, setBookToUnlock] = useState(null)
+
     useEffect(() => {
         const close = () => setBookDropdownOpen(false)
         document.addEventListener('click', close)
@@ -32,6 +36,21 @@ export default function ChapterLayout(props) {
     const changeChapter = async (e) => {
         const chapter = props.chapters.find(ch => ch.id == e.target.dataset.id)
         props.setSelectedChapter(chapter)
+    }
+
+    // selection d'un livre dans le dropdown : si le livre est prive et pas encore deverrouille
+    // pour cette session, on ouvre la popup de mot de passe au lieu de selectionner direct.
+    // unlockedBookIds/unlockBook viennent de Home.jsx (etat en memoire, pas en localStorage,
+    // donc tout se reverrouille quand on ferme l'appli).
+    const selectBook = (book) => {
+        const isUnlocked = props.unlockedBookIds?.includes(book.id)
+        if (book.is_private && !isUnlocked) {
+            setBookToUnlock(book)
+            return
+        }
+        props.setSelectedBook(book)
+        setBookDropdownOpen(false)
+        setBookSearch('')
     }
 
     return (
@@ -69,6 +88,24 @@ export default function ChapterLayout(props) {
                 id={chapterToDelete}
             />
 
+            {/* popup de mot de passe pour un livre prive, affichee a la place de la selection
+                directe tant que le livre n'a pas ete deverrouille pour cette session */}
+            <Modal isOpen={!!bookToUnlock} onClose={() => setBookToUnlock(null)} size={40}>
+                {bookToUnlock && (
+                    <ModalUnlockBook
+                        book={bookToUnlock}
+                        onClose={() => setBookToUnlock(null)}
+                        onUnlocked={(book) => {
+                            props.unlockBook(book.id)
+                            props.setSelectedBook(book)
+                            setBookToUnlock(null)
+                            setBookDropdownOpen(false)
+                            setBookSearch('')
+                        }}
+                    />
+                )}
+            </Modal>
+
             {/* header livre */}
             <div className='p-4 border-b border-primary-300'>
                 <div className='group flex items-center justify-between gap-2 mb-3'>
@@ -79,8 +116,11 @@ export default function ChapterLayout(props) {
                             className='flex items-center gap-1 cursor-pointer'
                             onClick={() => setBookDropdownOpen(!bookDropdownOpen)}
                         >
+                            {!!props.selectedBook?.is_private && (
+                                <Lock size={14} className='text-primary-400 flex-shrink-0' />
+                            )}
                             <p className='font-bold text-lg text-primary-800 truncate'>
-                                {props.selectedBook?.title}
+                                {props.selectedBook?.title || 'Choisir un livre...'}
                             </p>
                             <ChevronUp
                                 className={`text-primary-400 flex-shrink-0 transition-transform duration-300 ${bookDropdownOpen ? 'rotate-0' : 'rotate-180'}`}
@@ -111,13 +151,19 @@ export default function ChapterLayout(props) {
                                     {filteredBooks?.map(book => (
                                         <div
                                             key={book.id}
-                                            onClick={() => { props.setSelectedBook(book); setBookDropdownOpen(false); setBookSearch('') }}
+                                            onClick={() => selectBook(book)}
                                             className={`px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors flex items-center gap-2 ${book.id === props.selectedBook?.id
                                                 ? 'bg-primary-300 text-white font-bold'
                                                 : 'hover:bg-primary-50 text-primary-800'
                                                 }`}
                                         >
                                             {book.archived ? <span className='text-xs'>📦</span> : null}
+                                            {!!book.is_private && (
+                                                <Lock
+                                                    size={12}
+                                                    className={book.id === props.selectedBook?.id ? 'text-white' : 'text-primary-300'}
+                                                />
+                                            )}
                                             {book.title}
                                         </div>
                                     ))}
@@ -127,6 +173,15 @@ export default function ChapterLayout(props) {
                     </div>
 
                     <div className='hidden group-hover:flex gap-1'>
+                        {!!props.selectedBook?.is_private && (
+                            <button
+                                onClick={() => props.lockBook(props.selectedBook.id)}
+                                title='Verrouiller ce livre'
+                                className='text-primary-400 hover:text-red-500 transition-colors'
+                            >
+                                <Lock size={16} />
+                            </button>
+                        )}
                         <button onClick={() => setIsViewBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
                             <Eye size={16} />
                         </button>

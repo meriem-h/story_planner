@@ -13,7 +13,7 @@ import ModalGallery from '../modal/ModalGallery';
 import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, unlockedBookIds, unlockBook, lockBook }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -30,7 +30,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         books, selectedBook, setSelectedBook,
         addChapter, addBook, fetchChapters,
         tomes, selectedTome, setSelectedTome,
-        fetchTomes
+        fetchTomes,
+        unlockedBookIds, unlockBook, lockBook
     }
 
     const [content, setContent] = useState(<Chapter {...chapterProps} />)
@@ -69,7 +70,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
 
     return (
-        <div className="flex">
+        <div className="flex h-screen">
 
             <Modal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} size={60}>
                 <ModalGallery book={selectedBook} />
@@ -90,8 +91,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             </Modal>
 
             {/* Sidebar ouverte */}
-            <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} transition-all duration-300 overflow-hidden bg-primary-200`}>
-                <div className='p-4 flex gap-2 justify-center'>
+            <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} h-full flex flex-col transition-all duration-300 overflow-hidden bg-primary-200`}>
+                <div className='p-4 flex gap-2 justify-center flex-shrink-0'>
                     <button className={btnClass('chapter')} title="Chapitres" onClick={showChapter}>
                         <BookOpenText />
                     </button>
@@ -111,7 +112,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         <X />
                     </button>
                 </div>
-                <div>{content}</div>
+                <div className='flex-1 min-h-0'>{content}</div>
             </div>
 
             {/* Sidebar fermée */}

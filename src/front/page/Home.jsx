@@ -5,6 +5,7 @@ import { useApi } from '../context/ApiContext'
 import Modal from '../component/modal/Modal'
 import ModalBook from '../component/modal/ModalBook'
 import ModalChapter from '../component/modal/ModalChapter'
+import ModalUnlockBook from '../component/modal/ModalUnlockBook'
 import Editor from "../component/Editor"
 import FormField from "../component/FormField"
 import Timeline from '../component/Timeline'
@@ -31,8 +32,41 @@ export default function Home() {
     const [timelineKey, setTimelineKey] = useState(0)
     const [isTimelineFullscreen, setIsTimelineFullscreen] = useState(false)
 
+    // ids des livres prives deverrouilles. Persiste en localStorage : un livre reste
+    // deverrouille indefiniment (meme apres avoir ferme/rouvert l'appli) jusqu'a un clic
+    // explicite sur le cadenas pour le reverrouiller manuellement.
+    const [unlockedBookIds, setUnlockedBookIds] = useState(() => {
+        const saved = localStorage.getItem('unlockedBookIds')
+        return saved ? JSON.parse(saved) : []
+    })
+    // livre prive selectionne automatiquement au demarrage (dernier livre consulte) mais
+    // pas encore deverrouille -- affiche un ecran "verrouille" a la place du contenu.
+    const [pendingBook, setPendingBook] = useState(null)
+
     const { isDark } = useTheme()
 
+    useEffect(() => {
+        localStorage.setItem('unlockedBookIds', JSON.stringify(unlockedBookIds))
+    }, [unlockedBookIds])
+
+    const unlockBook = (bookId) => {
+        setUnlockedBookIds(prev => prev.includes(bookId) ? prev : [...prev, bookId])
+    }
+
+    const lockBook = (bookId) => {
+        setUnlockedBookIds(prev => prev.filter(id => id !== bookId))
+        // si on verrouille le livre actuellement affiche, on efface TOUT son contenu affiche
+        // (tomes, chapitres, chapitre selectionne) -- sinon la sidebar continue de montrer
+        // les chapitres de ce livre, modifiables/supprimables, alors qu'il est cense etre verrouille
+        if (selectedBook?.id === bookId) {
+            setPendingBook(selectedBook)
+            setSelectedBook(null)
+            setTomes([])
+            setSelectedTome(null)
+            setChapters([])
+            setSelectedChapter(null)
+        }
+    }
 
     useEffect(() => {
         !selectedBook ? fetchBooks() : fetchTomes(selectedBook.id)
@@ -84,7 +118,14 @@ export default function Home() {
                     new Date(a.updated_at) > new Date(b.updated_at) ? a : b)
                 : result.data.reduce((a, b) =>
                     new Date(a.updated_at) > new Date(b.updated_at) ? a : b)
-            setSelectedBook(lastBook)
+
+            // si ce livre est prive et pas encore deverrouille pour cette session, on ne
+            // l'ouvre pas tout seul -- on affiche l'ecran de verrouillage a la place
+            if (lastBook.is_private && !unlockedBookIds.includes(lastBook.id)) {
+                setPendingBook(lastBook)
+            } else {
+                setSelectedBook(lastBook)
+            }
         }
     }
 
@@ -189,6 +230,9 @@ export default function Home() {
                 setShowTimeline={setShowTimeline}
                 refreshTimeline={() => setTimelineKey(k => k + 1)}
                 onOpenFullscreen={() => setIsTimelineFullscreen(true)}
+                unlockedBookIds={unlockedBookIds}
+                unlockBook={unlockBook}
+                lockBook={lockBook}
             >
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size={50}>
                     <ModalBook onSuccess={handleBookCreated} />
@@ -206,6 +250,25 @@ export default function Home() {
                     />
                 </Modal>
 
+                {/* livre prive selectionne par defaut (dernier consulte) mais pas encore
+                    deverrouille pour cette session : popup de mdp + ecran de remplacement.
+                    onClose permet de fermer la popup (clic exterieur ou bouton Annuler) pour
+                    pouvoir utiliser la sidebar -- changer de livre ou en creer un -- sans
+                    rester bloque devant ce livre verrouille */}
+                <Modal isOpen={!!pendingBook} onClose={() => setPendingBook(null)} size={40}>
+                    {pendingBook && (
+                        <ModalUnlockBook
+                            book={pendingBook}
+                            onClose={() => setPendingBook(null)}
+                            onUnlocked={(book) => {
+                                unlockBook(book.id)
+                                setSelectedBook(book)
+                                setPendingBook(null)
+                            }}
+                        />
+                    )}
+                </Modal>
+
                 {books.length <= 0 ? (
                     <div className='flex justify-center pt-12'>
                         <button
@@ -214,6 +277,10 @@ export default function Home() {
                         >
                             + Créer un nouveau livre
                         </button>
+                    </div>
+                ) : !selectedBook ? (
+                    <div className='flex flex-col items-center justify-center gap-3 pt-24 text-primary-300'>
+                        <p>Choisis un livre dans le menu, ou crée-en un nouveau.</p>
                     </div>
                 ) : (
                     <div className='flex flex-col h-screen overflow-hidden'>

@@ -21,6 +21,7 @@ class BookIPC extends BaseIPC {
                 // 2. crée le tome 1
                 const tomeId = await this.tomeRepo.create({
                     book_id: bookId,
+                    number: 1,
                     title: 'Tome 1',
                     position: 1
                 })
@@ -34,6 +35,17 @@ class BookIPC extends BaseIPC {
                 })
 
                 return { success: true, bookId, tomeId, chapterId }
+            } catch (err) {
+                return { success: false, message: err.message }
+            }
+        })
+
+        // verifie le mot de passe d'un livre prive. Ne renvoie jamais le hash, seulement
+        // un booleen "ok" -- c'est tout ce dont le front a besoin pour deverrouiller l'acces.
+        ipcMain.handle('book:verifyPassword', async (event, { id, password }) => {
+            try {
+                const ok = await this.repo.verifyPassword(id, password)
+                return { success: true, ok }
             } catch (err) {
                 return { success: false, message: err.message }
             }

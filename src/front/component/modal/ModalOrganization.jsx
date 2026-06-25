@@ -3,7 +3,7 @@ import { useApi } from '../../context/ApiContext'
 import Modal from './Modal'
 import ModalImage from './ModalImage'
 import ModalAssignGrade from './ModalAssignGrade'
-import { Network, BadgePlus, Pen, Trash2, AlertTriangle, Settings, Check, Users } from 'lucide-react'
+import { Network, BadgePlus, Pen, Trash2, AlertTriangle, Settings, Check, Users, ZoomIn, ZoomOut, Maximize } from 'lucide-react'
 
 // petite confirmation inline reutilisable (independante de ModalDelete qui gere son propre
 // appel api(`${table}:delete`) -- ici on a besoin de logique supplementaire apres suppression,
@@ -51,6 +51,11 @@ const PADDING = 14
 const LEVEL_GAP = 70
 const SIBLING_GAP = 24
 
+// bornes et pas du zoom de l'organigramme (1 = taille reelle)
+const ZOOM_MIN = 0.3
+const ZOOM_MAX = 2
+const ZOOM_STEP = 0.1
+
 export default function ModalOrganization(props) {
 
     const api = useApi()
@@ -65,6 +70,9 @@ export default function ModalOrganization(props) {
     // mode 'view' = organigramme + selection de persos (par defaut)
     // mode 'edit' = creation/edition/suppression/reorganisation des grades, persos masques
     const [mode, setMode] = useState('view')
+
+    // niveau de zoom de l'organigramme (1 = 100%), reinitialise a chaque changement d'organisation
+    const [zoom, setZoom] = useState(1)
 
     const [selectedOrgId, setSelectedOrgId] = useState(() => {
         const saved = localStorage.getItem(`orgview-org-${props.book?.id}`)
@@ -137,6 +145,7 @@ export default function ModalOrganization(props) {
 
     useEffect(() => {
         if (selectedOrgId) fetchTree()
+        setZoom(1)
     }, [selectedOrgId])
 
     useEffect(() => {
@@ -295,6 +304,21 @@ export default function ModalOrganization(props) {
     const toggleMode = () => {
         if (mode === 'edit') closeGradeForm()
         setMode(prev => prev === 'view' ? 'edit' : 'view')
+    }
+
+    // --- zoom de l'organigramme ---
+
+    const zoomIn = () => setZoom(z => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100))
+    const zoomOut = () => setZoom(z => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100))
+    const zoomReset = () => setZoom(1)
+
+    // zoom a la molette uniquement si Ctrl/Cmd est maintenu, pour ne pas gener le scroll normal
+    // de la zone (qui sert a se deplacer dans l'arbre quand il est plus grand que la fenetre)
+    const handleWheelZoom = (e) => {
+        if (!e.ctrlKey && !e.metaKey) return
+        e.preventDefault()
+        if (e.deltaY < 0) zoomIn()
+        else zoomOut()
     }
 
     // --- drag and drop par fratrie (memes parent_grade_id uniquement), mode edit seulement ---
@@ -926,31 +950,73 @@ export default function ModalOrganization(props) {
                             </div>
                         )}
 
-                        <div className='flex-1 overflow-auto hide-scrollbar bg-primary-50 rounded-xl p-4 relative'>
-                            {tree.length === 0 ? (
-                                <div className='h-full flex flex-col items-center justify-center gap-2 text-primary-300'>
-                                    <Network size={32} />
-                                    <p>{mode === 'edit' ? "Aucun grade encore. Commence par creer le grade le plus eleve (ex: Doyen)." : "Cette organisation n'a encore aucun grade defini."}</p>
-                                </div>
-                            ) : (
-                                <div className='min-w-full min-h-full flex items-start justify-center'>
-                                    <div className='relative' style={{ width: layout.totalWidth, height: layout.totalHeight }}>
-                                        <svg width={layout.totalWidth} height={layout.totalHeight} style={{ position: 'absolute', top: 0, left: 0 }}>
-                                            {renderEdges()}
-                                            {renderNodes()}
-                                            {renderHoveredAvatarOnTop()}
-                                        </svg>
-                                        {renderEditOverlayButtons()}
-                                    </div>
+                        <div className='flex-1 relative min-h-0'>
+                            {/* controles de zoom, flottants en haut a droite. Places dans ce
+                                conteneur EXTERIEUR a la zone scrollable (et non a l'interieur),
+                                pour rester fixes a l'ecran meme quand on scrolle dans l'arbre */}
+                            {tree.length > 0 && (
+                                <div className='absolute top-3 right-3 z-20 flex items-center gap-1 bg-primary-1 rounded-lg shadow-md p-1'>
+                                    <button onClick={zoomOut} title='Zoom -' className='p-1.5 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded'>
+                                        <ZoomOut size={16} />
+                                    </button>
+                                    <button onClick={zoomReset} title='Reinitialiser le zoom' className='px-2 text-xs font-bold text-primary-500 hover:text-primary-700 min-w-[3rem] text-center'>
+                                        {Math.round(zoom * 100)}%
+                                    </button>
+                                    <button onClick={zoomIn} title='Zoom +' className='p-1.5 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded'>
+                                        <ZoomIn size={16} />
+                                    </button>
+                                    <div className='w-px h-5 bg-primary-100 mx-0.5' />
+                                    <button onClick={zoomReset} title='Ajuster a 100%' className='p-1.5 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded'>
+                                        <Maximize size={16} />
+                                    </button>
                                 </div>
                             )}
+
+                            <div
+                                className='absolute inset-0 overflow-auto hide-scrollbar bg-primary-50 rounded-xl p-4'
+                                onWheel={handleWheelZoom}
+                            >
+                                {tree.length === 0 ? (
+                                    <div className='h-full flex flex-col items-center justify-center gap-2 text-primary-300'>
+                                        <Network size={32} />
+                                        <p>{mode === 'edit' ? "Aucun grade encore. Commence par creer le grade le plus eleve (ex: Doyen)." : "Cette organisation n'a encore aucun grade defini."}</p>
+                                    </div>
+                                ) : (
+                                    <div className='min-w-full min-h-full flex items-start justify-center'>
+                                        <div
+                                            className='relative'
+                                            style={{
+                                                width: layout.totalWidth * zoom,
+                                                height: layout.totalHeight * zoom,
+                                            }}
+                                        >
+                                            <div
+                                                className='relative'
+                                                style={{
+                                                    width: layout.totalWidth,
+                                                    height: layout.totalHeight,
+                                                    transform: `scale(${zoom})`,
+                                                    transformOrigin: 'top left',
+                                                }}
+                                            >
+                                                <svg width={layout.totalWidth} height={layout.totalHeight} style={{ position: 'absolute', top: 0, left: 0 }}>
+                                                    {renderEdges()}
+                                                    {renderNodes()}
+                                                    {renderHoveredAvatarOnTop()}
+                                                </svg>
+                                                {renderEditOverlayButtons()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* persos sans grade attribue pour ce chapitre = au rang le plus bas, hors arbre
                             formel. Uniquement en mode vue */}
                         {mode === 'view' && lowestOccupants.length > 0 && (
                             <div className='bg-primary-100 rounded-lg px-3 py-2 flex items-center gap-3 flex-shrink-0'>
-                                <span className='text-xs font-bold text-primary-600 flex-shrink-0'>Rang le plus bas (aucun grade attribue) :</span>
+                                <span className='text-xs font-bold text-primary-600 flex-shrink-0'>Aucun grade attribue :</span>
                                 <div className='flex flex-wrap gap-2'>
                                     {lowestOccupants.map(char => (
                                         <div key={char.id} className='flex items-center gap-1.5 bg-primary-50 rounded-full pr-2 py-0.5'>
@@ -997,12 +1063,13 @@ export default function ModalOrganization(props) {
                                         onChange={(e) => setGradeParentId(e.target.value)}
                                         className='w-full px-3 py-2 border border-primary-200 rounded-lg text-sm outline-none focus:border-primary-400 bg-white'
                                     >
-                                        <option value=''>— Aucun (sommet de la hierarchie) —</option>
+                                        <option value=''>Aucun (sommet de la hierarchie)</option>
                                         {flatGradeOptions
                                             .filter(opt => !gradeForm.grade || opt.id !== gradeForm.grade.id)
                                             .map(opt => (
                                                 <option key={opt.id} value={opt.id}>
-                                                    {'—'.repeat(opt.depth)} {opt.title}
+                                                    {/* {'-'.repeat(opt.depth)} {opt.title} */}
+                                                    {opt.title}
                                                 </option>
                                             ))}
                                     </select>
