@@ -397,12 +397,15 @@ export default function ModalFamilyTree(props) {
     // Des relations de TYPES differents entre la meme paire (ex: fratrie ET couple en
     // meme temps) restent toutes deux affichees -- ce n'est pas le meme regroupement.
     const resolvedEdges = useMemo(() => {
-        const targetIndex = chapters.findIndex(c => c.id === selectedChapterId)
+        // Number(...) systematique sur les comparaisons d'id de chapitre : selon l'origine
+        // (select HTML -> toujours string, donnees mysql -> toujours number), un mismatch
+        // de type ferait echouer silencieusement tous les === et findIndex faussement -1.
+        const targetIndex = chapters.findIndex(c => Number(c.id) === Number(selectedChapterId))
 
         const isChapterInRange = (debut, fin) => {
             if (!selectedChapterId) return !debut && !fin // hors contexte de chapitre, on ne garde que ce qui est "permanent"
-            const debutIndex = debut ? chapters.findIndex(c => c.id === debut) : -1
-            const finIndex = fin ? chapters.findIndex(c => c.id === fin) : Infinity
+            const debutIndex = debut ? chapters.findIndex(c => Number(c.id) === Number(debut)) : -1
+            const finIndex = fin ? chapters.findIndex(c => Number(c.id) === Number(fin)) : Infinity
             return targetIndex >= (debutIndex === -1 ? -1 : debutIndex) && targetIndex <= finIndex
         }
 
@@ -417,11 +420,18 @@ export default function ModalFamilyTree(props) {
 
         const resolved = []
         groups.forEach(stages => {
+            // 1. l'etape dont la plage couvre precisement le chapitre cible
+            // 2. sinon, la derniere etape dont le debut est <= chapitre cible (etat le
+            //    plus recent connu a ce point de l'histoire)
+            // PAS de fallback par defaut sur stages[0] : si le chapitre cible est avant
+            // le debut de TOUTES les etapes connues, la relation n'existe pas encore a ce
+            // moment de l'histoire et ne doit simplement pas s'afficher.
             const active = stages.find(s => isChapterInRange(s.chapter_id_debut, s.chapter_id_fin))
-                // si aucune etape ne couvre precisement ce chapitre, on prend la derniere
-                // etape enregistree avant ce chapitre (etat le plus recent connu)
-                || stages.slice().reverse().find(s => !s.chapter_id_debut || chapters.findIndex(c => c.id === s.chapter_id_debut) <= targetIndex)
-                || stages[0]
+                || stages
+                    .filter(s => s.chapter_id_debut && chapters.findIndex(c => Number(c.id) === Number(s.chapter_id_debut)) <= targetIndex)
+                    .sort((a, b) => chapters.findIndex(c => Number(c.id) === Number(a.chapter_id_debut)) - chapters.findIndex(c => Number(c.id) === Number(b.chapter_id_debut)))
+                    .pop()
+                || stages.find(s => !s.chapter_id_debut) // etape sans bornes du tout = valable partout
             if (active) resolved.push(active)
         })
 
@@ -654,7 +664,7 @@ export default function ModalFamilyTree(props) {
                         <label className='block mb-1 text-xs text-primary-500 font-medium'>Chapitre</label>
                         <select
                             value={selectedChapterId || ''}
-                            onChange={(e) => setSelectedChapterId(e.target.value)}
+                            onChange={(e) => setSelectedChapterId(Number(e.target.value))}
                             className='w-full px-3 py-2 border border-primary-200 rounded-lg text-sm outline-none focus:border-primary-400 bg-white'
                         >
                             {chapters.map(ch => (
