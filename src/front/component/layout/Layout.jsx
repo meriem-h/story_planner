@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch, ChevronRight, ChevronLeft, Palette, CalendarDays, Network } from 'lucide-react'
+import { X, Lightbulb, BookUser, BookOpenText, NotebookPen, ScrollText, Images, Download, GitBranch, ChevronRight, ChevronLeft, Palette, CalendarDays, Network, UsersRound } from 'lucide-react'
+
 import { useTheme, THEMES } from '../../context/ThemeContext'
 
 import ModalExport from '../modal/ModalExport'
@@ -12,6 +13,7 @@ import Modal from '../modal/Modal';
 import ModalGallery from '../modal/ModalGallery';
 import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
+import ModalFamilyTree from '../modal/ModalFamilyTree';
 
 export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, unlockedBookIds, unlockBook, lockBook }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -20,6 +22,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [isExportOpen, setIsExportOpen] = useState(false)
     const [isCallandarOpen, setIsCallandarOpen] = useState(false)
     const [isOrgOpen, setIsOrgOpen] = useState(false)
+    const [isFamilyTreeOpen, setIsFamilyTreeOpen] = useState(false)
     const { theme, changeTheme, THEME_NAMES, isDark, toggleDark } = useTheme()
 
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
@@ -80,6 +83,9 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
             </Modal>
             <Modal isOpen={isOrgOpen} onClose={() => setIsOrgOpen(false)} size={80}>
                 <ModalOrganization book={selectedBook} />
+            </Modal>
+            <Modal isOpen={isFamilyTreeOpen} onClose={() => setIsFamilyTreeOpen(false)} size={80}>
+                <ModalFamilyTree book={selectedBook} />
             </Modal>
             <Modal isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} size={50}>
                 <ModalExport
@@ -185,7 +191,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                 <div className='flex flex-col'>
                     {/* Barre flottante */}
 
-                    <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+                    <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-[100%] opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
                         
                         
 
@@ -205,19 +211,20 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             <CalendarDays size={20} />
                         </button>
 
-
-
-
-
-
-
-
                         <button
                             onClick={() => setIsOrgOpen(true)}
                             title="Organisation Chart"
                             className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
                         >
                             <Network size={20} />
+                        </button>
+
+                        <button
+                            onClick={() => setIsFamilyTreeOpen(true)}
+                            title="Arbre genealogique"
+                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                        >
+                            <UsersRound size={20} />
                         </button>
 
                         
@@ -228,7 +235,6 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         >
                             <Images size={20} />
                         </button>
-
 
 
                         <button
