@@ -230,6 +230,7 @@ export default function Home() {
                 setShowTimeline={setShowTimeline}
                 refreshTimeline={() => setTimelineKey(k => k + 1)}
                 onOpenFullscreen={() => setIsTimelineFullscreen(true)}
+                onCloseFullscreen={() => setIsTimelineFullscreen(false)}
                 unlockedBookIds={unlockedBookIds}
                 unlockBook={unlockBook}
                 lockBook={lockBook}
@@ -250,11 +251,6 @@ export default function Home() {
                     />
                 </Modal>
 
-                {/* livre prive selectionne par defaut (dernier consulte) mais pas encore
-                    deverrouille pour cette session : popup de mdp + ecran de remplacement.
-                    onClose permet de fermer la popup (clic exterieur ou bouton Annuler) pour
-                    pouvoir utiliser la sidebar -- changer de livre ou en creer un -- sans
-                    rester bloque devant ce livre verrouille */}
                 <Modal isOpen={!!pendingBook} onClose={() => setPendingBook(null)} size={40}>
                     {pendingBook && (
                         <ModalUnlockBook

@@ -15,7 +15,7 @@ import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
 import ModalFamilyTree from '../modal/ModalFamilyTree';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, unlockedBookIds, unlockBook, lockBook }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen,onCloseFullscreen, unlockedBookIds, unlockBook, lockBook }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -35,6 +35,15 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         tomes, selectedTome, setSelectedTome,
         fetchTomes,
         unlockedBookIds, unlockBook, lockBook
+    }
+
+    const closeAllModals = () => {
+        setIsGalleryOpen(false)
+        setIsExportOpen(false)
+        setIsCallandarOpen(false)
+        setIsOrgOpen(false)
+        setIsFamilyTreeOpen(false)
+        onCloseFullscreen(false)
     }
 
     const [content, setContent] = useState(<Chapter {...chapterProps} />)
@@ -192,18 +201,18 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                     {/* Barre flottante */}
 
                     <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-[100%] opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
-                        
-                        
+
+
 
                         <button
-                            onClick={onOpenFullscreen}
+                            onClick={() => { closeAllModals(); onOpenFullscreen(true) }}
                             title="Timeline"
                             className={`text-white rounded-full p-3 transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
                         >
                             <GitBranch size={20} />
                         </button>
                         <button
-                            onClick={() => setIsCallandarOpen(true)}
+                            onClick={() => { closeAllModals(); setIsCallandarOpen(true) }}
 
                             title="Callandar"
                             className={`text-white rounded-full p-3 transition-colors bg-primary-400 hover:bg-primary-500`}
@@ -212,7 +221,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         </button>
 
                         <button
-                            onClick={() => setIsOrgOpen(true)}
+                            onClick={() => { closeAllModals(); setIsOrgOpen(true) }}
+
                             title="Organisation Chart"
                             className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
                         >
@@ -220,16 +230,18 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         </button>
 
                         <button
-                            onClick={() => setIsFamilyTreeOpen(true)}
+                            onClick={() => { closeAllModals(); setIsFamilyTreeOpen(true) }}
+
                             title="Arbre genealogique"
                             className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
                         >
                             <UsersRound size={20} />
                         </button>
 
-                        
+
                         <button
-                            onClick={() => setIsGalleryOpen(true)}
+                            onClick={() => { closeAllModals(); setIsGalleryOpen(true) }}
+
                             title="Galerie"
                             className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
                         >
@@ -239,6 +251,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
                         <button
                             onClick={() => setIsThemeOpen(prev => !prev)}
+
                             title="Thème"
                             className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
                         >
@@ -246,7 +259,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         </button>
 
                         <button
-                            onClick={() => setIsExportOpen(true)}
+                            onClick={() => { closeAllModals(); setIsExportOpen(true) }}
+
                             title="Exporter"
                             className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
                         >

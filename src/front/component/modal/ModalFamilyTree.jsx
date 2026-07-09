@@ -5,7 +5,7 @@ import ModalImage from './ModalImage'
 import ModalFamilyRelationForm from './ModalFamilyRelationForm'
 import { Users2, BadgePlus, Pen, Trash2, AlertTriangle, Settings, Check, Heart, Skull, ZoomIn, ZoomOut, Maximize } from 'lucide-react'
 
-// petite confirmation inline reutilisable (meme pattern que ModalOrganization)
+
 function ConfirmInline({ isOpen, onClose, onConfirm, message }) {
     if (!isOpen) return null
     return (
@@ -32,20 +32,19 @@ function ConfirmInline({ isOpen, onClose, onConfirm, message }) {
     )
 }
 
-// dimensions des cases personnage dans le svg (memes proportions que ModalOrganization,
-// mais ici chaque case = un seul personnage, jamais un groupe -- donc taille fixe)
+
 const NODE_WIDTH = 100
 const NODE_HEIGHT = 120
 const AVATAR_RADIUS = 32
-const LEVEL_GAP = 90 // espace vertical entre 2 generations
-const SIBLING_GAP = 28 // espace horizontal entre 2 personnages d'une meme generation
-const COUPLE_GAP = 14 // espace horizontal (plus petit) entre 2 personnes en couple
+const LEVEL_GAP = 90
+const SIBLING_GAP = 28
+const COUPLE_GAP = 14
 
 const ZOOM_MIN = 0.3
 const ZOOM_MAX = 2
 const ZOOM_STEP = 0.1
 
-// libelle affiche dans le select et dans la phrase dynamique du formulaire
+
 const RELATION_LABELS = {
     parent_enfant: 'parent de',
     fratrie: 'frere/soeur de',
@@ -55,15 +54,14 @@ const RELATION_LABELS = {
     divorce: 'divorce(e) de',
 }
 
-// couleurs des liens selon le type de relation (rose+coeur couple, rose+alliance fiance,
-// rouge+alliance marie, noir si un des deux est mort a ce chapitre -- gere dans le rendu)
+
 const RELATION_COLORS = {
-    parent_enfant: '#94a3b8', // gris neutre
+    parent_enfant: '#94a3b8',
     fratrie: '#94a3b8',
-    couple: '#f472b6', // rose
-    fiance: '#f472b6', // rose
-    marie: '#ef4444', // rouge
-    divorce: '#ef4444', // rouge (mais trait casse, gere dans le rendu)
+    couple: '#f472b6',
+    fiance: '#f472b6',
+    marie: '#ef4444',
+    divorce: '#ef4444',
 }
 
 export default function ModalFamilyTree(props) {
@@ -75,10 +73,9 @@ export default function ModalFamilyTree(props) {
 
     const [families, setFamilies] = useState([])
     const [relations, setRelations] = useState([])
-    const [statusesByCharacter, setStatusesByCharacter] = useState({}) // { characterId: [statuts actifs a ce chapitre] }
+    const [statusesByCharacter, setStatusesByCharacter] = useState({})
 
-    // mode 'view' = arbre + selection de persos (par defaut)
-    // mode 'edit' = creation/edition/suppression des relations, persos masques
+
     const [mode, setMode] = useState('view')
     const [zoom, setZoom] = useState(1)
 
@@ -95,16 +92,16 @@ export default function ModalFamilyTree(props) {
         return saved ? JSON.parse(saved) : []
     })
 
-    // creation rapide d'une famille (arbre), en popup separee
+
     const [isAddingFamily, setIsAddingFamily] = useState(false)
     const [newFamilyName, setNewFamilyName] = useState('')
 
-    // formulaire d'ajout/edition de relation (mode edit) : null = ferme
+
     const [relationForm, setRelationForm] = useState(null)
     const [relationToDelete, setRelationToDelete] = useState(null)
     const [isConfirmRelationOpen, setIsConfirmRelationOpen] = useState(false)
 
-    // avatar/lien survole (pour tooltip detail + agrandissement avatar au survol)
+
     const [hoveredAvatarKey, setHoveredAvatarKey] = useState(null)
     const [hoveredLinkId, setHoveredLinkId] = useState(null)
 
@@ -195,11 +192,6 @@ export default function ModalFamilyTree(props) {
         )
     }
 
-    // selectionne ou deselectionne en bloc tous les personnages ayant au moins une relation
-    // dans l'arbre actuellement choisi. Si tous sont deja selectionnes -> on les retire tous ;
-    // sinon -> on ajoute ceux qui manquent (sans toucher aux persos d'autres arbres deja
-    // selectionnes par ailleurs). Pas d'appel API necessaire : characterIdsInRelations est
-    // deja calcule cote front a partir des relations chargees.
     const toggleAllFamilyMembers = () => {
         const memberIds = [...characterIdsInRelations]
         if (memberIds.length === 0) return
@@ -215,16 +207,13 @@ export default function ModalFamilyTree(props) {
 
     const initialOf = (text) => text?.trim()?.charAt(0)?.toUpperCase() || '?'
 
-    // un perso est "mort" a ce chapitre si un de ses statuts actifs a ce chapitre a un
-    // label contenant "mort" (insensible a la casse) -- detection simple par mot-cle,
-    // pas de booleen dedie en bdd (le systeme de statuts est generique/texte libre)
+
     const isDead = (characterId) => {
         const statuses = statusesByCharacter[characterId] || []
         return statuses.some(s => s.label?.toLowerCase().includes('mort'))
     }
 
-    // persos selectionnes mais n'apparaissant dans AUCUNE relation de cet arbre -- affiches
-    // a part, en bas, comme les "sans grade" de l'organigramme. Uniquement en mode vue.
+
     const characterIdsInRelations = useMemo(() => {
         const ids = new Set()
         relations.forEach(r => { ids.add(r.character_id_1); ids.add(r.character_id_2) })
@@ -235,20 +224,13 @@ export default function ModalFamilyTree(props) {
         return character.filter(c => selectedCharacterIds.includes(c.id) && !characterIdsInRelations.has(c.id))
     }, [character, selectedCharacterIds, characterIdsInRelations])
 
-    // ids des persos reellement dessines dans l'arbre svg :
-    // - mode vue : seulement les persos SELECTIONNES a gauche ET ayant une relation
-    //   (les selectionnes sans relation sont affiches a part, en bas)
-    // - mode edit : TOUS les membres existants de cette famille (= ayant au moins une
-    //   relation), sans notion de selection -- on construit/visualise l'arbre complet
-    //   pendant qu'on l'edite. Jamais "tout le monde" : seulement les membres reels.
+
     const treeCharacterIds = useMemo(() => {
         if (mode === 'edit') return [...characterIdsInRelations]
         return selectedCharacterIds.filter(id => characterIdsInRelations.has(id))
     }, [mode, characterIdsInRelations, selectedCharacterIds])
 
-    // les statuts (mort, a risque...) sont recalcules pour tous les persos REELLEMENT
-    // affiches dans l'arbre (treeCharacterIds), a chaque changement de chapitre cible --
-    // determine la couleur noire des liens et l'icone deces sur l'avatar
+
     useEffect(() => {
         if (treeCharacterIds.length > 0) {
             fetchStatuses()
@@ -265,15 +247,7 @@ export default function ModalFamilyTree(props) {
         if (result.success) setStatusesByCharacter(result.data)
     }
 
-    // --- calcul des generations (placement vertical) ---
-    //
-    // Algorithme : on construit un graphe non-oriente ou chaque relation parent_enfant
-    // cree une arete "generation+1" entre parent et enfant, et chaque relation
-    // fratrie/couple cree une arete "meme generation". On propage depuis chaque racine
-    // (perso n'ayant aucun parent connu dans cet arbre) par parcours en largeur (BFS),
-    // en relaxant les contraintes jusqu'a stabilisation (comme un mini Bellman-Ford),
-    // pour que meme un arbre avec des cycles improbables ou des connexions complexes
-    // (ex: deux familles qui se rejoignent par un mariage) reste coherent.
+
     const generationByCharacter = useMemo(() => {
         const gen = {}
         const parentEdges = relations.filter(r => r.relation === 'parent_enfant')
@@ -281,9 +255,7 @@ export default function ModalFamilyTree(props) {
 
         treeCharacterIds.forEach(id => { gen[id] = 0 })
 
-        // relaxation iterative : un enfant est toujours a generation(parent) + 1, les
-        // personnes de meme generation (fratrie/couple) sont alignees. On boucle jusqu'a
-        // ce qu'aucune valeur ne change, avec une limite de securite anti boucle infinie.
+
         let changed = true
         let iterations = 0
         while (changed && iterations < 50) {
@@ -314,10 +286,7 @@ export default function ModalFamilyTree(props) {
         return gen
     }, [relations, treeCharacterIds])
 
-    // regroupe les personnages par generation, puis par "unite" horizontale (un couple
-    // reste groupe ensemble, une personne seule est sa propre unite). Chaque unite est
-    // ensuite positionnee cote a cote dans sa generation, les couples se touchant de plus
-    // pres (COUPLE_GAP) que les autres relations (SIBLING_GAP).
+
     const layout = useMemo(() => {
         const byGen = {}
         treeCharacterIds.forEach(id => {
@@ -326,9 +295,8 @@ export default function ModalFamilyTree(props) {
             byGen[g].push(id)
         })
 
-        // identifie les paires en couple (n'importe quelle etape) pour les regrouper en
-        // unites visuelles cote a cote, plutot que de les eparpiller dans leur generation
-        const coupleOf = {} // { characterId: autreCharacterId } si en couple
+
+        const coupleOf = {}
         relations
             .filter(r => ['couple', 'fiance', 'marie', 'divorce'].includes(r.relation))
             .forEach(r => {
@@ -336,13 +304,13 @@ export default function ModalFamilyTree(props) {
                 coupleOf[r.character_id_2] = r.character_id_1
             })
 
-        const positions = {} // { characterId: { x, y, genIndex } }
+        const positions = {}
         const sortedGens = Object.keys(byGen).map(Number).sort((a, b) => a - b)
 
         sortedGens.forEach(genLevel => {
             const idsInGen = byGen[genLevel]
             const placed = new Set()
-            const units = [] // chaque unite = [id] ou [id1, id2] si couple
+            const units = []
 
             idsInGen.forEach(id => {
                 if (placed.has(id)) return
@@ -358,9 +326,7 @@ export default function ModalFamilyTree(props) {
             })
 
             let cursorX = 0
-            // +50 : marge fixe en haut de l'arbre pour laisser de la place a la ligne de
-            // fratrie ET son tooltip au survol (dessines au-dessus des avatars), meme pour
-            // la toute premiere generation -- sinon ils sortiraient du cadre visible (y < 0)
+
             const y = 50 + genLevel * (NODE_HEIGHT + LEVEL_GAP)
 
             units.forEach(unit => {
@@ -386,31 +352,19 @@ export default function ModalFamilyTree(props) {
         return { positions, totalWidth: totalWidth + 20, totalHeight: totalHeight + 20 }
     }, [treeCharacterIds, generationByCharacter, relations])
 
-    // --- resolution des relations a afficher comme liens (edges) dans le svg ---
-    //
-    // parent_enfant et fratrie n'ont pas de notion de chapitre : toujours affiches tels
-    // parent_enfant, fratrie, couple/fiance/marie/divorce : TOUTES les relations peuvent
-    // desormais avoir une plage de chapitres (ex: "amis avant le chapitre 5, freres par
-    // alliance apres"). Plusieurs lignes peuvent donc exister pour une MEME paire + MEME
-    // type de relation (une par etape narrative) -- on ne garde que celle dont la plage
-    // [chapter_id_debut, chapter_id_fin] couvre le chapitre cible actuellement selectionne.
-    // Des relations de TYPES differents entre la meme paire (ex: fratrie ET couple en
-    // meme temps) restent toutes deux affichees -- ce n'est pas le meme regroupement.
+
+
+
     const resolvedEdges = useMemo(() => {
-        // Number(...) systematique sur les comparaisons d'id de chapitre : selon l'origine
-        // (select HTML -> toujours string, donnees mysql -> toujours number), un mismatch
-        // de type ferait echouer silencieusement tous les === et findIndex faussement -1.
         const targetIndex = chapters.findIndex(c => Number(c.id) === Number(selectedChapterId))
 
         const isChapterInRange = (debut, fin) => {
-            if (!selectedChapterId) return !debut && !fin // hors contexte de chapitre, on ne garde que ce qui est "permanent"
+            if (!selectedChapterId) return !debut && !fin
             const debutIndex = debut ? chapters.findIndex(c => Number(c.id) === Number(debut)) : -1
             const finIndex = fin ? chapters.findIndex(c => Number(c.id) === Number(fin)) : Infinity
             return targetIndex >= (debutIndex === -1 ? -1 : debutIndex) && targetIndex <= finIndex
         }
 
-        // regroupe par paire (peu importe l'ordre 1/2) + type de relation, et garde
-        // seulement l'etape active au chapitre cible pour chaque groupe
         const groups = new Map()
         relations.forEach(r => {
             const key = [r.character_id_1, r.character_id_2].sort((a, b) => a - b).join('-') + '|' + r.relation
@@ -420,33 +374,36 @@ export default function ModalFamilyTree(props) {
 
         const resolved = []
         groups.forEach(stages => {
-            // 1. l'etape dont la plage couvre precisement le chapitre cible
-            // 2. sinon, la derniere etape dont le debut est <= chapitre cible (etat le
-            //    plus recent connu a ce point de l'histoire)
-            // PAS de fallback par defaut sur stages[0] : si le chapitre cible est avant
-            // le debut de TOUTES les etapes connues, la relation n'existe pas encore a ce
-            // moment de l'histoire et ne doit simplement pas s'afficher.
+
             const active = stages.find(s => isChapterInRange(s.chapter_id_debut, s.chapter_id_fin))
+
                 || stages
-                    .filter(s => s.chapter_id_debut && chapters.findIndex(c => Number(c.id) === Number(s.chapter_id_debut)) <= targetIndex)
-                    .sort((a, b) => chapters.findIndex(c => Number(c.id) === Number(a.chapter_id_debut)) - chapters.findIndex(c => Number(c.id) === Number(b.chapter_id_debut)))
+                    .filter(s => {
+                        const debutIndex = s.chapter_id_debut
+                            ? chapters.findIndex(c => Number(c.id) === Number(s.chapter_id_debut))
+                            : -1
+                        return debutIndex !== -1 && debutIndex <= targetIndex
+                    })
+                    .sort((a, b) =>
+                        chapters.findIndex(c => Number(c.id) === Number(a.chapter_id_debut)) -
+                        chapters.findIndex(c => Number(c.id) === Number(b.chapter_id_debut))
+                    )
                     .pop()
-                || stages.find(s => !s.chapter_id_debut) // etape sans bornes du tout = valable partout
+            
+                || stages.find(s => !s.chapter_id_debut && isChapterInRange(s.chapter_id_debut, s.chapter_id_fin))
+
             if (active) resolved.push(active)
         })
 
         return resolved
     }, [relations, selectedChapterId, chapters])
 
-    // texte affiche au survol d'un lien : toujours au moins le libelle de la relation
-    // (ex: "frere/soeur de"), complete par le detail optionnel s'il existe (ex: "de coeur")
+
     const getTooltipText = (edge) => {
         const base = RELATION_LABELS[edge.relation] || edge.relation
         return edge.detail ? `${base} (${edge.detail})` : base
     }
 
-    // un petit tooltip svg generique, positionne au-dessus du point (x, y) donne. La
-    // largeur s'adapte grossierement a la longueur du texte pour ne jamais le couper.
     const renderTooltip = (x, y, text) => {
         const width = Math.max(70, text.length * 6 + 16)
         return (
@@ -457,8 +414,6 @@ export default function ModalFamilyTree(props) {
         )
     }
 
-    // couleur + style effectif d'un lien : priorite absolue a la mort (noir) si un des
-    // deux personnages est mort a ce chapitre, sinon couleur normale du type de relation
     const getEdgeStyle = (edge) => {
         const dead = isDead(edge.character_id_1) || isDead(edge.character_id_2)
         if (dead) return { color: '#1f2937', dashed: false, broken: false }
@@ -471,8 +426,6 @@ export default function ModalFamilyTree(props) {
         }
     }
 
-    // un personnage peut apparaitre plusieurs fois dans treeCharacterIds en theorie jamais
-    // (chaque id est unique), donc posById direct sans regroupement supplementaire
     const posById = layout.positions
 
     const renderEdges = () => {
@@ -490,13 +443,10 @@ export default function ModalFamilyTree(props) {
             const isCoupleType = ['couple', 'fiance', 'marie', 'divorce'].includes(edge.relation)
             const isHovered = hoveredLinkId === edge.id
 
-            // lien de couple (meme generation, cote a cote) : ligne horizontale simple
-            // entre les deux avatars, avec icone (coeur ou alliance) au milieu
             if (isCoupleType) {
                 const midX = (fromCx + toCx) / 2
                 const midY = (fromCy + toCy) / 2
-                const dashArray = style.broken ? '2,6' : 'none' // ligne cassee = pointille tres fin pour suggerer une rupture
-
+                const dashArray = style.broken ? '2,6' : 'none'
                 return (
                     <g key={edge.id} onMouseEnter={() => setHoveredLinkId(edge.id)} onMouseLeave={() => setHoveredLinkId(null)}>
                         <line
@@ -505,7 +455,7 @@ export default function ModalFamilyTree(props) {
                             strokeWidth={isHovered ? 4 : 3}
                             strokeDasharray={dashArray}
                         />
-                        {/* zone invisible plus large pour faciliter le survol */}
+
                         <line x1={fromCx} y1={fromCy} x2={toCx} y2={toCy} stroke='transparent' strokeWidth={16} style={{ cursor: 'pointer' }} />
                         <circle cx={midX} cy={midY} r={11} fill='white' stroke={style.color} strokeWidth={2} />
                         {(edge.relation === 'couple') && <Heart size={12} x={midX - 6} y={midY - 6} fill={style.color} stroke={style.color} />}
@@ -517,7 +467,7 @@ export default function ModalFamilyTree(props) {
                 )
             }
 
-            // lien parent -> enfant : coude vertical classique (comme l'organigramme)
+
             if (edge.relation === 'parent_enfant') {
                 const midY = fromCy + (toCy - fromCy) / 2
                 const path = `M ${fromCx} ${from.y + NODE_HEIGHT} L ${fromCx} ${midY} L ${toCx} ${midY} L ${toCx} ${to.y}`
@@ -530,7 +480,7 @@ export default function ModalFamilyTree(props) {
                 )
             }
 
-            // lien fratrie : ligne horizontale fine au-dessus des deux avatars
+
             const lineY = Math.min(from.y, to.y) - 14
             return (
                 <g key={edge.id} onMouseEnter={() => setHoveredLinkId(edge.id)} onMouseLeave={() => setHoveredLinkId(null)}>
@@ -549,8 +499,7 @@ export default function ModalFamilyTree(props) {
         })
     }
 
-    // un avatar (rond) : photo si dispo, sinon initiale. Croix grise + icone tete de mort
-    // si le perso est mort a ce chapitre (priorite visuelle absolue sur le reste).
+
     const renderAvatar = (char) => {
         const pos = posById[char.id]
         if (!pos) return null
@@ -600,7 +549,7 @@ export default function ModalFamilyTree(props) {
             .map(c => renderAvatar(c))
     }
 
-    // --- zoom (meme mecanique que ModalOrganization) ---
+
     const zoomIn = () => setZoom(z => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100))
     const zoomOut = () => setZoom(z => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100))
     const zoomReset = () => setZoom(1)
@@ -630,7 +579,7 @@ export default function ModalFamilyTree(props) {
                 message='Supprimer cette relation ?'
             />
 
-            {/* popup separee pour creer une famille (arbre), n'affecte jamais la mise en page des selects */}
+
             {isAddingFamily && (
                 <div className='fixed inset-0 z-[60] flex items-center justify-center'>
                     <div className='absolute inset-0 bg-black/50' onClick={() => setIsAddingFamily(false)} />
@@ -657,7 +606,7 @@ export default function ModalFamilyTree(props) {
                 </div>
             )}
 
-            {/* selection chapitre (gauche) + famille (droite), boutons texte+icone a droite */}
+
             <div className='flex flex-wrap gap-4 items-end'>
                 {families.length > 0 && mode === 'view' && (
                     <div className='flex-1 min-w-[200px]'>
@@ -718,10 +667,7 @@ export default function ModalFamilyTree(props) {
             ) : (
                 <div className='flex-1 flex gap-4 min-h-0'>
 
-                    {/* colonne gauche : personnages a afficher (mode vue) ou formulaire de
-                        relation (mode edit). Plus large en mode edit : la phrase dynamique
-                        (pill + select + detail + pill) a besoin de place pour ne pas
-                        sans cesse retourner a la ligne. */}
+
                     <div className={`${mode === 'edit' ? 'w-[420px]' : 'w-64'} flex-shrink-0 flex flex-col gap-2.5 overflow-y-auto hide-scrollbar pr-1`}>
                         <div className='flex items-center justify-between'>
                             <label className='text-sm text-primary-500 font-medium'>
@@ -769,7 +715,7 @@ export default function ModalFamilyTree(props) {
                         )}
                     </div>
 
-                    {/* colonne arbre : centree horizontalement, scrollable, zoomable */}
+
                     <div className='flex-1 flex flex-col gap-3 min-w-0'>
                         <div className='flex-1 relative min-h-0'>
                             {treeCharacterIds.length > 0 && (
@@ -817,8 +763,7 @@ export default function ModalFamilyTree(props) {
                             </div>
                         </div>
 
-                        {/* persos selectionnes mais sans relation dans cet arbre = hors arbre formel,
-                            affiches a part. Uniquement en mode vue */}
+
                         {mode === 'view' && unlinkedSelectedCharacters.length > 0 && (
                             <div className='bg-primary-100 rounded-lg px-3 py-2 flex items-center gap-3 flex-shrink-0'>
                                 <span className='text-xs font-bold text-primary-600 flex-shrink-0'>Sans relation dans cet arbre :</span>

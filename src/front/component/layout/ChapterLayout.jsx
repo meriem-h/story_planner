@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { ChevronUp, BadgePlus, Trash2, Eye, Pen, Lock } from 'lucide-react'
+import { ChevronUp, BadgePlus, Trash2, Eye, Pen, Lock, Check, X } from 'lucide-react'
+import { ReactSortable } from 'react-sortablejs'
+import { useApi } from '../../context/ApiContext'
 import Modal from '../modal/Modal'
 import ModalView from '../modal/ModalView'
 import ModalBook from '../modal/ModalBook'
@@ -8,6 +10,7 @@ import ModalTome from '../modal/ModalTome'
 import ModalUnlockBook from '../modal/ModalUnlockBook'
 
 export default function ChapterLayout(props) {
+    const api = useApi()
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const [chapterToDelete, setChapterToDelete] = useState(null)
     const [isViewBookOpen, setIsViewBookOpen] = useState(false)
@@ -19,9 +22,11 @@ export default function ChapterLayout(props) {
     const [tomeToEdit, setTomeToEdit] = useState(null)
     const [isViewTomeOpen, setIsViewTomeOpen] = useState(false)
     const [tomeToView, setTomeToView] = useState(null)
-
-    // livre prive en attente de mot de passe (null = pas de demande en cours)
     const [bookToUnlock, setBookToUnlock] = useState(null)
+
+    // edition inline du titre d'un chapitre
+    const [editingChapterId, setEditingChapterId] = useState(null)
+    const [editingTitle, setEditingTitle] = useState('')
 
     useEffect(() => {
         const close = () => setBookDropdownOpen(false)
@@ -33,15 +38,10 @@ export default function ChapterLayout(props) {
         ?.filter(b => showArchived ? true : !b.archived)
         .filter(b => b.title.toLowerCase().includes(bookSearch.toLowerCase()))
 
-    const changeChapter = async (e) => {
-        const chapter = props.chapters.find(ch => ch.id == e.target.dataset.id)
+    const changeChapter = (chapter) => {
         props.setSelectedChapter(chapter)
     }
 
-    // selection d'un livre dans le dropdown : si le livre est prive et pas encore deverrouille
-    // pour cette session, on ouvre la popup de mot de passe au lieu de selectionner direct.
-    // unlockedBookIds/unlockBook viennent de Home.jsx (etat en memoire, pas en localStorage,
-    // donc tout se reverrouille quand on ferme l'appli).
     const selectBook = (book) => {
         const isUnlocked = props.unlockedBookIds?.includes(book.id)
         if (book.is_private && !isUnlocked) {
@@ -51,6 +51,30 @@ export default function ChapterLayout(props) {
         props.setSelectedBook(book)
         setBookDropdownOpen(false)
         setBookSearch('')
+    }
+
+    const startEditing = (chapter, e) => {
+        e.stopPropagation()
+        setEditingChapterId(chapter.id)
+        setEditingTitle(chapter.title)
+    }
+
+    const cancelEditing = () => {
+        setEditingChapterId(null)
+        setEditingTitle('')
+    }
+
+    const saveEditing = async (chapter) => {
+        if (!editingTitle.trim()) return
+        await api('chapter:update', { id: chapter.id, data: { title: editingTitle.trim() } })
+        cancelEditing()
+        props.fetchChapters(props.selectedTome?.id)
+    }
+
+    const handleReorder = async (newList) => {
+        const updated = newList.map((ch, index) => ({ id: ch.id, position: index + 1 }))
+        await api('chapter:reorder', updated)
+        props.fetchChapters(props.selectedTome?.id)
     }
 
     return (
@@ -88,8 +112,6 @@ export default function ChapterLayout(props) {
                 id={chapterToDelete}
             />
 
-            {/* popup de mot de passe pour un livre prive, affichee a la place de la selection
-                directe tant que le livre n'a pas ete deverrouille pour cette session */}
             <Modal isOpen={!!bookToUnlock} onClose={() => setBookToUnlock(null)} size={40}>
                 {bookToUnlock && (
                     <ModalUnlockBook
@@ -109,8 +131,6 @@ export default function ChapterLayout(props) {
             {/* header livre */}
             <div className='p-4 border-b border-primary-300'>
                 <div className='group flex items-center justify-between gap-2 mb-3'>
-
-                    {/* dropdown livres */}
                     <div className='relative flex-1 min-w-0' onClick={(e) => e.stopPropagation()}>
                         <div
                             className='flex items-center gap-1 cursor-pointer'
@@ -195,7 +215,6 @@ export default function ChapterLayout(props) {
                     </button>
                 </div>
 
-                {/* select tome + actions */}
                 {props.tomes && props.tomes.length > 0 && (
                     <div className='group flex items-center gap-2'>
                         <select
@@ -223,7 +242,6 @@ export default function ChapterLayout(props) {
                             >
                                 <Pen size={16} />
                             </button>
-
                             <button
                                 onClick={() => { setTomeToEdit(null); setIsTomeOpen(true) }}
                                 className='text-primary-400 hover:text-primary-600 transition-colors'
@@ -231,7 +249,6 @@ export default function ChapterLayout(props) {
                                 <BadgePlus size={16} />
                             </button>
                         </div>
-
                     </div>
                 )}
             </div>
@@ -244,30 +261,73 @@ export default function ChapterLayout(props) {
                         <BadgePlus size={20} />
                     </button>
                 </div>
-                <div className='overflow-y-auto flex flex-col gap-1'>
-                    {props?.chapters?.map((chapter) => (
-                        <div
-                            key={chapter.id}
-                            className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${props.selectedChapter?.id == chapter.id
-                                ? 'bg-primary-300 text-white font-bold'
-                                : 'hover:bg-primary-100 text-primary-800'
-                                }`}
-                        >
-                            <button
-                                data-id={chapter.id}
-                                onClick={changeChapter}
-                                className='flex-1 text-left'
+                <div className='overflow-y-auto hide-scrollbar flex flex-col gap-1'>
+                    <ReactSortable
+                        list={props.chapters || []}
+                        setList={handleReorder}
+                        animation={200}
+                        ghostClass='opacity-30'
+                        handle='.drag-handle'
+                    >
+                        {props.chapters?.map((chapter) => (
+                            <div
+                                key={chapter.id}
+                                className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${props.selectedChapter?.id == chapter.id
+                                    ? 'bg-primary-300 text-white font-bold'
+                                    : 'hover:bg-primary-100 text-primary-800'
+                                    }`}
                             >
-                                {chapter.title}
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setChapterToDelete(chapter.id); setIsConfirmOpen(true) }}
-                                className='hidden group-hover:block text-red-400 hover:text-red-600 ml-2'
-                            >
-                                <Trash2 size={14} />
-                            </button>
-                        </div>
-                    ))}
+                                {editingChapterId === chapter.id ? (
+                                    // mode edition inline
+                                    <div className='flex items-center gap-1 flex-1 min-w-0'>
+                                        <input
+                                            autoFocus
+                                            type='text'
+                                            value={editingTitle}
+                                            onChange={(e) => setEditingTitle(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') saveEditing(chapter)
+                                                if (e.key === 'Escape') cancelEditing()
+                                            }}
+                                            className='flex-1 min-w-0 px-2 py-0.5 text-sm rounded border border-primary-300 outline-none text-primary-800 bg-white'
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <button onClick={() => saveEditing(chapter)} className='text-green-500 hover:text-green-700 flex-shrink-0'>
+                                            <Check size={14} />
+                                        </button>
+                                        <button onClick={cancelEditing} className='text-primary-400 hover:text-primary-600 flex-shrink-0'>
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* poignee de drag */}
+                                        <span className='drag-handle cursor-grab text-primary-300 mr-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity'>⠿</span>
+                                        <button
+                                            onClick={() => changeChapter(chapter)}
+                                            className='flex-1 text-left truncate'
+                                        >
+                                            {chapter.title}
+                                        </button>
+                                        <div className='hidden group-hover:flex gap-1 ml-2 flex-shrink-0'>
+                                            <button
+                                                onClick={(e) => startEditing(chapter, e)}
+                                                className='text-primary-400 hover:text-primary-600'
+                                            >
+                                                <Pen size={14} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setChapterToDelete(chapter.id); setIsConfirmOpen(true) }}
+                                                className='text-red-400 hover:text-red-600'
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </ReactSortable>
                 </div>
             </div>
         </div>

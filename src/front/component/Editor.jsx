@@ -176,7 +176,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                 </div>
 
                 {/* Minimap */}
-                <div className="flex flex-col w-[70px] bg-primary-50 overflow-y-auto">
+                <div className="flex flex-col w-[70px] bg-primary-50">
                     {/*Div du dessus — même hauteur que la toolbar */}
                     <div className={`h-[42px] w-full border-b-2 ${isDark ? 'bg-primary-200' : 'bg-primary-1'} border-primary-300 flex-shrink-0 flex items-center justify-center`}>
                         <button
@@ -189,7 +189,7 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     </div>
 
                     {/* Boutons pages */}
-                    <div className="flex flex-col items-center gap-1 py-3 flex-1">
+                    <div className="flex flex-col items-center gap-1 py-3 flex-1  overflow-y-auto hide-scrollbar" >
                         <span className="text-[9px] text-primary-300 font-bold tracking-widest mb-1">PG</span>
                         {Array.from({ length: pageCount }, (_, i) => i + 1).map(p => (
                             <button
