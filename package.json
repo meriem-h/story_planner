@@ -119,6 +119,7 @@
     "react-router-dom": "^7.14.2",
     "react-sortablejs": "^6.1.4",
     "recharts": "^3.8.1",
-    "sortablejs": "^1.15.7"
+    "sortablejs": "^1.15.7",
+    "sql.js": "^1.14.1"
   }
 }

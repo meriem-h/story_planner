@@ -202,17 +202,22 @@ export default function ChapterLayout(props) {
                                 <Lock size={16} />
                             </button>
                         )}
-                        <button onClick={() => setIsViewBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
-                            <Eye size={16} />
-                        </button>
-                        <button onClick={() => setIsUpdateBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
-                            <Pen size={16} />
-                        </button>
+                        {props.selectedBook &&
+                            <button onClick={() => setIsViewBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                                <Eye size={16} />
+                            </button>
+                        }
+                        {props.selectedBook &&
+                            <button onClick={() => setIsUpdateBookOpen(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                                <Pen size={16} />
+                            </button>
+                        }
                     </div>
-
-                    <button onClick={() => props.addBook(true)} className='text-primary-400 hover:text-primary-600 transition-colors flex-shrink-0'>
-                        <BadgePlus size={20} />
-                    </button>
+                    {props.selectedBook &&
+                        <button onClick={() => props.addBook(true)} className='text-primary-400 hover:text-primary-600 transition-colors flex-shrink-0'>
+                            <BadgePlus size={20} />
+                        </button>
+                    }
                 </div>
 
                 {props.tomes && props.tomes.length > 0 && (
@@ -257,9 +262,12 @@ export default function ChapterLayout(props) {
             <div className='flex-1 overflow-hidden flex flex-col p-4'>
                 <div className='flex justify-between items-center mb-3'>
                     <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Chapitres</p>
-                    <button onClick={() => props.addChapter(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
-                        <BadgePlus size={20} />
-                    </button>
+
+                    {props.selectedBook &&
+                        <button onClick={() => props.addChapter(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                            <BadgePlus size={20} />
+                        </button>
+                    }
                 </div>
                 <div className='overflow-y-auto hide-scrollbar flex flex-col gap-1'>
                     <ReactSortable

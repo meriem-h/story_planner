@@ -16,9 +16,12 @@ class BaseRepository {
 
     // on recupere les champs possible
     async getColumns() {
+        if (!process.env.DB_HOST) {
+            const [rows] = await db.query(`PRAGMA table_info(${this.table})`)
+            return rows.map(row => row.name)
+        }
         const [rows] = await db.query(
-            `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
-             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?`,
+            `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?`,
             [process.env.DB_NAME, this.table]
         )
         return rows.map(row => row.COLUMN_NAME)

@@ -11,5 +11,6 @@ module.exports = {
   externals: {
     'docx': 'commonjs docx',
     'jszip': 'commonjs jszip',
+    'sql.js': 'commonjs sql.js',
   }
 };

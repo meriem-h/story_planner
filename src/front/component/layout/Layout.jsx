@@ -15,7 +15,7 @@ import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
 import ModalFamilyTree from '../modal/ModalFamilyTree';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen,onCloseFullscreen, unlockedBookIds, unlockBook, lockBook }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, onCloseFullscreen, unlockedBookIds, unlockBook, lockBook }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -111,18 +111,26 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                     <button className={btnClass('chapter')} title="Chapitres" onClick={showChapter}>
                         <BookOpenText />
                     </button>
-                    <button className={btnClass('character')} title="Personnages" onClick={showCharacter}>
-                        <BookUser />
-                    </button>
-                    <button className={btnClass('lore')} title="Lore" onClick={showLore}>
-                        <ScrollText />
-                    </button>
-                    <button className={btnClass('snippet')} title="Snippets" onClick={showSnippet}>
-                        <Lightbulb />
-                    </button>
-                    <button className={btnClass('note')} title="Notes" onClick={showNote}>
-                        <NotebookPen />
-                    </button>
+                    {selectedBook &&
+                        <button className={btnClass('character')} title="Personnages" onClick={showCharacter}>
+                            <BookUser />
+                        </button>
+                    }
+                    {selectedBook &&
+                        <button className={btnClass('lore')} title="Lore" onClick={showLore}>
+                            <ScrollText />
+                        </button>
+                    }
+                    {selectedBook &&
+                        <button className={btnClass('snippet')} title="Snippets" onClick={showSnippet}>
+                            <Lightbulb />
+                        </button>
+                    }
+                    {selectedBook &&
+                        <button className={btnClass('note')} title="Notes" onClick={showNote}>
+                            <NotebookPen />
+                        </button>
+                    }
                     <button className='bg-primary-400 rounded-2xl p-2 text-primary-100 hover:bg-primary-500' onClick={() => setIsOpen(!isOpen)}>
                         <X />
                     </button>
@@ -138,18 +146,26 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             <button className={btnClass('chapter')} title="Chapitres" onClick={(e) => { e.stopPropagation(); showChapter(); setIsOpen(true) }}>
                                 <BookOpenText />
                             </button>
-                            <button className={btnClass('character')} title="Personnages" onClick={(e) => { e.stopPropagation(); showCharacter(); setIsOpen(true) }}>
-                                <BookUser />
-                            </button>
-                            <button className={btnClass('lore')} title="Lore" onClick={(e) => { e.stopPropagation(); showLore(); setIsOpen(true) }}>
-                                <ScrollText />
-                            </button>
-                            <button className={btnClass('snippet')} title="Snippets" onClick={(e) => { e.stopPropagation(); showSnippet(); setIsOpen(true) }}>
-                                <Lightbulb />
-                            </button>
-                            <button className={btnClass('note')} title="Notes" onClick={(e) => { e.stopPropagation(); showNote(); setIsOpen(true) }}>
-                                <NotebookPen />
-                            </button>
+                            {selectedBook &&
+                                <button className={btnClass('character')} title="Personnages" onClick={(e) => { e.stopPropagation(); showCharacter(); setIsOpen(true) }}>
+                                    <BookUser />
+                                </button>
+                            }
+                            {selectedBook &&
+                                <button className={btnClass('lore')} title="Lore" onClick={(e) => { e.stopPropagation(); showLore(); setIsOpen(true) }}>
+                                    <ScrollText />
+                                </button>
+                            }
+                            {selectedBook &&
+                                <button className={btnClass('snippet')} title="Snippets" onClick={(e) => { e.stopPropagation(); showSnippet(); setIsOpen(true) }}>
+                                    <Lightbulb />
+                                </button>
+                            }
+                            {selectedBook &&
+                                <button className={btnClass('note')} title="Notes" onClick={(e) => { e.stopPropagation(); showNote(); setIsOpen(true) }}>
+                                    <NotebookPen />
+                                </button>
+                            }
                         </>
                     }
                 </div>
@@ -203,50 +219,58 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                     <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-[100%] opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
 
+                        {selectedBook &&
 
-                        <button
-                            onClick={() => { closeAllModals(); onOpenFullscreen(true) }}
-                            title="Timeline"
-                            className={`text-white rounded-full p-3 transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
-                        >
-                            <GitBranch size={20} />
-                        </button>
-                        <button
-                            onClick={() => { closeAllModals(); setIsCallandarOpen(true) }}
+                            <button
+                                onClick={() => { closeAllModals(); onOpenFullscreen(true) }}
+                                title="Timeline"
+                                className={`text-white rounded-full p-3 transition-colors ${showTimeline ? 'bg-primary-600' : 'bg-primary-400 hover:bg-primary-500'}`}
+                            >
+                                <GitBranch size={20} />
+                            </button>
+                        }
 
-                            title="Callandar"
-                            className={`text-white rounded-full p-3 transition-colors bg-primary-400 hover:bg-primary-500`}
-                        >
-                            <CalendarDays size={20} />
-                        </button>
+                        {selectedBook &&
+                            <button
+                                onClick={() => { closeAllModals(); setIsCallandarOpen(true) }}
 
-                        <button
-                            onClick={() => { closeAllModals(); setIsOrgOpen(true) }}
+                                title="Callandar"
+                                className={`text-white rounded-full p-3 transition-colors bg-primary-400 hover:bg-primary-500`}
+                            >
+                                <CalendarDays size={20} />
+                            </button>
+                        }
+                        {selectedBook &&
+                            <button
+                                onClick={() => { closeAllModals(); setIsOrgOpen(true) }}
 
-                            title="Organisation Chart"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <Network size={20} />
-                        </button>
+                                title="Organisation Chart"
+                                className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                            >
+                                <Network size={20} />
+                            </button>
+                        }
+                        {selectedBook &&
+                            <button
+                                onClick={() => { closeAllModals(); setIsFamilyTreeOpen(true) }}
 
-                        <button
-                            onClick={() => { closeAllModals(); setIsFamilyTreeOpen(true) }}
+                                title="Arbre genealogique"
+                                className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                            >
+                                <UsersRound size={20} />
+                            </button>
+                        }
 
-                            title="Arbre genealogique"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <UsersRound size={20} />
-                        </button>
+                        {selectedBook &&
+                            <button
+                                onClick={() => { closeAllModals(); setIsGalleryOpen(true) }}
 
-
-                        <button
-                            onClick={() => { closeAllModals(); setIsGalleryOpen(true) }}
-
-                            title="Galerie"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <Images size={20} />
-                        </button>
+                                title="Galerie"
+                                className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                            >
+                                <Images size={20} />
+                            </button>
+                        }
 
 
                         <button
@@ -257,15 +281,16 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         >
                             <Palette size={20} />
                         </button>
+                        {selectedBook &&
+                            <button
+                                onClick={() => { closeAllModals(); setIsExportOpen(true) }}
 
-                        <button
-                            onClick={() => { closeAllModals(); setIsExportOpen(true) }}
-
-                            title="Exporter"
-                            className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
-                        >
-                            <Download size={20} />
-                        </button>
+                                title="Exporter"
+                                className="bg-primary-400 hover:bg-primary-500 text-white rounded-full p-3 transition-colors"
+                            >
+                                <Download size={20} />
+                            </button>
+                        }
                     </div>
 
                     {/* Bouton toggle */}
