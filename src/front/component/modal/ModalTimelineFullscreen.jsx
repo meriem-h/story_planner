@@ -5,6 +5,7 @@ import Modal from './Modal'
 import ModalView from './ModalView'
 import ModalTimeline from './ModalTimeline'
 import ModalSnippet from './ModalSnippet'
+import ModalSplitChapter from './ModalSplitChapter'
 import { BadgePlus } from 'lucide-react'
 
 export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate, book }) {
@@ -19,6 +20,8 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const [isLinkOpen, setIsLinkOpen] = useState(false)
     const [snippetActionItem, setSnippetActionItem] = useState(null)
     const [availableSnippets, setAvailableSnippets] = useState([])
+    const [isSplitOpen, setIsSplitOpen] = useState(false)
+    const [splitItem, setSplitItem] = useState(null)
 
     const [selectedChapters, setSelectedChapters] = useState(() => {
         const saved = localStorage.getItem(`timeline-chapters-${book?.id}`)
@@ -188,6 +191,18 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                                 </button>
                             </>
                         )}
+
+                        {item.chapter_id && (
+                            <>
+                                <hr className="border-primary-100 my-1" />
+                                <button
+                                    onClick={() => { setSplitItem(item); setIsSplitOpen(true); setOpenPopover(null) }}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                                >
+                                    ✂️ Diviser le chapitre
+                                </button>
+                            </>
+                        )}
                         <hr className="border-primary-100 my-1" />
                         <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
                             🗑️ Supprimer
@@ -278,6 +293,24 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                         }
                     </div>
                 </div>
+            </Modal>
+
+            <Modal isOpen={isSplitOpen} onClose={() => { setIsSplitOpen(false); setSplitItem(null) }} size={40}>
+                {splitItem && (
+                    <ModalSplitChapter
+                        item={splitItem}
+                        chapters={chapters}
+                        selectedTome={selectedTome}
+                        book={book}
+                        onSuccess={(newChapterId) => {
+                            setIsSplitOpen(false)
+                            setSplitItem(null)
+                            setSelectedChapters(prev => [...prev, newChapterId])
+                            fetchItems()
+                            if (onUpdate) onUpdate()
+                        }}
+                    />
+                )}
             </Modal>
 
             {/* Header filtre multi-select + bouton ajouter */}

@@ -168,6 +168,51 @@ class ChapterRepository extends BaseRepository {
         // suppression réelle du chapitre, comportement standard
         return super.delete(id)
     }
+
+    // Insère un nouveau chapitre juste après chapterIdActuel dans le même tome
+    // (décale les positions des chapitres suivants de +1) et retourne le nouveau chapitre
+    async insertAfter(chapterIdActuel, title) {
+        const current = await this.findById(chapterIdActuel)
+        if (!current) throw new Error('Chapitre introuvable')
+
+        // décale tous les chapitres dont la position est > à celle du chapitre actuel
+        await db.query(
+            `UPDATE chapter SET position = position + 1 WHERE tome_id = ? AND position > ?`,
+            [current.tome_id, current.position]
+        )
+
+        // insère le nouveau chapitre juste après
+        const newPosition = current.position + 1
+        const [result] = await db.query(
+            `INSERT INTO chapter (book_id, tome_id, title, position) VALUES (?, ?, ?, ?)`,
+            [current.book_id, current.tome_id, title, newPosition]
+        )
+        return this.findById(result.insertId)
+    }
+
+    // Crée un nouveau chapitre à la fin du tome et retourne-le
+    async appendToTome(tomeId, bookId, title) {
+        const [rows] = await db.query(
+            `SELECT COALESCE(MAX(position), 0) as maxPos FROM chapter WHERE tome_id = ?`,
+            [tomeId]
+        )
+        const newPosition = rows[0].maxPos + 1
+        const [result] = await db.query(
+            `INSERT INTO chapter (book_id, tome_id, title, position) VALUES (?, ?, ?, ?)`,
+            [bookId, tomeId, title, newPosition]
+        )
+        return this.findById(result.insertId)
+    }
+
+    // Déplace les items timeline d'un chapitre vers un autre,
+    // uniquement ceux dont la position >= fromPosition
+    async moveTimelineItems(fromChapterId, toChapterId, fromPosition) {
+        await db.query(
+            `UPDATE timeline_item SET chapter_id = ? WHERE chapter_id = ? AND position >= ?`,
+            [toChapterId, fromChapterId, fromPosition]
+        )
+    }
+
 }
 
 module.exports = ChapterRepository

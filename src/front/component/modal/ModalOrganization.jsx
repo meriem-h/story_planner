@@ -982,7 +982,8 @@ export default function ModalOrganization(props) {
                                         <p>{mode === 'edit' ? "Aucun grade encore. Commence par creer le grade le plus eleve (ex: Doyen)." : "Cette organisation n'a encore aucun grade defini."}</p>
                                     </div>
                                 ) : (
-                                    <div className='min-w-full min-h-full flex items-start justify-center'>
+                                    // <div className='min-w-full min-h-full flex items-start justify-center'>
+                                    <div style={{ minWidth: layout.totalWidth * zoom, minHeight: '100%' }} >
                                         <div
                                             className='relative'
                                             style={{

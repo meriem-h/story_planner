@@ -247,7 +247,10 @@ export default function Home() {
                         selectedTome={selectedTome}
                         chapters={chapters}
                         book={selectedBook}
-                        onUpdate={() => setTimelineKey(k => k + 1)}
+                        onUpdate={() => {
+                            setTimelineKey(k => k + 1)
+                            fetchChapters(selectedTome.id)
+                        }}
                     />
                 </Modal>
 

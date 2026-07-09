@@ -389,7 +389,7 @@ export default function ModalFamilyTree(props) {
                         chapters.findIndex(c => Number(c.id) === Number(b.chapter_id_debut))
                     )
                     .pop()
-            
+
                 || stages.find(s => !s.chapter_id_debut && isChapterInRange(s.chapter_id_debut, s.chapter_id_fin))
 
             if (active) resolved.push(active)
@@ -746,7 +746,8 @@ export default function ModalFamilyTree(props) {
                                         <p>{mode === 'edit' ? 'Choisis 2 personnages a gauche pour creer une relation.' : "Selectionne des personnages ayant des relations dans cet arbre."}</p>
                                     </div>
                                 ) : (
-                                    <div className='min-w-full min-h-full flex items-start justify-center'>
+                                    // <div className='min-w-full min-h-full flex items-start justify-center'>
+                                    <div style={{ minWidth: layout.totalWidth * zoom, minHeight: '100%' }} >
                                         <div className='relative' style={{ width: layout.totalWidth * zoom, height: layout.totalHeight * zoom }}>
                                             <div
                                                 className='relative'

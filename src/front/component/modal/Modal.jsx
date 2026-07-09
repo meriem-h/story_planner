@@ -15,8 +15,6 @@ export default function Modal({ isOpen, onClose, title, children, size, maxSize 
             />
 
             {/* modal par dessus */}
-            {/* <div className={`relative bg-primary-50 rounded-lg p-6 shadow-xl z-10 ${size ? `w-[${size}%]` : `min-w-[${minSize}%] max-w-[${maxSize}%]`}`}> */}
-            {/* <div className={`relative bg-primary-50 rounded-lg border-2 border-primary-100 p-6 shadow-xl z-10 ${size ? `w-[${size}%]` : `w-2/3`}`}> */}
             <div
                 className="relative bg-primary-50 rounded-lg border-2 border-primary-100 p-6 shadow-xl z-10"
                 style={{
