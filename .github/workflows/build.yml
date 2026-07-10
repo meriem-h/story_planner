@@ -23,8 +23,9 @@ jobs:
       - name: Build
         run: npm run make -- --platform win32
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: story-planner-windows
-          path: out/make/**/*.exe
+          tag_name: latest
+          files: out/make/**/*.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
