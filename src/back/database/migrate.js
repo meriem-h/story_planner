@@ -29,10 +29,13 @@ function migrate(db) {
             summary TEXT,
             content TEXT,
             position INTEGER DEFAULT 0,
+            is_adult INTEGER DEFAULT 0,
+            paired_chapter_id INTEGER DEFAULT NULL,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (book_id) REFERENCES book(id) ON DELETE CASCADE,
-            FOREIGN KEY (tome_id) REFERENCES tome(id) ON DELETE CASCADE
+            FOREIGN KEY (tome_id) REFERENCES tome(id) ON DELETE CASCADE,
+            FOREIGN KEY (paired_chapter_id) REFERENCES chapter(id) ON DELETE SET NULL
         )`,
         `CREATE TABLE IF NOT EXISTS character_type (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
