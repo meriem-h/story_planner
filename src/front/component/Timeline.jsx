@@ -12,14 +12,14 @@ import { BadgePlus, Maximize2, MessageCircleMore, Clapperboard, Quote, FileText,
 export default function Timeline({ selectedTome, chapters, refreshTimeline, book }) {
     const api = useApi()
     const [items, setItems] = useState([])
-    const [showUnplaced, setShowUnplaced] = useState(false)
+    // const [showUnplaced, setShowUnplaced] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
-    const [snippetToEdit, setSnippetToEdit] = useState(null)
-    const [snippetActionItem, setSnippetActionItem] = useState(null)
-    const [isSnippetOpen, setIsSnippetOpen] = useState(false)
+    // const [snippetToEdit, setSnippetToEdit] = useState(null)
+    // const [snippetActionItem, setSnippetActionItem] = useState(null)
+    // const [isSnippetOpen, setIsSnippetOpen] = useState(false)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [snippetToView, setSnippetToView] = useState(null)
 
@@ -63,10 +63,6 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     useEffect(() => {
         setGrouped(buildGrouped(items))
     }, [items.length, chapters])
-
-    // useEffect(() => {
-    //     setGrouped(buildGrouped(items))
-    // }, [items, chapters])
 
     const fetchItems = async () => {
         const result = await api('timeline:findBy', { tome_id: selectedTome.id })
@@ -139,32 +135,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                             <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                                 {item.status ? '↩️ Dévalider' : '✅ Valider'}
                             </button>
-                            {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
-                            ✏️ Modifier
-                        </button> */}
-                            <button
 
-                                onClick={() => {
-                                    if (item.snippet_id) {
-                                        setSnippetToEdit({
-                                            id: item.snippet_id,
-                                            title: item.s_title,
-                                            type: item.s_type,
-                                            content: item.s_content
-                                        })
-                                        setSnippetActionItem(item)
-                                        setIsSnippetOpen(true)
-                                    } else {
-                                        setSelectedItem(item)
-                                        setIsModalOpen(true)
-                                    }
-                                    setOpenPopover(null)
-                                }}
-
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
-                            >
-                                ✏️ Modifier
-                            </button>
                             <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
                                 🗑️ Supprimer
                             </button>
@@ -185,9 +156,6 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                     {/* ici mettre icone */}
                     <Icon size={18} />
                 </div>
-
-
-
 
 
                 <span
@@ -235,17 +203,6 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     return (
         <div className="flex items-center w-full px-4 py-2">
 
-            {/* Non placés */}
-            {/* <div className="flex flex-col items-start shrink-0 border-e border-primary-300 pr-3 mr-2">
-                <button
-                    onClick={() => setShowUnplaced(!showUnplaced)}
-                    className="text-xs text-primary-300 font-semibold mb-2 hover:text-primary-500 transition-colors whitespace-nowrap"
-                >
-                    ? {unplaced.length > 0 && <span className="bg-primary-200 rounded-full px-1">{unplaced.length}</span>} {showUnplaced ? '▲' : '▼'}
-                </button>
-                {showUnplaced && renderSortable(unplaced, null)}
-            </div> */}
-
             {/* Zone chapitres scrollable */}
             <div className="flex-1 min-w-0 overflow-x-auto hide-scrollbar">
                 <div className="flex items-start py-1" style={{ width: 'max-content' }}>
@@ -266,16 +223,6 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                         selectedTome={selectedTome}
                         chapters={chapters}
                         selectedItem={selectedItem}
-                    />
-                </Modal>
-                {/* <Modal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} size={50}> */}
-                <Modal isOpen={isSnippetOpen} onClose={() => { setIsSnippetOpen(false); setSnippetToEdit(null); setSnippetActionItem(null) }} size={50}>
-                    <ModalSnippet
-                        onSuccess={() => { setIsSnippetOpen(false); setSnippetToEdit(null); setSnippetActionItem(null); fetchItems() }}
-                        book={book}
-                        tome={selectedTome}
-                        chapters={chapters}
-                        selectedSnippet={snippetToEdit}
                     />
                 </Modal>
 

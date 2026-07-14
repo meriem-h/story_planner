@@ -149,6 +149,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         }
 
         onSuccess(result)
+        
     }
 
     return (
