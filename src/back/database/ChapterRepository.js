@@ -6,13 +6,10 @@ class ChapterRepository extends BaseRepository {
         super('chapter')
     }
 
-    // trouve le chapitre juste APRÈS celui donné, en traversant les tomes si besoin
-    // (même tome, position+1 ; sinon premier chapitre du tome suivant)
     async findNextChapter(chapterId) {
         const current = await this.findById(chapterId)
         if (!current) return null
 
-        // d'abord, chapitre suivant dans le même tome
         const [sameBook] = await db.query(
             `SELECT c.* FROM chapter c
              WHERE c.tome_id = ? AND c.position > ?
@@ -21,7 +18,6 @@ class ChapterRepository extends BaseRepository {
         )
         if (sameBook[0]) return sameBook[0]
 
-        // sinon, premier chapitre du tome suivant (même book_id, tome.number supérieur)
         const [nextTome] = await db.query(
             `SELECT c.* FROM chapter c
              JOIN tome t ON t.id = c.tome_id
@@ -33,12 +29,10 @@ class ChapterRepository extends BaseRepository {
         return nextTome[0] || null
     }
 
-    // trouve le chapitre juste AVANT celui donné, en traversant les tomes si besoin
     async findPreviousChapter(chapterId) {
         const current = await this.findById(chapterId)
         if (!current) return null
 
-        // d'abord, chapitre précédent dans le même tome
         const [sameBook] = await db.query(
             `SELECT c.* FROM chapter c
              WHERE c.tome_id = ? AND c.position < ?
@@ -47,7 +41,6 @@ class ChapterRepository extends BaseRepository {
         )
         if (sameBook[0]) return sameBook[0]
 
-        // sinon, dernier chapitre du tome précédent
         const [prevTome] = await db.query(
             `SELECT c.* FROM chapter c
              JOIN tome t ON t.id = c.tome_id
@@ -59,8 +52,6 @@ class ChapterRepository extends BaseRepository {
         return prevTome[0] || null
     }
 
-    // compare deux chapitres par leur position narrative (tome.number puis chapter.position)
-    // retourne true si chapitreA est strictement après chapitreB
     async isAfter(chapterIdA, chapterIdB) {
         const [rows] = await db.query(
             `SELECT
@@ -75,9 +66,6 @@ class ChapterRepository extends BaseRepository {
         return !!rows[0]?.is_after
     }
 
-    // compte le nombre de chapitres compris entre deux bornes (inclusivement), pour un même livre.
-    // Utilisé pour mesurer "la longueur" d'une plage chapter_id_debut -> chapter_id_fin sur une
-    // activité (une plage qui couvre moins de chapitres est considérée plus "spécifique"/courte).
     async countChaptersBetween(chapterIdDebut, chapterIdFin) {
         const [rows] = await db.query(
             `SELECT COUNT(*) as count
@@ -95,14 +83,9 @@ class ChapterRepository extends BaseRepository {
         return rows[0]?.count || 0
     }
 
-    // surcharge reorder : après tout changement de position des chapitres (drag-and-drop),
-    // on vérifie que chaque activité (schedule) ayant une plage chapter_id_debut -> chapter_id_fin
-    // reste cohérente (début toujours avant ou égal à la fin). Si une plage est cassée par le
-    // nouvel ordre, on supprime l'activité concernée (même règle que pour la suppression).
     async reorder(items) {
         const result = await super.reorder(items)
 
-        // toutes les activités qui ont une vraie plage définie (les deux bornes non NULL)
         const [schedulesWithRange] = await db.query(
             `SELECT * FROM schedule WHERE chapter_id_debut IS NOT NULL AND chapter_id_fin IS NOT NULL`
         )
@@ -117,10 +100,7 @@ class ChapterRepository extends BaseRepository {
         return result
     }
 
-    // surcharge delete : avant de supprimer le chapitre, on répare toutes les activités (schedule)
-    // qui l'utilisent comme borne de plage (chapter_id_debut ou chapter_id_fin)
     async delete(id) {
-        // toutes les activités où ce chapitre est une borne (début ou fin, ou les deux)
         const [affected] = await db.query(
             `SELECT * FROM schedule WHERE chapter_id_debut = ? OR chapter_id_fin = ?`,
             [id, id]
@@ -130,7 +110,6 @@ class ChapterRepository extends BaseRepository {
             const isDebut = sched.chapter_id_debut === id
             const isFin = sched.chapter_id_fin === id
 
-            // plage d'un seul chapitre (début = fin = celui qu'on supprime) -> l'activité entière disparaît
             if (isDebut && isFin) {
                 await db.query(`DELETE FROM schedule WHERE id = ?`, [sched.id])
                 continue
@@ -141,15 +120,13 @@ class ChapterRepository extends BaseRepository {
 
             if (isDebut) {
                 const next = await this.findNextChapter(id)
-                newDebut = next ? next.id : null // plus rien après -> plage invalide, sera nettoyée ci-dessous
+                newDebut = next ? next.id : null
             }
             if (isFin) {
                 const prev = await this.findPreviousChapter(id)
                 newFin = prev ? prev.id : null
             }
 
-            // si après rétrécissement il ne reste plus de chapitre dans la plage (debut après fin,
-            // ou une borne devenue introuvable alors qu'elle existait avant), on supprime l'activité
             const rangeBroken =
                 (newDebut === null && sched.chapter_id_debut !== null) ||
                 (newFin === null && sched.chapter_id_fin !== null) ||
@@ -165,23 +142,24 @@ class ChapterRepository extends BaseRepository {
             }
         }
 
-        // suppression réelle du chapitre, comportement standard
+        // casser le lien du jumeau avant de supprimer
+        await db.query(
+            `UPDATE chapter SET paired_chapter_id = NULL WHERE paired_chapter_id = ?`,
+            [id]
+        )
+
         return super.delete(id)
     }
 
-    // Insère un nouveau chapitre juste après chapterIdActuel dans le même tome
-    // (décale les positions des chapitres suivants de +1) et retourne le nouveau chapitre
     async insertAfter(chapterIdActuel, title) {
         const current = await this.findById(chapterIdActuel)
         if (!current) throw new Error('Chapitre introuvable')
 
-        // décale tous les chapitres dont la position est > à celle du chapitre actuel
         await db.query(
             `UPDATE chapter SET position = position + 1 WHERE tome_id = ? AND position > ?`,
             [current.tome_id, current.position]
         )
 
-        // insère le nouveau chapitre juste après
         const newPosition = current.position + 1
         const [result] = await db.query(
             `INSERT INTO chapter (book_id, tome_id, title, position) VALUES (?, ?, ?, ?)`,
@@ -190,7 +168,6 @@ class ChapterRepository extends BaseRepository {
         return this.findById(result.insertId)
     }
 
-    // Crée un nouveau chapitre à la fin du tome et retourne-le
     async appendToTome(tomeId, bookId, title) {
         const [rows] = await db.query(
             `SELECT COALESCE(MAX(position), 0) as maxPos FROM chapter WHERE tome_id = ?`,
@@ -204,8 +181,6 @@ class ChapterRepository extends BaseRepository {
         return this.findById(result.insertId)
     }
 
-    // Déplace les items timeline d'un chapitre vers un autre,
-    // uniquement ceux dont la position >= fromPosition
     async moveTimelineItems(fromChapterId, toChapterId, fromPosition) {
         await db.query(
             `UPDATE timeline_item SET chapter_id = ? WHERE chapter_id = ? AND position >= ?`,
@@ -213,6 +188,34 @@ class ChapterRepository extends BaseRepository {
         )
     }
 
+    // crée un chapitre jumeau et relie les deux via paired_chapter_id
+    async createVariant(chapterId, copyContent, isAdult) {
+        const original = await this.findById(chapterId)
+        if (!original) throw new Error('Chapitre introuvable')
+
+        const [result] = await db.query(
+            `INSERT INTO chapter (book_id, tome_id, title, position, is_adult, paired_chapter_id, content)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                original.book_id,
+                original.tome_id,
+                original.title,
+                original.position,
+                isAdult ? 1 : 0,
+                chapterId,
+                copyContent ? (original.content || null) : null
+            ]
+        )
+        const newId = result.insertId
+
+        // relier l'original vers le nouveau
+        await db.query(
+            `UPDATE chapter SET paired_chapter_id = ?, is_adult = ? WHERE id = ?`,
+            [newId, isAdult ? 0 : 1, chapterId]
+        )
+
+        return this.findById(newId)
+    }
 }
 
 module.exports = ChapterRepository

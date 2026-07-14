@@ -15,7 +15,7 @@ import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
 import ModalFamilyTree from '../modal/ModalFamilyTree';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, onCloseFullscreen, unlockedBookIds, unlockBook, lockBook }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, onCloseFullscreen, unlockedBookIds, unlockBook, lockBook, adultChapters, setAdultChapters }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -34,7 +34,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         addChapter, addBook, fetchChapters,
         tomes, selectedTome, setSelectedTome,
         fetchTomes,
-        unlockedBookIds, unlockBook, lockBook
+        unlockedBookIds, unlockBook, lockBook,
+        adultChapters, setAdultChapters 
     }
 
     const closeAllModals = () => {

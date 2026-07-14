@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ChevronUp, BadgePlus, Trash2, Eye, Pen, Lock, Check, X } from 'lucide-react'
+import { ChevronUp, BadgePlus, Trash2, Eye, Pen, Lock, Check, X, Layers2, Flame } from 'lucide-react'
 import { ReactSortable } from 'react-sortablejs'
 import { useApi } from '../../context/ApiContext'
 import Modal from '../modal/Modal'
@@ -8,11 +8,25 @@ import ModalBook from '../modal/ModalBook'
 import ModalDelete from '../modal/ModalDelete'
 import ModalTome from '../modal/ModalTome'
 import ModalUnlockBook from '../modal/ModalUnlockBook'
+import ModalChapterVariant from '../modal/ModalChapterVariant'
+import ModalDeleteChapter from '../modal/ModalDeleteChapter'
+
+const ADULT_KEY = 'adultChapters'
+
+const getAdultChapters = () => {
+    try { return JSON.parse(localStorage.getItem(ADULT_KEY)) || [] }
+    catch { return [] }
+}
+
+const setAdultChapters = (ids) => {
+    localStorage.setItem(ADULT_KEY, JSON.stringify(ids))
+}
 
 export default function ChapterLayout(props) {
     const api = useApi()
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const [chapterToDelete, setChapterToDelete] = useState(null)
+    const [variantToDelete, setVariantToDelete] = useState(null)
     const [isViewBookOpen, setIsViewBookOpen] = useState(false)
     const [isUpdateBookOpen, setIsUpdateBookOpen] = useState(false)
     const [bookSearch, setBookSearch] = useState('')
@@ -23,10 +37,42 @@ export default function ChapterLayout(props) {
     const [isViewTomeOpen, setIsViewTomeOpen] = useState(false)
     const [tomeToView, setTomeToView] = useState(null)
     const [bookToUnlock, setBookToUnlock] = useState(null)
-
-    // edition inline du titre d'un chapitre
+    const [isVariantOpen, setIsVariantOpen] = useState(false)
+    const [chapterForVariant, setChapterForVariant] = useState(null)
     const [editingChapterId, setEditingChapterId] = useState(null)
     const [editingTitle, setEditingTitle] = useState('')
+    const [adultChapters, setAdultChaptersState] = useState(getAdultChapters)
+
+    const toggleAdult = (e, chapter) => {
+        e.stopPropagation()
+        const familyId = chapter.is_adult ? chapter.paired_chapter_id : chapter.id
+        const adultId = chapter.is_adult ? chapter.id : chapter.paired_chapter_id
+
+        const current = getAdultChapters()
+        let updated
+
+        if (current.includes(familyId)) {
+            updated = current.filter(id => id !== familyId)
+            if (props.selectedChapter?.id === adultId || props.selectedChapter?.id === familyId) {
+                const familyChapter = props.chapters.find(c => c.id === familyId)
+                if (familyChapter) props.setSelectedChapter(familyChapter)
+            }
+        } else {
+            updated = [...current, familyId]
+            if (props.selectedChapter?.id === familyId || props.selectedChapter?.id === adultId) {
+                const adultChapter = props.chapters.find(c => c.id === adultId)
+                if (adultChapter) props.setSelectedChapter(adultChapter)
+            }
+        }
+
+        setAdultChapters(updated)
+        setAdultChaptersState(updated)
+    }
+
+    const isAdultActive = (chapter) => {
+        const familyId = chapter.is_adult ? chapter.paired_chapter_id : chapter.id
+        return adultChapters.includes(familyId)
+    }
 
     useEffect(() => {
         const close = () => setBookDropdownOpen(false)
@@ -38,7 +84,16 @@ export default function ChapterLayout(props) {
         ?.filter(b => showArchived ? true : !b.archived)
         .filter(b => b.title.toLowerCase().includes(bookSearch.toLowerCase()))
 
+    const visibleChapters = props.chapters?.filter(chapter => {
+        if (!chapter.paired_chapter_id) return true
+        return !chapter.is_adult
+    })
+
     const changeChapter = (chapter) => {
+        if (chapter.paired_chapter_id && isAdultActive(chapter)) {
+            const adultChapter = props.chapters.find(c => c.id === chapter.paired_chapter_id && !!c.is_adult)
+            if (adultChapter) { props.setSelectedChapter(adultChapter); return }
+        }
         props.setSelectedChapter(chapter)
     }
 
@@ -73,9 +128,21 @@ export default function ChapterLayout(props) {
 
     const handleReorder = async (newList) => {
         const updated = newList.map((ch, index) => ({ id: ch.id, position: index + 1 }))
-        await api('chapter:reorder', updated)
+        const withPaired = []
+        for (const item of updated) {
+            withPaired.push(item)
+            const chapter = props.chapters.find(c => c.id === item.id)
+            if (chapter?.paired_chapter_id) {
+                withPaired.push({ id: chapter.paired_chapter_id, position: item.position })
+            }
+        }
+        await api('chapter:reorder', withPaired)
         props.fetchChapters(props.selectedTome?.id)
     }
+
+    const selectedFamilyId = props.selectedChapter?.is_adult
+        ? props.selectedChapter?.paired_chapter_id
+        : props.selectedChapter?.id
 
     return (
         <div className='flex flex-col h-full'>
@@ -123,6 +190,35 @@ export default function ChapterLayout(props) {
                             setBookToUnlock(null)
                             setBookDropdownOpen(false)
                             setBookSearch('')
+                        }}
+                    />
+                )}
+            </Modal>
+
+            <Modal isOpen={isVariantOpen} onClose={() => { setIsVariantOpen(false); setChapterForVariant(null) }} size={40}>
+                {chapterForVariant && (
+                    <ModalChapterVariant
+                        chapter={chapterForVariant}
+                        onSuccess={() => {
+                            setIsVariantOpen(false)
+                            setChapterForVariant(null)
+                            props.fetchChapters(props.selectedTome?.id)
+                        }}
+                    />
+                )}
+            </Modal>
+
+            <Modal isOpen={!!variantToDelete} onClose={() => setVariantToDelete(null)} size={40}>
+                {variantToDelete && (
+                    <ModalDeleteChapter
+                        chapter={variantToDelete}
+                        onClose={() => setVariantToDelete(null)}
+                        onSuccess={() => {
+                            const updated = getAdultChapters().filter(id => id !== variantToDelete?.id)
+                            setAdultChapters(updated)
+                            setAdultChaptersState(updated)
+                            props.fetchChapters(props.selectedTome?.id)
+                            setVariantToDelete(null)
                         }}
                     />
                 )}
@@ -262,7 +358,6 @@ export default function ChapterLayout(props) {
             <div className='flex-1 overflow-hidden flex flex-col p-4'>
                 <div className='flex justify-between items-center mb-3'>
                     <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Chapitres</p>
-
                     {props.selectedBook &&
                         <button onClick={() => props.addChapter(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
                             <BadgePlus size={20} />
@@ -271,22 +366,21 @@ export default function ChapterLayout(props) {
                 </div>
                 <div className='overflow-y-auto hide-scrollbar flex flex-col gap-1'>
                     <ReactSortable
-                        list={props.chapters || []}
+                        list={visibleChapters || []}
                         setList={handleReorder}
                         animation={200}
                         ghostClass='opacity-30'
                         handle='.drag-handle'
                     >
-                        {props.chapters?.map((chapter) => (
+                        {visibleChapters?.map((chapter) => (
                             <div
                                 key={chapter.id}
-                                className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${props.selectedChapter?.id == chapter.id
+                                className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${selectedFamilyId === chapter.id
                                     ? 'bg-primary-300 text-white font-bold'
                                     : 'hover:bg-primary-100 text-primary-800'
                                     }`}
                             >
                                 {editingChapterId === chapter.id ? (
-                                    // mode edition inline
                                     <div className='flex items-center gap-1 flex-1 min-w-0'>
                                         <input
                                             autoFocus
@@ -309,15 +403,42 @@ export default function ChapterLayout(props) {
                                     </div>
                                 ) : (
                                     <>
-                                        {/* poignee de drag */}
                                         <span className='drag-handle cursor-grab text-primary-300 mr-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity'>⠿</span>
+
+                                        <span className='w-5 flex-shrink-0 flex items-center justify-center mr-1'>
+                                            {chapter.paired_chapter_id && (
+                                                <button
+                                                    onClick={(e) => toggleAdult(e, chapter)}
+                                                    title={isAdultActive(chapter) ? 'Version adulte active' : 'Version familiale active'}
+                                                >
+                                                    <Flame
+                                                        size={15}
+                                                        className={isAdultActive(chapter)
+                                                            ? 'text-red-500 fill-current'
+                                                            : 'text-red-500 fill-none'
+                                                        }
+                                                    />
+                                                </button>
+                                            )}
+                                        </span>
+
                                         <button
                                             onClick={() => changeChapter(chapter)}
                                             className='flex-1 text-left truncate'
                                         >
                                             {chapter.title}
                                         </button>
+
                                         <div className='hidden group-hover:flex gap-1 ml-2 flex-shrink-0'>
+                                            {!chapter.paired_chapter_id && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setChapterForVariant(chapter); setIsVariantOpen(true) }}
+                                                    className='text-primary-400 hover:text-primary-600'
+                                                    title='Créer une version alternative'
+                                                >
+                                                    <Layers2 size={14} />
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={(e) => startEditing(chapter, e)}
                                                 className='text-primary-400 hover:text-primary-600'
@@ -325,7 +446,18 @@ export default function ChapterLayout(props) {
                                                 <Pen size={14} />
                                             </button>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setChapterToDelete(chapter.id); setIsConfirmOpen(true) }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    if (chapter.paired_chapter_id) {
+                                                        const idToDelete = isAdultActive(chapter)
+                                                            ? chapter.paired_chapter_id
+                                                            : chapter.id
+                                                        setVariantToDelete({ ...chapter, idToDelete })
+                                                    } else {
+                                                        setChapterToDelete(chapter.id)
+                                                        setIsConfirmOpen(true)
+                                                    }
+                                                }}
                                                 className='text-red-400 hover:text-red-600'
                                             >
                                                 <Trash2 size={14} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { GitBranch } from 'lucide-react'
+import { GitBranch, Flame } from 'lucide-react'
 import Layout from '../component/layout/Layout'
 import { useApi } from '../context/ApiContext'
 import Modal from '../component/modal/Modal'
@@ -26,7 +26,7 @@ export default function Home() {
     const [selectedChapter, setSelectedChapter] = useState(null)
     const [chapterListeField, setChapterListeField] = useState(null)
     const [tomeListeField, setTomeListeField] = useState(null)
-    const [content, setContent] = useState([])
+    const [content, setContent] = useState(null)
     const [saved, setSaved] = useState(false)
     const [showTimeline, setShowTimeline] = useState(false)
     const [timelineKey, setTimelineKey] = useState(0)
@@ -44,6 +44,9 @@ export default function Home() {
     const [pendingBook, setPendingBook] = useState(null)
 
     const { isDark } = useTheme()
+
+    const ADULT_KEY = 'adultChapters'
+
 
     useEffect(() => {
         localStorage.setItem('unlockedBookIds', JSON.stringify(unlockedBookIds))
@@ -88,17 +91,23 @@ export default function Home() {
 
     useEffect(() => {
         if (!chapters.length) return
-        const fildListe = chapters.map(element => ({
+        const visibleChapters = chapters.filter(ch => !ch.paired_chapter_id || !ch.is_adult)
+        const fildListe = visibleChapters.map(element => ({
             value: element.id,
             text: element.title,
-            selected: element.id == selectedChapter?.id
+            selected: element.id == familyId
         }))
-        setChapterListeField([{ name: 'chapter', type: 'select', value: selectedChapter?.id || '', data: fildListe }])
+        setChapterListeField([{ name: 'chapter', type: 'select', value: familyId || '', data: fildListe }])
     }, [selectedChapter, chapters])
+
 
     useEffect(() => {
         if (selectedBook) localStorage.setItem('lastBookId', selectedBook.id)
     }, [selectedBook])
+
+    useEffect(() => {
+        setContent(null)
+    }, [selectedChapter?.id])
 
     useEffect(() => {
         if (selectedChapter) localStorage.setItem('lastChapterId', selectedChapter.id)
@@ -178,8 +187,15 @@ export default function Home() {
         setSelectedTome(tome)
     }
 
+
     const handleChapterChange = (e) => {
         const chapter = chapters.find(ch => ch.id == e.target.value)
+        if (!chapter) return
+        const currentAdults = JSON.parse(localStorage.getItem('adultChapters') || '[]')
+        if (chapter.paired_chapter_id && currentAdults.includes(chapter.id)) {
+            const adult = chapters.find(c => c.id === chapter.paired_chapter_id && !!c.is_adult)
+            if (adult) { setSelectedChapter(adult); return }
+        }
         setSelectedChapter(chapter)
     }
 
@@ -197,18 +213,55 @@ export default function Home() {
         })
     }
 
+
     const saveChapter = async () => {
         if (!selectedChapter) return
+        const contentToSave = content ?? selectedChapter.content
         const updateResult = await api('chapter:update', {
             id: selectedChapter.id,
-            data: { content }
+            data: { content: contentToSave }
         })
         if (updateResult.success == true) {
             setSaved(true)
-            fetchChapters(selectedTome.id)
+            const result = await api('chapter:findBy', { tome_id: selectedTome.id })
+            if (result.data) {
+                setChapters(result.data)
+                const same = result.data.find(c => c.id === selectedChapter.id)
+                if (same) setSelectedChapter(same)
+            }
             setTimeout(() => setSaved(false), 2000)
         }
     }
+
+
+
+    const getAdultChapters = () => {
+        try { return JSON.parse(localStorage.getItem(ADULT_KEY)) || [] }
+        catch { return [] }
+    }
+
+    const familyId = selectedChapter?.is_adult
+        ? selectedChapter?.paired_chapter_id
+        : selectedChapter?.id
+
+    const isAdultActive = selectedChapter?.paired_chapter_id
+        ? getAdultChapters().includes(familyId)
+        : false
+
+    const toggleAdultFromEditor = () => {
+        if (!selectedChapter?.paired_chapter_id) return
+        const current = getAdultChapters()
+        const updated = current.includes(familyId)
+            ? current.filter(id => id !== familyId)
+            : [...current, familyId]
+        localStorage.setItem(ADULT_KEY, JSON.stringify(updated))
+
+        const targetId = isAdultActive ? familyId : selectedChapter.paired_chapter_id
+        const target = chapters.find(c => c.id === targetId)
+        if (target) setSelectedChapter(target)
+    }
+
+
 
     return (
         <div className="min-h-screen bg-primary-50">
@@ -320,13 +373,42 @@ export default function Home() {
                                         selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-sm text-primary-400 hover:text-primary-300 transition-colors"}
                                     />
                                 }
-                                {chapterListeField &&
-                                    <FormField
-                                        fields={chapterListeField}
-                                        onChange={handleChapterChange}
-                                        selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-primary-500 hover:text-primary-300 transition-colors"}
-                                    />
-                                }
+
+
+
+
+                                <div className='flex item-center justify-center'>
+
+                                    {chapterListeField &&
+                                        <FormField
+                                            fields={chapterListeField}
+                                            onChange={handleChapterChange}
+                                            selectClass={"bg-transparent border-none outline-none cursor-pointer appearance-none text-xl text-primary-500 hover:text-primary-300 transition-colors"}
+                                        />
+                                    }
+
+                                    {selectedChapter?.paired_chapter_id && (
+                                        <button
+                                            onClick={toggleAdultFromEditor}
+                                            className='pt-2'
+                                            title={isAdultActive ? 'Version adulte active' : 'Version familiale active'}
+                                        >
+
+                                            <Flame
+                                                size={20}
+                                                strokeWidth={3}
+                                                className={'text-red-500'}
+                                                style={{ fill: isAdultActive ? 'currentColor' : 'none' }}
+                                            />
+                                        </button>
+                                    )}
+
+
+
+                                </div>
+
+
+
                             </div>
                             <div className='flex gap-2'>
                                 <button
