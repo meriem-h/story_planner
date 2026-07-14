@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useApi } from '../context/ApiContext'
 import { ReactSortable } from 'react-sortablejs'
 import Modal from './modal/Modal'
+import ModalView from './modal/ModalView'
+import ModalSnippet from './modal/ModalSnippet'
 import ModalTimeline from './modal/ModalTimeline'
 import ModalTimelineFullscreen from './modal/ModalTimelineFullscreen'
 import { BadgePlus, Maximize2 } from 'lucide-react'
@@ -14,6 +16,11 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
+    const [snippetToEdit, setSnippetToEdit] = useState(null)
+    const [snippetActionItem, setSnippetActionItem] = useState(null)
+    const [isSnippetOpen, setIsSnippetOpen] = useState(false)
+    const [isViewOpen, setIsViewOpen] = useState(false)
+    const [snippetToView, setSnippetToView] = useState(null)
 
     const handleSuccess = () => {
         setIsModalOpen(false)
@@ -116,7 +123,26 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                         <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             {item.status ? '↩️ Dévalider' : '✅ Valider'}
                         </button>
-                        <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
+                        {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
+                            ✏️ Modifier
+                        </button> */}
+                        <button
+                            onClick={async () => {
+                                if (item.snippet_id) {
+                                    const result = await api('snippet:findById', item.snippet_id)
+                                    if (result.success) {
+                                        setSnippetToEdit(result.data)
+                                        setSnippetActionItem(item)
+                                        setIsSnippetOpen(true)
+                                    }
+                                } else {
+                                    setSelectedItem(item)
+                                    setIsModalOpen(true)
+                                }
+                                setOpenPopover(null)
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                        >
                             ✏️ Modifier
                         </button>
                         <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
@@ -131,7 +157,20 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                 className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${getBubbleClass(item)}`}
                 onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
             />
-            <span className="text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span>
+            {/* <span className="text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span> */}
+            <span
+                className={`text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium ${item.snippet_id ? 'cursor-pointer hover:text-primary-700 hover:underline' : ''}`}
+                onClick={async () => {
+                    if (!item.snippet_id) return
+                    const result = await api('snippet:findById', item.snippet_id)
+                    if (result.success) {
+                        setSnippetToView(result.data)
+                        setIsViewOpen(true)
+                    }
+                }}
+            >
+                {item.s_title ?? item.title}
+            </span>
         </div>
     )
 
@@ -195,8 +234,22 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                     />
                 </Modal>
                 {/* <Modal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} size={50}> */}
+                <Modal isOpen={isSnippetOpen} onClose={() => { setIsSnippetOpen(false); setSnippetToEdit(null); setSnippetActionItem(null) }} size={50}>
+                    <ModalSnippet
+                        onSuccess={() => { setIsSnippetOpen(false); setSnippetToEdit(null); setSnippetActionItem(null); fetchItems() }}
+                        book={book}
+                        tome={selectedTome}
+                        chapters={chapters}
+                        selectedSnippet={snippetToEdit}
+                    />
+                </Modal>
+                
                 <Modal isOpen={isFullscreen} onClose={() => { setIsFullscreen(false); fetchItems() }} >
                     <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline} book={book} />
+                </Modal>
+
+                <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
+                    <ModalView item={snippetToView} type="snippet" />
                 </Modal>
 
                 <div className='flex flex-col gap-4 ml-2'>

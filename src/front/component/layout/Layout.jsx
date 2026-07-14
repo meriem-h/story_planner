@@ -28,6 +28,8 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
     const [isThemeOpen, setIsThemeOpen] = useState(false)
 
+    // const [content, setContent] = useState(<Chapter {...chapterProps} />)
+
     const chapterProps = {
         chapters, selectedChapter, setSelectedChapter,
         books, selectedBook, setSelectedBook,
@@ -35,7 +37,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         tomes, selectedTome, setSelectedTome,
         fetchTomes,
         unlockedBookIds, unlockBook, lockBook,
-        adultChapters, setAdultChapters 
+        adultChapters, setAdultChapters
     }
 
     const closeAllModals = () => {
@@ -47,17 +49,16 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         onCloseFullscreen(false)
     }
 
-    const [content, setContent] = useState(<Chapter {...chapterProps} />)
 
 
-    useEffect(() => {
-        if (activeView === 'chapter') {
-            setContent(<Chapter {...chapterProps} />)
-        }
-        if (activeView === 'snippet') {
-            setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
-        }
-    }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
+    // useEffect(() => {
+    //     if (activeView === 'chapter') {
+    //         setContent(<Chapter {...chapterProps} />)
+    //     }
+    //     if (activeView === 'snippet') {
+    //         setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
+    //     }
+    // }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
 
     const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-primary-600 text-primary-100' : 'bg-primary-400 text-primary-100 hover:bg-primary-500'}`
 
@@ -136,7 +137,16 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         <X />
                     </button>
                 </div>
-                <div className='flex-1 min-h-0'>{content}</div>
+
+                {/* <div className='flex-1 min-h-0'>{content}</div> */}
+                <div className='flex-1 min-h-0'>
+                    {activeView === 'chapter' && <Chapter {...chapterProps} />}
+                    {activeView === 'character' && <Character selectedBook={selectedBook} />}
+                    {activeView === 'lore' && <Lore selectedBook={selectedBook} />}
+                    {activeView === 'snippet' && <Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} refreshTimeline={refreshTimeline} />}
+                    {activeView === 'note' && <Note selectedBook={selectedBook} />}
+                </div>
+
             </div>
 
             {/* Sidebar fermée */}

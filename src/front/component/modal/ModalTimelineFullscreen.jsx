@@ -22,6 +22,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const [availableSnippets, setAvailableSnippets] = useState([])
     const [isSplitOpen, setIsSplitOpen] = useState(false)
     const [splitItem, setSplitItem] = useState(null)
+    const [snippetToEdit, setSnippetToEdit] = useState(null)
 
     const [selectedChapters, setSelectedChapters] = useState(() => {
         const saved = localStorage.getItem(`timeline-chapters-${book?.id}`)
@@ -171,6 +172,41 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                         <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             {item.status ? '↩️ Dévalider' : '✅ Valider'}
                         </button>
+
+                        <button
+                            // onClick={() => {
+                            //     if (item.snippet_id) {
+                            //         setSnippetActionItem(item)
+                            //         setIsCreateSnippetOpen(true)
+                            //         console.log("item =>", item)
+
+                            //     } else {
+                            //         setSelectedItem(item)
+                            //         setIsModalOpen(true)
+                            //     }
+                            //     setOpenPopover(null)
+                            // }}
+
+                            onClick={async () => {
+                                if (item.snippet_id) {
+                                    const result = await api('snippet:findById', item.snippet_id)
+                                    console.log('snippet complet', result.data)
+                                    if (result.success) {
+                                        setSnippetToEdit(result.data)
+                                        setSnippetActionItem(item)
+                                        setIsCreateSnippetOpen(true)
+                                    }
+                                } else {
+                                    setSelectedItem(item)
+                                    setIsModalOpen(true)
+                                }
+                                setOpenPopover(null)
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                        >
+                            ✏️ Modifier
+                        </button>
+
                         {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             ✏️ Modifier
                         </button> */}
@@ -264,16 +300,22 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <ModalView item={snippetToView} type="snippet" />
             </Modal>
 
-            <Modal isOpen={isCreateSnippetOpen} onClose={() => { setIsCreateSnippetOpen(false); setSnippetActionItem(null) }} size={50}>
+           
+
+            <Modal isOpen={isCreateSnippetOpen} onClose={() => { setIsCreateSnippetOpen(false); setSnippetActionItem(null); setSnippetToEdit(null) }} size={50}>
                 <ModalSnippet
-                    onSuccess={handleSnippetCreated}
+                    onSuccess={snippetToEdit
+                        ? () => { setIsCreateSnippetOpen(false); setSnippetToEdit(null); setSnippetActionItem(null); fetchItems(); if (onUpdate) onUpdate() }
+                        : handleSnippetCreated
+                    }
                     book={book}
                     tome={selectedTome}
                     chapters={chapters}
-                    // selectedSnippet={null}
-                    selectedSnippet={{ title: snippetActionItem?.title ?? '' }}
+                    selectedSnippet={snippetToEdit ?? { title: snippetActionItem?.title ?? '' }}
                 />
             </Modal>
+
+
 
             <Modal isOpen={isLinkOpen} onClose={() => { setIsLinkOpen(false); setSnippetActionItem(null) }} size={40}>
                 <div className="p-4 flex flex-col gap-4">
