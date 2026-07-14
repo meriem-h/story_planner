@@ -12,14 +12,10 @@ import { BadgePlus, Maximize2, MessageCircleMore, Clapperboard, Quote, FileText,
 export default function Timeline({ selectedTome, chapters, refreshTimeline, book }) {
     const api = useApi()
     const [items, setItems] = useState([])
-    // const [showUnplaced, setShowUnplaced] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState(null)
     const [openPopover, setOpenPopover] = useState(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
-    // const [snippetToEdit, setSnippetToEdit] = useState(null)
-    // const [snippetActionItem, setSnippetActionItem] = useState(null)
-    // const [isSnippetOpen, setIsSnippetOpen] = useState(false)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [snippetToView, setSnippetToView] = useState(null)
 
@@ -61,8 +57,8 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     }, [selectedTome])
 
     useEffect(() => {
-        setGrouped(buildGrouped(items))
-    }, [items.length, chapters])
+    setGrouped(buildGrouped(items))
+}, [items, chapters])
 
     const fetchItems = async () => {
         const result = await api('timeline:findBy', { tome_id: selectedTome.id })
@@ -105,14 +101,17 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     const unplaced = grouped['null'] || []
 
     const handleToggleStatus = async (item) => {
-        await api('timeline:update', { id: item.id, data: { status: !item.status } })
-        fetchItems()
+        await api('timeline:update', { id: item.id, data: { status: item.status ? 0 : 1 } })
+        setItems(prev => prev.map(i =>
+            i.id === item.id ? { ...i, status: i.status ? 0 : 1 } : i
+        ))
         setOpenPopover(null)
     }
 
+
     const handleDelete = async (id) => {
         await api('timeline:delete', id)
-        fetchItems()
+        setItems(prev => prev.filter(i => i.id !== id))
         setOpenPopover(null)
     }
 
@@ -143,7 +142,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                     </>
                 )}
 
-                
+
 
                 {/* pastille */}
                 <div
