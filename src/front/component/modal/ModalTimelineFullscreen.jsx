@@ -6,7 +6,7 @@ import ModalView from './ModalView'
 import ModalTimeline from './ModalTimeline'
 import ModalSnippet from './ModalSnippet'
 import ModalSplitChapter from './ModalSplitChapter'
-import { BadgePlus } from 'lucide-react'
+import { BadgePlus, MessageCircleMore, Clapperboard, Quote, FileText, History, Lightbulb, PenLine, ChevronsRight, CircleSlash } from 'lucide-react'
 
 export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpdate, book }) {
     const api = useApi()
@@ -23,6 +23,18 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const [isSplitOpen, setIsSplitOpen] = useState(false)
     const [splitItem, setSplitItem] = useState(null)
     const [snippetToEdit, setSnippetToEdit] = useState(null)
+
+    const SNIPPET_ICONS = {
+        dialogue: MessageCircleMore,
+        scene: Clapperboard,
+        citation: Quote,
+        description: FileText,
+        flashback: History,
+        idee: Lightbulb,
+        note_auteur: PenLine,
+        transition: ChevronsRight,
+        autre: CircleSlash,
+    }
 
     const [selectedChapters, setSelectedChapters] = useState(() => {
         const saved = localStorage.getItem(`timeline-chapters-${book?.id}`)
@@ -80,9 +92,9 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     }
 
     const getBubbleClass = (item) => {
-        if (item.status) return 'bg-green-400 border-green-500'
-        if (item.snippet_id) return 'bg-amber-200 border-amber-300'
-        return 'bg-primary-1 border-primary-300'
+        if (item.status) return 'bg-green-300 border-green-500 text-green-600'
+        if (item.snippet_id) return 'bg-amber-200 border-amber-300 text-amber-500'
+        return 'bg-primary-1 border-primary-300 text-primary-500'
     }
 
     const handleReorder = async (newList, chapterId) => {
@@ -157,115 +169,116 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
     const unplaced = grouped['null'] || []
     const filteredChapters = chapters.filter(ch => selectedChapters.includes(ch.id))
 
-    const renderItem = (item) => (
-        <div key={item.id} className="relative flex items-center gap-3 cursor-grab">
-            {openPopover === item.id && (
-                <>
-                    <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
-                    <div
-                        className="fixed z-20 bg-primary-50 border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
-                        style={{
-                            top: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().bottom + 8,
-                            left: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().left - 40,
-                        }}
-                    >
-                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
-                            {item.status ? '↩️ Dévalider' : '✅ Valider'}
-                        </button>
+    const renderItem = (item) => {
+        const Icon = SNIPPET_ICONS[item.s_type] || CircleSlash
+        return (
+            <div key={item.id} className="relative flex items-center gap-3 cursor-grab">
+                {openPopover === item.id && (
+                    <>
+                        <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
+                        <div
+                            className="fixed z-20 bg-primary-50 border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[140px]"
+                            style={{
+                                top: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().bottom + 8,
+                                left: document.getElementById(`bubble-fs-${item.id}`)?.getBoundingClientRect().left - 40,
+                            }}
+                        >
+                            <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
+                                {item.status ? '↩️ Dévalider' : '✅ Valider'}
+                            </button>
 
-                        <button
-                            // onClick={() => {
-                            //     if (item.snippet_id) {
-                            //         setSnippetActionItem(item)
-                            //         setIsCreateSnippetOpen(true)
-                            //         console.log("item =>", item)
+                            <button
 
-                            //     } else {
-                            //         setSelectedItem(item)
-                            //         setIsModalOpen(true)
-                            //     }
-                            //     setOpenPopover(null)
-                            // }}
 
-                            onClick={async () => {
-                                if (item.snippet_id) {
-                                    const result = await api('snippet:findById', item.snippet_id)
-                                    console.log('snippet complet', result.data)
-                                    if (result.success) {
-                                        setSnippetToEdit(result.data)
+                                onClick={() => {
+                                    if (item.snippet_id) {
+                                        setSnippetToEdit({
+                                            id: item.snippet_id,
+                                            title: item.s_title,
+                                            type: item.s_type,
+                                            content: item.s_content
+                                        })
                                         setSnippetActionItem(item)
                                         setIsCreateSnippetOpen(true)
+                                    } else {
+                                        setSelectedItem(item)
+                                        setIsModalOpen(true)
                                     }
-                                } else {
-                                    setSelectedItem(item)
-                                    setIsModalOpen(true)
-                                }
-                                setOpenPopover(null)
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
-                        >
-                            ✏️ Modifier
-                        </button>
+                                    setOpenPopover(null)
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                            >
+                                ✏️ Modifier
+                            </button>
 
-                        {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
-                            ✏️ Modifier
-                        </button> */}
-                        {!item.snippet_id && (
-                            <>
-                                <hr className="border-primary-100 my-1" />
-                                <button
-                                    onClick={() => { setSnippetActionItem(item); setIsCreateSnippetOpen(true); setOpenPopover(null) }}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
-                                >
-                                    ✨ Créer un snippet
-                                </button>
-                                <button
-                                    onClick={() => handleOpenLink(item)}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
-                                >
-                                    🔗 Lier un snippet
-                                </button>
-                            </>
-                        )}
+                            {!item.snippet_id && (
+                                <>
+                                    <hr className="border-primary-100 my-1" />
+                                    <button
+                                        onClick={() => { setSnippetActionItem(item); setIsCreateSnippetOpen(true); setOpenPopover(null) }}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                                    >
+                                        ✨ Créer un snippet
+                                    </button>
+                                    <button
+                                        onClick={() => handleOpenLink(item)}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                                    >
+                                        🔗 Lier un snippet
+                                    </button>
+                                </>
+                            )}
 
-                        {item.chapter_id && (
-                            <>
-                                <hr className="border-primary-100 my-1" />
-                                <button
-                                    onClick={() => { setSplitItem(item); setIsSplitOpen(true); setOpenPopover(null) }}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
-                                >
-                                    ✂️ Diviser le chapitre
-                                </button>
-                            </>
-                        )}
-                        <hr className="border-primary-100 my-1" />
-                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
-                            🗑️ Supprimer
-                        </button>
-                    </div>
-                </>
-            )}
-            <div
-                id={`bubble-fs-${item.id}`}
-                className={`w-6 h-6 rounded-full border-2 shrink-0 hover:scale-110 transition-transform cursor-pointer ${getBubbleClass(item)}`}
-                onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
-            />
-            <span
-                className={`text-sm text-primary-500 font-medium ${item.snippet_id ? 'cursor-pointer hover:text-primary-700 hover:underline' : ''}`}
-                onClick={async () => {
-                    if (!item.snippet_id) return
-                    const result = await api('snippet:findById', item.snippet_id)
-                    if (result.success) {
-                        setSnippetToView(result.data)
+                            {item.chapter_id && (
+                                <>
+                                    <hr className="border-primary-100 my-1" />
+                                    <button
+                                        onClick={() => { setSplitItem(item); setIsSplitOpen(true); setOpenPopover(null) }}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                                    >
+                                        ✂️ Diviser le chapitre
+                                    </button>
+                                </>
+                            )}
+                            <hr className="border-primary-100 my-1" />
+                            <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
+                                🗑️ Supprimer
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                {/* pastille */}
+                <div
+                    id={`bubble-fs-${item.id}`}
+                    className={`w-6 h-6 rounded-full border-2 shrink-0 hover:scale-110 transition-transform cursor-pointer ${getBubbleClass(item)}
+                    flex justify-center items-center
+                    `}
+                    onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
+                >
+                    {/* ici mettre icone */}
+                    <Icon size={18} />
+                </div>
+
+                <span
+                    className={`text-sm text-primary-500 font-medium ${item.snippet_id ? 'cursor-pointer hover:text-primary-700 hover:underline' : ''}`}
+                    onClick={() => {
+                        if (!item.snippet_id) return
+                        setSnippetToView({
+                            id: item.snippet_id,
+                            title: item.s_title,
+                            type: item.s_type,
+                            content: item.s_content
+                        })
                         setIsViewOpen(true)
-                    }
-                }}
-            >
-                {item.s_title ?? item.title}
-            </span>
-        </div>
-    )
+                    }}
+                >
+                    {item.s_title ?? item.title}
+                </span>
+            </div>
+        )
+
+    }
 
     const renderSortable = (list, chapterId) => (
         <ReactSortable
@@ -300,7 +313,7 @@ export default function ModalTimelineFullscreen({ selectedTome, chapters, onUpda
                 <ModalView item={snippetToView} type="snippet" />
             </Modal>
 
-           
+
 
             <Modal isOpen={isCreateSnippetOpen} onClose={() => { setIsCreateSnippetOpen(false); setSnippetActionItem(null); setSnippetToEdit(null) }} size={50}>
                 <ModalSnippet

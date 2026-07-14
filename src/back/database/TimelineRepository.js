@@ -15,7 +15,7 @@ class TimelineRepository extends BaseRepository {
                 table: 'snippet',
                 alias: 's',
                 on: { foreign: 'id', local: 'snippet_id' },
-                fields: ['title']
+                fields: ['title', 'type', 'content']
             }
         ]
     }

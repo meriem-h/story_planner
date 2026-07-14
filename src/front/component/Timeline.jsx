@@ -6,7 +6,8 @@ import ModalView from './modal/ModalView'
 import ModalSnippet from './modal/ModalSnippet'
 import ModalTimeline from './modal/ModalTimeline'
 import ModalTimelineFullscreen from './modal/ModalTimelineFullscreen'
-import { BadgePlus, Maximize2 } from 'lucide-react'
+import { BadgePlus, Maximize2, MessageCircleMore, Clapperboard, Quote, FileText, History, Lightbulb, PenLine, ChevronsRight, CircleSlash } from 'lucide-react'
+
 
 export default function Timeline({ selectedTome, chapters, refreshTimeline, book }) {
     const api = useApi()
@@ -21,6 +22,18 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     const [isSnippetOpen, setIsSnippetOpen] = useState(false)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [snippetToView, setSnippetToView] = useState(null)
+
+    const SNIPPET_ICONS = {
+        dialogue: MessageCircleMore,
+        scene: Clapperboard,
+        citation: Quote,
+        description: FileText,
+        flashback: History,
+        idee: Lightbulb,
+        note_auteur: PenLine,
+        transition: ChevronsRight,
+        autre: CircleSlash,
+    }
 
     const handleSuccess = () => {
         setIsModalOpen(false)
@@ -61,9 +74,9 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
     }
 
     const getBubbleClass = (item) => {
-        if (item.status) return 'bg-green-400 border-green-500'
-        if (item.snippet_id) return 'bg-amber-200 border-amber-300'
-        return 'bg-primary-1 border-primary-300'
+        if (item.status) return 'bg-green-300 border-green-500 text-green-600'
+        if (item.snippet_id) return 'bg-amber-200 border-amber-300 text-amber-500'
+        return 'bg-primary-1 border-primary-300 text-primary-500'
     }
 
     const handleReorder = async (newList, chapterId) => {
@@ -107,72 +120,94 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
         setOpenPopover(null)
     }
 
-    const renderItem = (item) => (
-        <div key={item.id} className="relative flex flex-col items-center gap-1 cursor-grab">
+    const renderItem = (item) => {
+        const Icon = SNIPPET_ICONS[item.s_type] || CircleSlash
 
-            {/* Popover */}
-            {openPopover === item.id && (
-                <>
-                    <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
-                    <div className="fixed z-20 bg-primary-50 border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
-                        style={{
-                            top: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().bottom + 8,
-                            left: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().left - 40,
-                        }}
-                    >
-                        <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
-                            {item.status ? '↩️ Dévalider' : '✅ Valider'}
-                        </button>
-                        {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
+        return (
+            <div key={item.id} className="relative flex flex-col items-center gap-1 cursor-grab">
+
+                {/* Popover */}
+                {openPopover === item.id && (
+                    <>
+                        <div className="fixed inset-0 z-10" onClick={() => setOpenPopover(null)} />
+                        <div className="fixed z-20 bg-primary-50 border border-primary-200 rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[120px]"
+                            style={{
+                                top: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().bottom + 8,
+                                left: document.getElementById(`bubble-${item.id}`)?.getBoundingClientRect().left - 40,
+                            }}
+                        >
+                            <button onClick={() => handleToggleStatus(item)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
+                                {item.status ? '↩️ Dévalider' : '✅ Valider'}
+                            </button>
+                            {/* <button onClick={() => { setSelectedItem(item); setIsModalOpen(true); setOpenPopover(null) }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap">
                             ✏️ Modifier
                         </button> */}
-                        <button
-                            onClick={async () => {
-                                if (item.snippet_id) {
-                                    const result = await api('snippet:findById', item.snippet_id)
-                                    if (result.success) {
-                                        setSnippetToEdit(result.data)
+                            <button
+
+                                onClick={() => {
+                                    if (item.snippet_id) {
+                                        setSnippetToEdit({
+                                            id: item.snippet_id,
+                                            title: item.s_title,
+                                            type: item.s_type,
+                                            content: item.s_content
+                                        })
                                         setSnippetActionItem(item)
                                         setIsSnippetOpen(true)
+                                    } else {
+                                        setSelectedItem(item)
+                                        setIsModalOpen(true)
                                     }
-                                } else {
-                                    setSelectedItem(item)
-                                    setIsModalOpen(true)
-                                }
-                                setOpenPopover(null)
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
-                        >
-                            ✏️ Modifier
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
-                            🗑️ Supprimer
-                        </button>
-                    </div>
-                </>
-            )}
+                                    setOpenPopover(null)
+                                }}
 
-            {/* Bulle */}
-            <div id={`bubble-${item.id}`}
-                className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${getBubbleClass(item)}`}
-                onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
-            />
-            {/* <span className="text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium">{item.title}</span> */}
-            <span
-                className={`text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium ${item.snippet_id ? 'cursor-pointer hover:text-primary-700 hover:underline' : ''}`}
-                onClick={async () => {
-                    if (!item.snippet_id) return
-                    const result = await api('snippet:findById', item.snippet_id)
-                    if (result.success) {
-                        setSnippetToView(result.data)
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-primary-50 text-xs text-primary-600 whitespace-nowrap"
+                            >
+                                ✏️ Modifier
+                            </button>
+                            <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-red-50 text-xs text-red-400 whitespace-nowrap">
+                                🗑️ Supprimer
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                
+
+                {/* pastille */}
+                <div
+                    id={`bubble-fs-${item.id}`}
+                    className={`w-6 h-6 rounded-full border-2 shrink-0 hover:scale-110 transition-transform cursor-pointer ${getBubbleClass(item)}
+                    flex justify-center items-center
+                    `}
+                    onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === item.id ? null : item.id) }}
+                >
+                    {/* ici mettre icone */}
+                    <Icon size={18} />
+                </div>
+
+
+
+
+
+                <span
+                    className={`text-xs text-primary-500 whitespace-nowrap max-w-[70px] truncate text-center font-medium ${item.snippet_id ? 'cursor-pointer hover:text-primary-700 hover:underline' : ''}`}
+                    onClick={() => {
+                        if (!item.snippet_id) return
+                        setSnippetToView({
+                            id: item.snippet_id,
+                            title: item.s_title,
+                            type: item.s_type,
+                            content: item.s_content
+                        })
                         setIsViewOpen(true)
-                    }
-                }}
-            >
-                {item.s_title ?? item.title}
-            </span>
-        </div>
-    )
+                    }}
+                >
+                    {item.s_title ?? item.title}
+                </span>
+            </div>
+        )
+    }
 
     const renderSortable = (list, chapterId) => (
         <ReactSortable
@@ -243,7 +278,7 @@ export default function Timeline({ selectedTome, chapters, refreshTimeline, book
                         selectedSnippet={snippetToEdit}
                     />
                 </Modal>
-                
+
                 <Modal isOpen={isFullscreen} onClose={() => { setIsFullscreen(false); fetchItems() }} >
                     <ModalTimelineFullscreen selectedTome={selectedTome} chapters={chapters} onUpdate={refreshTimeline} book={book} />
                 </Modal>
