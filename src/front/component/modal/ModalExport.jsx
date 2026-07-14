@@ -10,15 +10,28 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
     const [chapterId, setChapterId] = useState(selectedChapter?.id || '')
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState(null)
+    const [exportAdult, setExportAdult] = useState(false)
+
+    // vérifie si au moins un chapitre a un jumeau
+    const hasVariants = chapters.some(ch => ch.paired_chapter_id)
+
+    const visibleChapters = chapters.filter(ch => !ch.paired_chapter_id || !ch.is_adult)
 
     const handleExport = async () => {
         setLoading(true)
         setMessage(null)
 
+        const resolvedIds = visibleChapters.map(ch => {
+            if (ch.paired_chapter_id && exportAdult) {
+                return ch.paired_chapter_id
+            }
+            return ch.id
+        })
+
         const result = await api('export:chapters', {
             bookId: book.id,
             tomeId: tome?.id || null,
-            chapterIds: mode === 'chapitre' ? [chapterId] : null,
+            chapterIds: mode === 'chapitre' ? [Number(chapterId)] : resolvedIds,
             format,
             mode: mode === 'zip' ? 'zip' : 'single'
         })
@@ -46,7 +59,6 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                 <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Que voulez-vous exporter ?</p>
                 <div className='flex flex-col gap-2'>
 
-                    {/* tome entier */}
                     <button
                         onClick={() => setMode('tome')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'tome' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
@@ -58,7 +70,6 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                         </div>
                     </button>
 
-                    {/* un chapitre */}
                     <button
                         onClick={() => setMode('chapitre')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'chapitre' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
@@ -70,7 +81,6 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                         </div>
                     </button>
 
-                    {/* zip */}
                     <button
                         onClick={() => setMode('zip')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm transition-colors text-left ${mode === 'zip' ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400 hover:border-primary-200'}`}
@@ -85,6 +95,27 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                 </div>
             </div>
 
+            {/* version adulte/familiale — uniquement si ya des variantes */}
+            {hasVariants && (
+                <div className='flex flex-col gap-2'>
+                    <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Version</p>
+                    <div className='flex gap-2'>
+                        <button
+                            onClick={() => setExportAdult(false)}
+                            className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${!exportAdult ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400'}`}
+                        >
+                            👨‍👩‍👧 Familiale
+                        </button>
+                        <button
+                            onClick={() => setExportAdult(true)}
+                            className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${exportAdult ? 'bg-primary-100 border-primary-300 text-primary-600' : 'border-gray-200 text-gray-400'}`}
+                        >
+                            🔞 Adulte
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* select chapitre si mode chapitre */}
             {mode === 'chapitre' && (
                 <div className='flex flex-col gap-2'>
@@ -94,7 +125,7 @@ export default function ModalExport({ book, tome, chapters, selectedChapter }) {
                         onChange={(e) => setChapterId(e.target.value)}
                         className='w-full px-3 py-2 border border-primary-200 rounded-lg text-sm text-primary-600 outline-none bg-primary-50'
                     >
-                        {chapters.map(ch => (
+                        {visibleChapters.map(ch => (
                             <option key={ch.id} value={ch.id}>{ch.title}</option>
                         ))}
                     </select>
