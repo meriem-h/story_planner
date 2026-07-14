@@ -16,7 +16,7 @@ export default function Modal({ isOpen, onClose, title, children, size, maxSize 
 
             {/* modal par dessus */}
             <div
-                className="relative bg-primary-50 rounded-lg border-2 border-primary-100 p-6 shadow-xl z-10"
+                className="relative bg-primary-50 rounded-lg border-2 border-primary-100 p-6 shadow-xl z-20"
                 style={{
                     width: size ? `${size}%` : 'auto',
                     ...(maxSize && { maxWidth: `${maxSize}%` }),
@@ -24,7 +24,7 @@ export default function Modal({ isOpen, onClose, title, children, size, maxSize 
                     height: height ? `${height}vh` : 'auto',
                     ...(maxHeight && { maxHeight: `${maxHeight}vh` }),
                     ...(minHeight && { minHeight: `${minHeight}vh` }),
-                    overflow: 'hidden'
+                    
                 }}
             >
 

@@ -15,7 +15,7 @@ import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
 import ModalFamilyTree from '../modal/ModalFamilyTree';
 
-export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, onCloseFullscreen, unlockedBookIds, unlockBook, lockBook, adultChapters, setAdultChapters }) {
+export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, onCloseFullscreen, unlockedBookIds, unlockBook, lockBook }) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeView, setActiveView] = useState('chapter')
     const [isGalleryOpen, setIsGalleryOpen] = useState(false)
@@ -28,16 +28,13 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
     const [isThemeOpen, setIsThemeOpen] = useState(false)
 
-    // const [content, setContent] = useState(<Chapter {...chapterProps} />)
-
     const chapterProps = {
         chapters, selectedChapter, setSelectedChapter,
         books, selectedBook, setSelectedBook,
         addChapter, addBook, fetchChapters,
         tomes, selectedTome, setSelectedTome,
         fetchTomes,
-        unlockedBookIds, unlockBook, lockBook,
-        adultChapters, setAdultChapters
+        unlockedBookIds, unlockBook, lockBook
     }
 
     const closeAllModals = () => {
@@ -49,16 +46,17 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         onCloseFullscreen(false)
     }
 
+    const [content, setContent] = useState(<Chapter {...chapterProps} />)
 
 
-    // useEffect(() => {
-    //     if (activeView === 'chapter') {
-    //         setContent(<Chapter {...chapterProps} />)
-    //     }
-    //     if (activeView === 'snippet') {
-    //         setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
-    //     }
-    // }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
+    useEffect(() => {
+        if (activeView === 'chapter') {
+            setContent(<Chapter {...chapterProps} />)
+        }
+        if (activeView === 'snippet') {
+            setContent(<Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} />)
+        }
+    }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
 
     const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-primary-600 text-primary-100' : 'bg-primary-400 text-primary-100 hover:bg-primary-500'}`
 
@@ -137,16 +135,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                         <X />
                     </button>
                 </div>
-
-                {/* <div className='flex-1 min-h-0'>{content}</div> */}
-                <div className='flex-1 min-h-0'>
-                    {activeView === 'chapter' && <Chapter {...chapterProps} />}
-                    {activeView === 'character' && <Character selectedBook={selectedBook} />}
-                    {activeView === 'lore' && <Lore selectedBook={selectedBook} />}
-                    {activeView === 'snippet' && <Snippet selectedBook={selectedBook} selectedTome={selectedTome} chapters={chapters} refreshTimeline={refreshTimeline} />}
-                    {activeView === 'note' && <Note selectedBook={selectedBook} />}
-                </div>
-
+                <div className='flex-1 min-h-0'>{content}</div>
             </div>
 
             {/* Sidebar fermée */}
