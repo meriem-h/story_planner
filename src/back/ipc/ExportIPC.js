@@ -228,7 +228,6 @@ async function buildPdfBuffer(title, chapters, showTitle, authorName = '') {
                 <div class="title-page">
                     ${authorName ? `<p class="author">${authorName}</p>` : ''}
                     <h1>${title}</h1>
-                    <p class="wordcount">${wordCount.toLocaleString()} mots</p>
                 </div>
             ` : ''}
 
