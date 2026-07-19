@@ -92,6 +92,7 @@ function migrate(db) {
             title TEXT NOT NULL,
             parent_grade_id INTEGER DEFAULT NULL,
             position INTEGER DEFAULT 0,
+            rank INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE,
@@ -225,6 +226,19 @@ function migrate(db) {
     ]
 
     tables.forEach(query => db.run(query))
+
+    // alterations : colonnes ajoutees apres la creation initiale des tables.
+    // Le try/catch ignore l'erreur si la colonne existe deja (cas d'une base existante).
+    const alterations = []
+
+    alterations.forEach(query => {
+        try {
+            db.run(query)
+        } catch (e) {
+            // colonne deja existante, on ignore
+        }
+    })
+
     console.log('✅ Tables SQLite créées/vérifiées')
 }
 

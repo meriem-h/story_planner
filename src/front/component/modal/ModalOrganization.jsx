@@ -5,9 +5,6 @@ import ModalImage from './ModalImage'
 import ModalAssignGrade from './ModalAssignGrade'
 import { Network, BadgePlus, Pen, Trash2, AlertTriangle, Settings, Check, Users, ZoomIn, ZoomOut, Maximize } from 'lucide-react'
 
-// petite confirmation inline reutilisable (independante de ModalDelete qui gere son propre
-// appel api(`${table}:delete`) -- ici on a besoin de logique supplementaire apres suppression,
-// comme rafraichir l'arbre ou fermer le formulaire en cours)
 function ConfirmInline({ isOpen, onClose, onConfirm, message }) {
     if (!isOpen) return null
     return (
@@ -34,24 +31,17 @@ function ConfirmInline({ isOpen, onClose, onConfirm, message }) {
     )
 }
 
-// largeur/hauteur d'une case de grade dans le svg, et espacement entre niveaux
-// dimensions de base : MIN_NODE_WIDTH/EDIT_NODE_HEIGHT pour les cases vides ou en mode edition,
-// CARD_WIDTH/CARD_HEIGHT pour une mini-carte "personne" (avatar + nom) a l'interieur d'une case
-// occupee. La largeur/hauteur reelle d'une case occupee depend du nombre de personnes qu'elle
-// contient (calculee dynamiquement, voir getNodeSize), donc plus aucun chevauchement ni texte
-// qui depasse, peu importe combien de gens partagent le meme grade.
 const MIN_NODE_WIDTH = 150
 const EDIT_NODE_HEIGHT = 70
 const CARD_WIDTH = 92
 const CARD_HEIGHT = 88
 const CARD_GAP = 10
-const CARDS_PER_ROW = 3 // au-dela de 3 personnes sur un meme grade, on passe a la ligne suivante
+const CARDS_PER_ROW = 3
 const AVATAR_RADIUS = 26
 const PADDING = 14
 const LEVEL_GAP = 70
 const SIBLING_GAP = 24
 
-// bornes et pas du zoom de l'organigramme (1 = taille reelle)
 const ZOOM_MIN = 0.3
 const ZOOM_MAX = 2
 const ZOOM_STEP = 0.1
@@ -65,13 +55,9 @@ export default function ModalOrganization(props) {
 
     const [organizations, setOrganizations] = useState([])
     const [tree, setTree] = useState([])
-    const [gradesByCharacter, setGradesByCharacter] = useState({}) // { characterId: ligne_grade | null }
+    const [gradesByCharacter, setGradesByCharacter] = useState({})
 
-    // mode 'view' = organigramme + selection de persos (par defaut)
-    // mode 'edit' = creation/edition/suppression/reorganisation des grades, persos masques
     const [mode, setMode] = useState('view')
-
-    // niveau de zoom de l'organigramme (1 = 100%), reinitialise a chaque changement d'organisation
     const [zoom, setZoom] = useState(1)
 
     const [selectedOrgId, setSelectedOrgId] = useState(() => {
@@ -87,28 +73,21 @@ export default function ModalOrganization(props) {
         return saved ? JSON.parse(saved) : []
     })
 
-    // creation rapide d'une organisation, en popup separee (ne deplace jamais le select)
     const [isAddingOrg, setIsAddingOrg] = useState(false)
     const [newOrgName, setNewOrgName] = useState('')
 
-    // formulaire grade (mode edit) : null = ferme, sinon { grade: null|existing }
     const [gradeForm, setGradeForm] = useState(null)
     const [gradeTitle, setGradeTitle] = useState('')
     const [gradeParentId, setGradeParentId] = useState('')
+    const [gradeRank, setGradeRank] = useState(1)
     const [gradeToDelete, setGradeToDelete] = useState(null)
     const [isConfirmGradeOpen, setIsConfirmGradeOpen] = useState(false)
     const [gradeError, setGradeError] = useState(null)
 
-    // case survolee (mode edit, pour afficher ses boutons d'action) + drag and drop
     const [hoveredId, setHoveredId] = useState(null)
     const [dragGrade, setDragGrade] = useState(null)
     const [dragOverId, setDragOverId] = useState(null)
-
-    // avatar actuellement survole (cle composite nodeId-characterId), pour l'agrandir et le
-    // faire passer au-dessus de tout le reste au survol
     const [hoveredAvatarKey, setHoveredAvatarKey] = useState(null)
-
-    // personnage pour lequel la popup d'attribution de grade est ouverte (null = fermee)
     const [characterForGradeAssign, setCharacterForGradeAssign] = useState(null)
 
     useEffect(() => {
@@ -117,14 +96,12 @@ export default function ModalOrganization(props) {
         fetchOrganizations()
     }, [])
 
-    // si rien n'est sauvegarde (ou si l'orga sauvegardee n'existe plus), on prend la 1ere organisation
     useEffect(() => {
         if (organizations.length === 0) return
         const stillExists = organizations.some(o => o.id === selectedOrgId)
         if (!selectedOrgId || !stillExists) setSelectedOrgId(organizations[0].id)
     }, [organizations])
 
-    // pareil pour le chapitre : par defaut le premier, sinon on garde celui sauvegarde s'il existe encore
     useEffect(() => {
         if (chapters.length === 0) return
         const stillExists = chapters.some(c => c.id === selectedChapterId)
@@ -173,7 +150,6 @@ export default function ModalOrganization(props) {
             .filter(r => r.success)
             .flatMap((r, index) => r.data.map(ch => ({ ...ch, tome_title: tomesResult.data[index].title, tome_number: tomesResult.data[index].number })))
 
-        // trié par numéro de tome puis position du chapitre, pour un affichage cohérent dans les pills
         merged.sort((a, b) => (a.tome_number - b.tome_number) || (a.position - b.position))
         setChapters(merged)
     }
@@ -203,10 +179,6 @@ export default function ModalOrganization(props) {
         )
     }
 
-    // selectionne ou deselectionne en bloc tous les personnages ayant au moins une attribution
-    // dans l'organisation actuellement choisie. Si tous sont deja selectionnes -> on les retire
-    // tous ; sinon -> on ajoute ceux qui manquent (sans toucher aux persos d'autres organisations
-    // deja selectionnes par ailleurs).
     const toggleAllOrgMembers = async () => {
         if (!selectedOrgId) return
         const result = await api('characterGrade:findCharacterIdsByOrganization', selectedOrgId)
@@ -232,9 +204,6 @@ export default function ModalOrganization(props) {
         }
     }
 
-    // --- gestion des grades (mode edit) ---
-
-    // liste plate de tous les grades (pour le select "superieur direct"), avec leur profondeur
     const flattenForSelect = (nodes, depth = 0, acc = []) => {
         nodes.forEach(n => {
             acc.push({ id: n.id, title: n.title, depth })
@@ -248,6 +217,7 @@ export default function ModalOrganization(props) {
         setGradeForm({ grade: null })
         setGradeTitle('')
         setGradeParentId('')
+        setGradeRank(1)
         setGradeError(null)
     }
 
@@ -255,6 +225,7 @@ export default function ModalOrganization(props) {
         setGradeForm({ grade: null })
         setGradeTitle('')
         setGradeParentId(parentGrade.id)
+        setGradeRank(1)
         setGradeError(null)
     }
 
@@ -262,6 +233,7 @@ export default function ModalOrganization(props) {
         setGradeForm({ grade })
         setGradeTitle(grade.title)
         setGradeParentId(grade.parent_grade_id || '')
+        setGradeRank(grade.rank || 1)
         setGradeError(null)
     }
 
@@ -279,6 +251,7 @@ export default function ModalOrganization(props) {
             organization_id: selectedOrgId,
             title: gradeTitle.trim(),
             parent_grade_id: gradeParentId || null,
+            rank: gradeRank,
         }
 
         const result = gradeForm.grade
@@ -300,28 +273,21 @@ export default function ModalOrganization(props) {
         await fetchTree()
     }
 
-    // bascule entre les deux modes : en sortant de edit, on referme tout formulaire en cours
     const toggleMode = () => {
         if (mode === 'edit') closeGradeForm()
         setMode(prev => prev === 'view' ? 'edit' : 'view')
     }
 
-    // --- zoom de l'organigramme ---
-
     const zoomIn = () => setZoom(z => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100))
     const zoomOut = () => setZoom(z => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100))
     const zoomReset = () => setZoom(1)
 
-    // zoom a la molette uniquement si Ctrl/Cmd est maintenu, pour ne pas gener le scroll normal
-    // de la zone (qui sert a se deplacer dans l'arbre quand il est plus grand que la fenetre)
     const handleWheelZoom = (e) => {
         if (!e.ctrlKey && !e.metaKey) return
         e.preventDefault()
         if (e.deltaY < 0) zoomIn()
         else zoomOut()
     }
-
-    // --- drag and drop par fratrie (memes parent_grade_id uniquement), mode edit seulement ---
 
     const handleDragStart = (grade) => setDragGrade(grade)
 
@@ -332,8 +298,6 @@ export default function ModalOrganization(props) {
         }
     }
 
-    // retrouve le tableau (reference live de l'arbre courant) qui contient la fratrie
-    // partageant le parentId donne. Si parentId est null/vide, c'est le tableau racine.
     const findSiblings = (nodes, parentId) => {
         if (!parentId) return nodes
         for (const n of nodes) {
@@ -350,7 +314,7 @@ export default function ModalOrganization(props) {
         if (!dragGrade || dragGrade.id === targetGrade.id) return
         if (dragGrade.parent_grade_id !== targetGrade.parent_grade_id) {
             setDragGrade(null)
-            return // pas de deplacement vers une autre fratrie depuis ce drag simple
+            return
         }
 
         const siblings = findSiblings(tree, dragGrade.parent_grade_id)
@@ -363,9 +327,6 @@ export default function ModalOrganization(props) {
         await fetchTree()
     }
 
-    // regroupe les personnages selectionnes par grade_id (plusieurs persos peuvent partager
-    // le meme grade). Les persos sans ligne en bdd pour ce chapitre -> grade le plus bas implicite,
-    // regroupes sous la cle speciale "__lowest__".
     const charactersByGradeId = useMemo(() => {
         const map = {}
         for (const charId of selectedCharacterIds) {
@@ -379,9 +340,6 @@ export default function ModalOrganization(props) {
         return map
     }, [selectedCharacterIds, gradesByCharacter, character])
 
-    // decoupe un titre en 1 ou 2 lignes maximum pour qu'il ne deborde jamais de la case.
-    // Coupe sur un espace le plus proche du milieu, jamais au milieu d'un mot. Si meme la
-    // 2eme ligne est trop longue, elle est tronquee avec "...".
     const wrapTitle = (title, maxCharsPerLine = 18) => {
         if (!title || title.length <= maxCharsPerLine) return [title]
 
@@ -392,7 +350,6 @@ export default function ModalOrganization(props) {
             line1 += (line1 ? ' ' : '') + words[i]
             i++
         }
-        // au moins un mot sur la 1ere ligne, meme s'il depasse legerement, pour eviter une ligne vide
         if (!line1 && words.length > 0) { line1 = words[0]; i = 1 }
 
         let line2 = words.slice(i).join(' ')
@@ -401,12 +358,9 @@ export default function ModalOrganization(props) {
         return line2 ? [line1, line2] : [line1]
     }
 
-    // taille reelle d'une case : en mode edit, taille fixe (pas d'occupants a afficher).
-    // En mode vue, la case s'agrandit selon le nombre de personnes qui partagent ce grade
-    // (disposees en grille de CARDS_PER_ROW colonnes max), pour que rien ne deborde jamais.
     const getNodeSize = (node) => {
         const titleLines = wrapTitle(node.title).length
-        const titleHeight = titleLines === 2 ? 44 : 30 // place reservee en haut de la case pour le titre
+        const titleHeight = titleLines === 2 ? 44 : 30
 
         if (mode === 'edit') return { width: MIN_NODE_WIDTH, height: Math.max(EDIT_NODE_HEIGHT, titleHeight + 40) }
 
@@ -420,11 +374,6 @@ export default function ModalOrganization(props) {
         return { width, height, titleHeight }
     }
 
-    // calcule les coordonnees (x, y) de chaque noeud de l'arbre pour le rendu svg.
-    // Algorithme : largeur de sous-arbre calculee recursivement a partir de la taille reelle
-    // de chaque case (et non plus une constante fixe), hauteur uniforme par NIVEAU de
-    // profondeur (le niveau le plus "haut" dicte le y de tous les niveaux suivants), pour que
-    // toutes les cases d'une meme rangee restent alignees meme si certaines sont plus hautes.
     const layout = useMemo(() => {
         const positions = []
         const edges = []
@@ -443,18 +392,26 @@ export default function ModalOrganization(props) {
             return Math.max(ownWidth, childrenWidth)
         }
 
-        // hauteur max des cases a chaque profondeur, pour aligner toute une rangee sur la plus
-        // haute case de cette rangee (sinon les niveaux suivants seraient decales de travers)
+        // calcule la profondeur visuelle max de tout le sous-arbre d'un noeud,
+        // en tenant compte du rank de chaque enfant
+        const maxVisualDepth = (node, depth) => {
+            const vDepth = depth + (node.rank ? node.rank - 1 : 0)
+            if (node.children.length === 0) return vDepth
+            return Math.max(...node.children.map(c => maxVisualDepth(c, vDepth + 1)))
+        }
+
+        // collecte la hauteur max par profondeur visuelle (en tenant compte du rank)
         const maxHeightByDepth = {}
         const collectHeights = (nodes, depth) => {
             nodes.forEach(n => {
-                maxHeightByDepth[depth] = Math.max(maxHeightByDepth[depth] || 0, sizeById[n.id].height)
-                collectHeights(n.children, depth + 1)
+                const vDepth = depth + (n.rank ? n.rank - 1 : 0)
+                maxHeightByDepth[vDepth] = Math.max(maxHeightByDepth[vDepth] || 0, sizeById[n.id].height)
+                collectHeights(n.children, vDepth + 1)
             })
         }
         collectHeights(tree, 0)
 
-        // y de depart cumule de chaque profondeur (somme des hauteurs max des niveaux precedents + gaps)
+        // y de depart cumule par profondeur visuelle
         const yByDepth = {}
         let cumulY = 0
         Object.keys(maxHeightByDepth).map(Number).sort((a, b) => a - b).forEach(depth => {
@@ -462,17 +419,19 @@ export default function ModalOrganization(props) {
             cumulY += maxHeightByDepth[depth] + LEVEL_GAP
         })
 
+        // place chaque noeud a sa profondeur visuelle (depth + rank - 1)
         const place = (node, x, depth) => {
+            const vDepth = depth + (node.rank ? node.rank - 1 : 0)
             const width = subtreeWidth(node)
             const centerX = x + width / 2
-            const y = yByDepth[depth]
+            const y = yByDepth[vDepth] ?? (vDepth * (EDIT_NODE_HEIGHT + LEVEL_GAP))
 
             positions.push({ node, x: centerX, y, ...sizeById[node.id] })
 
             let childX = x
             node.children.forEach(child => {
                 const childWidth = subtreeWidth(child)
-                place(child, childX, depth + 1)
+                place(child, childX, vDepth + 1)
                 edges.push({ fromId: node.id, toId: child.id })
                 childX += childWidth + SIBLING_GAP
             })
@@ -521,14 +480,8 @@ export default function ModalOrganization(props) {
         })
     }
 
-    // initiale a afficher dans un rond vide (pas de perso) : premiere lettre du titre/nom
     const initialOf = (text) => text?.trim()?.charAt(0)?.toUpperCase() || '?'
 
-    // un avatar individuel (rond) : photo du perso si dispo, sinon initiale. Utilise aussi bien
-    // pour un perso que, en mode vide, pour le grade lui-meme (avec son titre comme label).
-    // avatarKey permet de savoir si CET avatar precis est celui actuellement survole (pour
-    // l'agrandir legerement) ; onAvatarClick/onAvatarHover restent optionnels (cases vides
-    // n'ont pas besoin d'etre cliquables).
     const renderAvatar = (avatarKey, cx, cy, imageUrl, label, isEmpty, radius = AVATAR_RADIUS, onAvatarClick = null) => {
         const clipId = `clip-${avatarKey}`
         const isHovered = hoveredAvatarKey === avatarKey
@@ -584,7 +537,6 @@ export default function ModalOrganization(props) {
 
     const renderNodes = () => {
         if (mode === 'edit') {
-            // mode edition : case simple (titre seul), taille fixe, draggable
             return layout.positions.map(({ node, x, y, width, height }) => {
                 const isDragOver = dragOverId === node.id
                 const isHovered = hoveredId === node.id
@@ -625,8 +577,6 @@ export default function ModalOrganization(props) {
             })
         }
 
-        // mode vue : grand rectangle pour le grade, contenant une grille de mini-cartes
-        // (une par personne occupant ce grade), ou une seule case vide a l'initiale du grade
         return layout.positions.map(({ node, x, y, width, height }) => {
             const occupants = charactersByGradeId[node.id] || []
             const hasOccupants = occupants.length > 0
@@ -644,8 +594,6 @@ export default function ModalOrganization(props) {
                         stroke={hasOccupants ? 'var(--primary-400, #60a5fa)' : 'var(--primary-300, #a3a3a3)'}
                         strokeWidth={hasOccupants ? 2.5 : 1.5}
                     />
-
-                    {/* titre du grade, toujours en haut de la case, sur 1 ou 2 lignes */}
                     <text x={centerX} textAnchor='middle' fontSize='12' fontWeight='bold' fill={hasOccupants ? 'var(--primary-700, #1e3a8a)' : 'var(--primary-700, #334155)'}>
                         {titleLines.map((line, i) => (
                             <tspan key={i} x={centerX} y={titleLines.length === 2 ? 17 + i * 16 : 18} dominantBaseline='middle'>{line}</tspan>
@@ -653,10 +601,6 @@ export default function ModalOrganization(props) {
                     </text>
 
                     {hasOccupants ? (
-                        // grille de mini-cartes (avatar + nom complet dessous), une par personne.
-                        // Chaque ligne de la grille est centree independamment dans la largeur de
-                        // la case (une ligne incomplete, ex: 1 perso sur la derniere ligne, reste
-                        // centree plutot que collee a gauche).
                         occupants.map((char, i) => {
                             const row = Math.floor(i / CARDS_PER_ROW)
                             const colsInThisRow = Math.min(CARDS_PER_ROW, occupants.length - row * CARDS_PER_ROW)
@@ -699,9 +643,6 @@ export default function ModalOrganization(props) {
         })
     }
 
-    // l'avatar survole doit passer AU-DESSUS de toutes les autres cases (pas seulement la
-    // sienne) : en SVG l'empilement suit l'ordre du DOM, donc on redessine une derniere fois,
-    // tout en bas de l'arbre de rendu, uniquement la carte actuellement survolee.
     const renderHoveredAvatarOnTop = () => {
         if (mode === 'edit' || !hoveredAvatarKey) return null
 
@@ -738,9 +679,6 @@ export default function ModalOrganization(props) {
         return null
     }
 
-    // boutons d'action superposes en HTML par-dessus chaque case, visibles au survol, mode edit
-    // uniquement. Le conteneur parent (relatif) partage le meme repere que le svg, donc les
-    // coordonnees x/y du layout correspondent directement aux pixels CSS du conteneur.
     const renderEditOverlayButtons = () => {
         if (mode !== 'edit') return null
         return layout.positions.map(({ node, x, y, width }) => {
@@ -767,7 +705,6 @@ export default function ModalOrganization(props) {
         })
     }
 
-    // persos sans grade trouve pour ce chapitre (= grade le plus bas implicite), affiches a part
     const lowestOccupants = charactersByGradeId['__lowest__'] || []
 
     return (
@@ -786,8 +723,6 @@ export default function ModalOrganization(props) {
                 message={`Supprimer le grade "${gradeToDelete?.title}" ? Ses sous-grades seront remontes au niveau superieur.`}
             />
 
-            {/* popup d'attribution de grade pour un personnage. A la fermeture, on rafraichit
-                l'organigramme affiche au cas ou le perso concerne y soit visible */}
             <Modal isOpen={!!characterForGradeAssign} onClose={() => { setCharacterForGradeAssign(null); fetchGrades() }} size={45}>
                 {characterForGradeAssign && (
                     <ModalAssignGrade
@@ -798,7 +733,6 @@ export default function ModalOrganization(props) {
                 )}
             </Modal>
 
-            {/* popup separee pour creer une organisation, n'affecte jamais la mise en page des selects */}
             {isAddingOrg && (
                 <div className='fixed inset-0 z-[60] flex items-center justify-center'>
                     <div className='absolute inset-0 bg-black/50' onClick={() => setIsAddingOrg(false)} />
@@ -825,8 +759,6 @@ export default function ModalOrganization(props) {
                 </div>
             )}
 
-            {/* selection chapitre (gauche) + organisation (droite), boutons texte+icone a droite.
-                en mode edit, le chapitre n'a plus d'effet (pas de perso affiche) donc on le masque */}
             <div className='flex flex-wrap gap-4 items-end'>
                 {organizations.length > 0 && mode === 'view' && (
                     <div className='flex-1 min-w-[200px]'>
@@ -860,7 +792,6 @@ export default function ModalOrganization(props) {
                     )}
                 </div>
 
-                {/* boutons d'action, toujours a droite des selects, avec libelle texte explicite */}
                 <div className='flex gap-2 flex-shrink-0'>
                     {selectedOrgId && (
                         <button
@@ -888,8 +819,6 @@ export default function ModalOrganization(props) {
             ) : (
                 <div className='flex-1 flex gap-4 min-h-0'>
 
-                    {/* colonne gauche : personnages a afficher, masquee en mode edit (pas de
-                        selection de perso pendant l'edition des grades) */}
                     {mode === 'view' && (
                         <div className='w-64 flex-shrink-0 flex flex-col gap-2.5 overflow-y-auto hide-scrollbar pr-1'>
                             <div className='flex items-center justify-between'>
@@ -938,9 +867,6 @@ export default function ModalOrganization(props) {
                         </div>
                     )}
 
-                    {/* colonne organigramme : centree horizontalement, scrollable dans les deux
-                        sens si le contenu depasse. Prend toute la largeur en mode edit (pas de
-                        colonne perso a cote) */}
                     <div className='flex-1 flex flex-col gap-3 min-w-0'>
                         {mode === 'edit' && (
                             <div className='flex justify-end'>
@@ -951,9 +877,6 @@ export default function ModalOrganization(props) {
                         )}
 
                         <div className='flex-1 relative min-h-0'>
-                            {/* controles de zoom, flottants en haut a droite. Places dans ce
-                                conteneur EXTERIEUR a la zone scrollable (et non a l'interieur),
-                                pour rester fixes a l'ecran meme quand on scrolle dans l'arbre */}
                             {tree.length > 0 && (
                                 <div className='absolute top-3 right-3 z-20 flex items-center gap-1 bg-primary-1 rounded-lg shadow-md p-1'>
                                     <button onClick={zoomOut} title='Zoom -' className='p-1.5 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded'>
@@ -982,8 +905,7 @@ export default function ModalOrganization(props) {
                                         <p>{mode === 'edit' ? "Aucun grade encore. Commence par creer le grade le plus eleve (ex: Doyen)." : "Cette organisation n'a encore aucun grade defini."}</p>
                                     </div>
                                 ) : (
-                                    // <div className='min-w-full min-h-full flex items-start justify-center'>
-                                    <div style={{ minWidth: layout.totalWidth * zoom, minHeight: '100%' }} >
+                                    <div style={{ minWidth: layout.totalWidth * zoom, minHeight: '100%' }}>
                                         <div
                                             className='relative'
                                             style={{
@@ -1013,8 +935,6 @@ export default function ModalOrganization(props) {
                             </div>
                         </div>
 
-                        {/* persos sans grade attribue pour ce chapitre = au rang le plus bas, hors arbre
-                            formel. Uniquement en mode vue */}
                         {mode === 'view' && lowestOccupants.length > 0 && (
                             <div className='bg-primary-100 rounded-lg px-3 py-2 flex items-center gap-3 flex-shrink-0'>
                                 <span className='text-xs font-bold text-primary-600 flex-shrink-0'>Aucun grade attribue :</span>
@@ -1040,7 +960,6 @@ export default function ModalOrganization(props) {
                             </div>
                         )}
 
-                        {/* formulaire grade (creation / edition), mode edit uniquement */}
                         {mode === 'edit' && gradeForm && (
                             <div className='border-t-2 border-primary-100 pt-4 flex flex-col gap-3 flex-shrink-0'>
                                 <p className='text-sm font-bold text-primary-600'>{gradeForm.grade ? 'Modifier le grade' : 'Nouveau grade'}</p>
@@ -1068,12 +987,22 @@ export default function ModalOrganization(props) {
                                         {flatGradeOptions
                                             .filter(opt => !gradeForm.grade || opt.id !== gradeForm.grade.id)
                                             .map(opt => (
-                                                <option key={opt.id} value={opt.id}>
-                                                    {/* {'-'.repeat(opt.depth)} {opt.title} */}
-                                                    {opt.title}
-                                                </option>
+                                                <option key={opt.id} value={opt.id}>{opt.title}</option>
                                             ))}
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label className='block mb-1 text-xs text-primary-500 font-medium'>Rang hiérarchique</label>
+                                    <p className='text-xs text-primary-300 mb-1'>1 = juste sous le parent, 2 = deux niveaux en dessous, etc.</p>
+                                    <input
+                                        type='number'
+                                        min={1}
+                                        max={10}
+                                        value={gradeRank}
+                                        onChange={(e) => setGradeRank(Number(e.target.value))}
+                                        className='w-full px-3 py-2 border border-primary-200 rounded-lg text-sm outline-none focus:border-primary-400'
+                                    />
                                 </div>
 
                                 {gradeError && <p className='text-red-500 text-xs'>{gradeError}</p>}
