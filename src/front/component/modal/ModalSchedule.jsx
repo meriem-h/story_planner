@@ -3,7 +3,7 @@ import { useApi } from '../../context/ApiContext'
 import { ReactSortable } from 'react-sortablejs'
 import Modal from './Modal'
 import ModalImage from './ModalImage'
-import ModalScheduleForm from './ModalScheduleForm'
+import ModalScheduleForm from './form/ModalScheduleForm'
 import ModalScheduleDuplicate from './ModalScheduleDuplicate'
 import { BadgePlus, ChevronDown, ChevronUp, Lock, Unlock, Copy, Layers, CalendarClock } from 'lucide-react'
 

@@ -9,7 +9,6 @@ class GradeIPC extends BaseIPC {
     }
 
     custom() {
-        // liste plate des grades d'une organisation, triee par position
         ipcMain.handle('grade:findByOrganization', async (_, organizationId) => {
             try {
                 const data = await this.repo.findByOrganization(organizationId)
@@ -19,7 +18,6 @@ class GradeIPC extends BaseIPC {
             }
         })
 
-        // l'arbre complet (avec children) d'une organisation, pret a etre dessine
         ipcMain.handle('grade:getTree', async (_, organizationId) => {
             try {
                 const data = await this.repo.getTree(organizationId)
@@ -29,7 +27,6 @@ class GradeIPC extends BaseIPC {
             }
         })
 
-        // reordonne une fratrie (memes parent_grade_id) apres un drag and drop
         ipcMain.handle('grade:reorderSiblings', async (_, items) => {
             try {
                 await this.repo.reorderSiblings(items)

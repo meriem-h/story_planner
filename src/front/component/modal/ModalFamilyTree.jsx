@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useApi } from '../../context/ApiContext'
 import Modal from './Modal'
 import ModalImage from './ModalImage'
-import ModalFamilyRelationForm from './ModalFamilyRelationForm'
+import ModalFamilyRelationForm from './form/ModalFamilyRelationForm'
 import { Users2, BadgePlus, Pen, Trash2, AlertTriangle, Settings, Check, Heart, Skull, ZoomIn, ZoomOut, Maximize } from 'lucide-react'
 
 

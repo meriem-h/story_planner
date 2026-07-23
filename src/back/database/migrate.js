@@ -90,13 +90,18 @@ function migrate(db) {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             organization_id INTEGER NOT NULL,
             title TEXT NOT NULL,
-            parent_grade_id INTEGER DEFAULT NULL,
             position INTEGER DEFAULT 0,
             rank INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE,
-            FOREIGN KEY (parent_grade_id) REFERENCES grade(id) ON DELETE SET NULL
+            FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE
+        )`,
+        `CREATE TABLE IF NOT EXISTS grade_parent (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            grade_id INTEGER NOT NULL,
+            parent_grade_id INTEGER NOT NULL,
+            FOREIGN KEY (grade_id) REFERENCES grade(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_grade_id) REFERENCES grade(id) ON DELETE CASCADE
         )`,
         `CREATE TABLE IF NOT EXISTS character_grade (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -227,8 +232,6 @@ function migrate(db) {
 
     tables.forEach(query => db.run(query))
 
-    // alterations : colonnes ajoutees apres la creation initiale des tables.
-    // Le try/catch ignore l'erreur si la colonne existe deja (cas d'une base existante).
     const alterations = []
 
     alterations.forEach(query => {

@@ -1,38 +1,51 @@
 const BaseRepository = require('./BaseRepository')
+const GradeParentRepository = require('./GradeParentRepository')
 const db = require('./db')
 
 class GradeRepository extends BaseRepository {
     constructor() {
         super('grade')
+        this.gradeParent = new GradeParentRepository()
     }
 
-    // tous les grades d'une organisation, triés par position (a plat, pas encore en arbre)
     async findByOrganization(organizationId) {
         const [rows] = await db.query(
-            `SELECT * FROM grade WHERE organization_id = ? ORDER BY position ASC`,
+            `SELECT g.*, gp.id as relation_id, gp.parent_grade_id
+             FROM grade g
+             LEFT JOIN grade_parent gp ON gp.grade_id = g.id
+             WHERE g.organization_id = ?
+             ORDER BY g.position ASC`,
             [organizationId]
         )
         return rows
     }
 
-    // reconstruit l'arbre complet d'une organisation a partir de la liste plate
-    // (chaque noeud recoit un tableau "children"). Les racines (parent_grade_id NULL)
-    // sont retournees triees par position, et chaque niveau d'enfants est trie pareil.
     async getTree(organizationId) {
-        const flat = await this.findByOrganization(organizationId)
+        const rows = await this.findByOrganization(organizationId)
 
-        const byId = new Map(flat.map(g => [g.id, { ...g, children: [] }]))
-        const roots = []
-
-        for (const grade of byId.values()) {
-            if (grade.parent_grade_id && byId.has(grade.parent_grade_id)) {
-                byId.get(grade.parent_grade_id).children.push(grade)
-            } else {
-                roots.push(grade)
+        // regroupe les lignes par grade (un grade peut apparaitre plusieurs fois si plusieurs parents)
+        const byId = new Map()
+        for (const row of rows) {
+            if (!byId.has(row.id)) {
+                byId.set(row.id, { ...row, parents: [], children: [] })
+            }
+            if (row.parent_grade_id) {
+                byId.get(row.id).parents.push(row.parent_grade_id)
             }
         }
 
-        // tri recursif par position
+        // construit les children
+        for (const grade of byId.values()) {
+            for (const parentId of grade.parents) {
+                if (byId.has(parentId)) {
+                    byId.get(parentId).children.push(grade)
+                }
+            }
+        }
+
+        // racines = grades sans parents
+        const roots = [...byId.values()].filter(g => g.parents.length === 0)
+
         const sortRec = (nodes) => {
             nodes.sort((a, b) => a.position - b.position)
             nodes.forEach(n => sortRec(n.children))
@@ -42,76 +55,113 @@ class GradeRepository extends BaseRepository {
         return roots
     }
 
-    // empeche de choisir comme parent un grade qui est en fait un descendant de soi-meme
-    // (sinon on cree une boucle infinie dans l'arbre). Remonte la chaine parent_grade_id
-    // depuis candidateParentId : si on retombe sur gradeId, c'est interdit.
     async wouldCreateCycle(gradeId, candidateParentId) {
         if (!candidateParentId) return false
         if (candidateParentId === gradeId) return true
 
-        let current = await this.findById(candidateParentId)
-        const seen = new Set()
+        // remonte tous les ancetres du candidat via grade_parent
+        const visited = new Set()
+        const queue = [candidateParentId]
 
-        while (current && current.parent_grade_id) {
-            if (current.parent_grade_id === gradeId) return true
-            if (seen.has(current.id)) break // securite anti boucle deja existante
-            seen.add(current.id)
-            current = await this.findById(current.parent_grade_id)
+        while (queue.length > 0) {
+            const current = queue.shift()
+            if (current === gradeId) return true
+            if (visited.has(current)) continue
+            visited.add(current)
+
+            const [rows] = await db.query(
+                `SELECT parent_grade_id FROM grade_parent WHERE grade_id = ?`,
+                [current]
+            )
+            rows.forEach(r => queue.push(r.parent_grade_id))
         }
         return false
     }
 
-    // creation avec position calculee au sein de la fratrie (meme parent_grade_id), pas globale
     async create(data) {
-        if (data.parent_grade_id) {
-            const valid = await this.findById(data.parent_grade_id)
-            if (!valid) throw new Error('Le grade superieur choisi n\'existe pas.')
-        }
+        const { parent_grade_ids = [], ...gradeData } = data
 
+        // position au sein de la fratrie (ou racine si pas de parents)
+        const firstParentId = parent_grade_ids[0] || null
         const [rows] = await db.query(
-            `SELECT MAX(position) as maxPos FROM grade WHERE organization_id = ? AND parent_grade_id ${data.parent_grade_id ? '= ?' : 'IS NULL'}`,
-            data.parent_grade_id ? [data.organization_id, data.parent_grade_id] : [data.organization_id]
+            `SELECT MAX(position) as maxPos FROM grade WHERE organization_id = ?`,
+            [gradeData.organization_id]
         )
-        const cleanData = await this.clean(data)
+        const cleanData = await this.clean(gradeData)
         cleanData.position = (rows[0].maxPos || 0) + 1
 
         const [result] = await db.query(`INSERT INTO grade SET ?`, [cleanData])
-        return result.insertId
-    }
+        const newId = result.insertId
 
-    // mise a jour avec verification anti-cycle si on change le parent
-    async update(id, data) {
-        if (data.parent_grade_id) {
-            const cycle = await this.wouldCreateCycle(id, data.parent_grade_id)
-            if (cycle) throw new Error('Ce choix creerait une boucle dans la hierarchie (un grade ne peut pas dependre de lui-meme ou d\'un de ses subordonnes).')
+        // insert les relations dans grade_parent
+        for (const parentId of parent_grade_ids) {
+            await this.gradeParent.create({ grade_id: newId, parent_grade_id: parentId })
         }
-        return super.update(id, data)
+
+        return newId
     }
 
-    // reordonne les grades PARMI UNE MEME FRATRIE (meme parent_grade_id). On ne touche
-    // jamais a position au niveau global de l'organisation, seulement au sein du groupe
-    // de freres/soeurs concerne, pour ne pas perturber les autres branches de l'arbre.
+    async update(id, data) {
+        const { parent_grade_ids = null, ...gradeData } = data
+
+        // verification anti-cycle pour chaque parent
+        if (parent_grade_ids) {
+            for (const parentId of parent_grade_ids) {
+                const cycle = await this.wouldCreateCycle(id, parentId)
+                if (cycle) throw new Error('Ce choix creerait une boucle dans la hierarchie.')
+            }
+
+            // remplace toutes les relations existantes
+            await db.query(`DELETE FROM grade_parent WHERE grade_id = ?`, [id])
+            for (const parentId of parent_grade_ids) {
+                await this.gradeParent.create({ grade_id: id, parent_grade_id: parentId })
+            }
+        }
+
+        return super.update(id, gradeData)
+    }
+
+    async delete(id) {
+        // remonte les enfants vers les parents du grade supprime
+        const [parents] = await db.query(
+            `SELECT parent_grade_id FROM grade_parent WHERE grade_id = ?`,
+            [id]
+        )
+        const [children] = await db.query(
+            `SELECT grade_id FROM grade_parent WHERE parent_grade_id = ?`,
+            [id]
+        )
+
+        // pour chaque enfant, on remplace le lien vers "id" par les parents de "id"
+        for (const child of children) {
+            await db.query(
+                `DELETE FROM grade_parent WHERE grade_id = ? AND parent_grade_id = ?`,
+                [child.grade_id, id]
+            )
+            for (const parent of parents) {
+                // evite les doublons
+                const [existing] = await db.query(
+                    `SELECT id FROM grade_parent WHERE grade_id = ? AND parent_grade_id = ?`,
+                    [child.grade_id, parent.parent_grade_id]
+                )
+                if (existing.length === 0) {
+                    await this.gradeParent.create({
+                        grade_id: child.grade_id,
+                        parent_grade_id: parent.parent_grade_id
+                    })
+                }
+            }
+        }
+
+        return super.delete(id)
+    }
+
     async reorderSiblings(items) {
         const promises = items.map((item, index) =>
             db.query(`UPDATE grade SET position = ? WHERE id = ?`, [index + 1, item.id])
         )
         await Promise.all(promises)
         return true
-    }
-
-    // suppression d'un grade : les enfants directs sont "remontes" au parent du grade supprime
-    // (plutot que detaches a la racine, ce qui casserait visuellement l'arbre). Si le grade
-    // supprime etait une racine, ses enfants deviennent eux-memes racines.
-    async delete(id) {
-        const grade = await this.findById(id)
-        if (!grade) return 0
-
-        await db.query(
-            `UPDATE grade SET parent_grade_id = ? WHERE parent_grade_id = ?`,
-            [grade.parent_grade_id, id]
-        )
-
-        return super.delete(id)
     }
 }
 

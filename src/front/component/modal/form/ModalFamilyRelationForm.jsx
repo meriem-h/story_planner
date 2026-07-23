@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useApi } from '../../context/ApiContext'
+import { useApi } from '../../../context/ApiContext'
 import { Pen, Trash2, X, Plus } from 'lucide-react'
 
 // types de relation proposes dans le select, dans un ordre narratif logique

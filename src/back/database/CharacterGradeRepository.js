@@ -123,7 +123,7 @@ class CharacterGradeRepository extends BaseRepository {
     // (= grade le plus bas implicite, gere cote front/affichage).
     async getGradeForCharacterAtChapter(characterId, organizationId, targetChapterId) {
         const [rows] = await db.query(
-            `SELECT cg.*, g.title AS grade_title, g.parent_grade_id
+            `SELECT cg.*, g.title AS grade_title
              FROM character_grade cg
              JOIN grade g ON g.id = cg.grade_id
              LEFT JOIN chapter cd ON cd.id = cg.chapter_id_debut

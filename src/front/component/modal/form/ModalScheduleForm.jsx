@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Clock, Trash2, Copy } from 'lucide-react'
-import FormField from '../FormField'
-import { useApi } from '../../context/ApiContext'
+import FormField from '../../FormField'
+import { useApi } from '../../../context/ApiContext'
 
 const COLOR_OPTIONS = [
     '#93c5fd', '#60a5fa', '#86efac', '#4ade80',
