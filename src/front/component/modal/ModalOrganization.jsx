@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useApi } from '../../context/ApiContext'
 import Modal from './Modal'
 import ModalImage from './ModalImage'
@@ -77,6 +77,8 @@ export default function ModalOrganization(props) {
     const [hoveredAvatarKey, setHoveredAvatarKey] = useState(null)
     const [characterForGradeAssign, setCharacterForGradeAssign] = useState(null)
 
+    const isFirstMount = useRef(true)
+
     useEffect(() => {
         fetchCharacter()
         fetchAllChapters()
@@ -85,13 +87,13 @@ export default function ModalOrganization(props) {
 
     useEffect(() => {
         if (organizations.length === 0) return
-        const stillExists = organizations.some(o => o.id === selectedOrgId)
+        const stillExists = organizations.some(o => Number(o.id) === Number(selectedOrgId))
         if (!selectedOrgId || !stillExists) setSelectedOrgId(organizations[0].id)
     }, [organizations])
 
     useEffect(() => {
         if (chapters.length === 0) return
-        const stillExists = chapters.some(c => c.id === selectedChapterId)
+        const stillExists = chapters.some(c => Number(c.id) === Number(selectedChapterId))
         if (!selectedChapterId || !stillExists) setSelectedChapterId(chapters[0].id)
     }, [chapters])
 
@@ -108,9 +110,15 @@ export default function ModalOrganization(props) {
     }, [selectedCharacterIds])
 
     useEffect(() => {
-        if (selectedOrgId) fetchTree()
+        if (selectedOrgId) {
+            fetchTree()
+            autoSelectOrgMembers()
+        }
         setZoom(1)
-        setSelectedCharacterIds([])
+        // if (!isFirstMount.current) {
+        //     setSelectedCharacterIds([])
+        // }
+        isFirstMount.current = false
     }, [selectedOrgId])
 
     useEffect(() => {
@@ -120,6 +128,14 @@ export default function ModalOrganization(props) {
             setGradesByCharacter({})
         }
     }, [selectedOrgId, selectedChapterId, selectedCharacterIds])
+
+
+    const autoSelectOrgMembers = async () => {
+        if (!selectedOrgId) return
+        const result = await api('characterGrade:findCharacterIdsByOrganization', selectedOrgId)
+        if (!result.success) return
+        setSelectedCharacterIds(result.data)
+    }
 
     const fetchCharacter = async () => {
         const result = await api('characters:findBy', { book_id: props.book.id })
