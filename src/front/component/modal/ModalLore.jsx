@@ -12,7 +12,7 @@ export default function ModalLore({ onSuccess, book, selectedLore }) {
     const [fieldLore, setFieldLore] = useState([
         { label: 'Titre *', name: 'title', type: 'text', placeholder: 'Nom du lieu, personnage, événement...' },
         { label: 'Catégorie', name: 'category', type: 'text', placeholder: 'Lieu, Magie, Histoire...' },
-        { label: 'Contenu', name: 'content', type: 'textarea' },
+        { label: 'Contenu', name: 'content', type: 'textarea', rows : 15 },
     ])
 
     useEffect(() => {

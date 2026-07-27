@@ -7,7 +7,7 @@ import ModalView from '../modal/ModalView'
 import ModalNote from '../modal/ModalNote'
 import ModalDelete from '../modal/ModalDelete'
 
-export default function NoteLayout({ selectedBook }) {
+export default function NoteLayout({ selectedBook, refreshPostit }) {
     const api = useApi()
     const [notes, setNotes] = useState([])
     const [isOpen, setIsOpen] = useState(false)
@@ -30,6 +30,7 @@ export default function NoteLayout({ selectedBook }) {
     const handleNoteCreated = () => {
         fetchNotes()
         setIsOpen(false)
+        refreshPostit()
     }
 
     const handleReorder = async (newList) => {

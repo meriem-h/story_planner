@@ -35,7 +35,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
             pinned: 0,
             used: 'disponible'
         }
-    )    
+    )
 
     const [fieldSnippet, setFieldSnippet] = useState([
         {
@@ -62,7 +62,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         })))
 
         if (!selectedSnippet?.id) {
- 
+
             setSnippet({
                 book_id: book.id,
                 tome_id: tome?.id || null,
@@ -77,7 +77,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
             return
         }
         setSnippet(selectedSnippet)
-        
+
         checkTimelineItem(selectedSnippet.id)
     }, [selectedSnippet])
 
@@ -149,7 +149,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         }
 
         onSuccess(result)
-        
+
     }
 
     return (
@@ -246,7 +246,8 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                         placeholder='Contenu du snippet...'
                         value={snippet.content || ''}
                         onChange={handleChange}
-                        className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                        rows={25}
+                        className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                     />
                 )}
 

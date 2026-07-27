@@ -75,7 +75,7 @@ const SingleField = ({ field, onChange, errors, selectClass = null }) => {
                             onChange={onChange}
                             {...(field.value !== undefined && { value: field.value })}
                             className={`${!Icon ? "rounded-lg" : "rounded-e-lg"} block w-full ${isDark ? 'text-primary-200' : 'text-primary-800'} px-3 py-2.5 border text-heading text-sm focus:ring-brand focus:border-brand placeholder:text-body`}
-                            rows={5}
+                            rows={field.rows || 5}
                         />
 
                         :

@@ -148,7 +148,8 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                             placeholder='Description du personnage...'
                             value={character.description || ''}
                             onChange={handleChange}
-                            className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                            rows={20}
+                            className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                         />
                     )}
 
@@ -158,7 +159,9 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                             placeholder='Personnalité du personnage...'
                             value={character.personality || ''}
                             onChange={handleChange}
-                            className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                            rows={20}
+
+                            className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                         />
                     )}
 
@@ -168,7 +171,9 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                             placeholder='Notes diverses...'
                             value={character.notes || ''}
                             onChange={handleChange}
-                            className='w-full h-64 px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                            rows={20}
+
+                            className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
                         />
                     )}
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { NotebookPen } from 'lucide-react'
+import { NotebookPen, Pin } from 'lucide-react'
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
 
@@ -9,24 +9,35 @@ export default function ModalNote({ onSuccess, book, selectedNote }) {
     const [error, setError] = useState(null)
     const [note, setNote] = useState(selectedNote || { book_id: book.id })
 
-    const [fieldNote, setFieldNote] = useState([
+    const [fieldTitle] = useState([
         { label: 'Titre', name: 'title', type: 'text', placeholder: 'Titre de la note' },
-        { label: 'Contenu *', name: 'content', type: 'textarea' },
     ])
+
+    const [fieldContent] = useState([
+        { label: 'Contenu *', name: 'content', type: 'textarea', rows: 20 },
+    ])
+
+    const [titleField, setTitleField] = useState(fieldTitle)
+    const [contentField, setContentField] = useState(fieldContent)
 
     useEffect(() => {
         if (!selectedNote) {
             setNote({ book_id: book.id })
-            setFieldNote(prev => prev.map(f => ({ ...f, value: undefined })))
+            setTitleField(prev => prev.map(f => ({ ...f, value: undefined })))
+            setContentField(prev => prev.map(f => ({ ...f, value: undefined })))
             return
         }
         setNote(selectedNote)
-        setFieldNote(prev => prev.map(f => ({ ...f, value: selectedNote[f.name] })))
+        setTitleField(prev => prev.map(f => ({ ...f, value: selectedNote[f.name] })))
+        setContentField(prev => prev.map(f => ({ ...f, value: selectedNote[f.name] })))
     }, [selectedNote])
 
     const handleChange = (e) => {
         setNote(prev => ({ ...prev, [e.target.name]: e.target.value }))
-        setFieldNote(prev => prev.map(f =>
+        setTitleField(prev => prev.map(f =>
+            f.name === e.target.name ? { ...f, value: e.target.value } : f
+        ))
+        setContentField(prev => prev.map(f =>
             f.name === e.target.name ? { ...f, value: e.target.value } : f
         ))
     }
@@ -67,7 +78,30 @@ export default function ModalNote({ onSuccess, book, selectedNote }) {
             </div>
 
             <form className='flex flex-col gap-4'>
-                <FormField fields={fieldNote} onChange={handleChange} errors={error} />
+
+                {/* deux colonnes */}
+                <div className='flex gap-4 items-start'>
+
+                    {/* colonne gauche : titre + post-it */}
+                    <div className='flex flex-col gap-4 w-1/3'>
+                        <FormField fields={titleField} onChange={handleChange} errors={error} />
+
+                        <button
+                            type="button"
+                            onClick={() => setNote(prev => ({ ...prev, is_postit: prev.is_postit ? 0 : 1 }))}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${note.is_postit ? 'bg-primary-400 text-white' : 'bg-primary-100 text-primary-400 hover:bg-primary-200'}`}
+                        >
+                            <Pin size={14} />
+                            {note.is_postit ? 'Post-it activé' : 'Ajouter en post-it'}
+                        </button>
+                    </div>
+
+                    {/* colonne droite : contenu */}
+                    <div className='flex-1'>
+                        <FormField fields={contentField} onChange={handleChange} errors={error} />
+                    </div>
+
+                </div>
 
                 {error?.all && (
                     <div className="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm">

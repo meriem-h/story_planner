@@ -14,6 +14,7 @@ import ModalGallery from '../modal/ModalGallery';
 import ModalSchedule from '../modal/ModalSchedule';
 import ModalOrganization from '../modal/ModalOrganization';
 import ModalFamilyTree from '../modal/ModalFamilyTree';
+import PostitPanel from '../PostitPanel'
 
 export default function Layout({ children, books, selectedBook, setSelectedBook, chapters, selectedChapter, setSelectedChapter, addChapter, addBook, fetchChapters, tomes, selectedTome, setSelectedTome, fetchTomes, showTimeline, setShowTimeline, refreshTimeline, onOpenFullscreen, onCloseFullscreen, unlockedBookIds, unlockBook, lockBook }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +25,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     const [isOrgOpen, setIsOrgOpen] = useState(false)
     const [isFamilyTreeOpen, setIsFamilyTreeOpen] = useState(false)
     const { theme, changeTheme, THEME_NAMES, isDark, toggleDark } = useTheme()
+    const [postitKey, setPostitKey] = useState(0)
 
     const [isFloatingOpen, setIsFloatingOpen] = useState(true)
     const [isThemeOpen, setIsThemeOpen] = useState(false)
@@ -78,11 +80,13 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
     }
     const showNote = () => {
         setActiveView('note')
-        setContent(<Note selectedBook={selectedBook} />)
+        setContent(<Note selectedBook={selectedBook} refreshPostit={() => setPostitKey(k => k+1)}/>)
     }
 
     return (
         <div className="flex h-screen">
+
+            <PostitPanel selectedBook={selectedBook} key={postitKey}/>
 
             <Modal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} size={60}>
                 <ModalGallery book={selectedBook} />
@@ -104,6 +108,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                     selectedChapter={selectedChapter}
                 />
             </Modal>
+
 
             {/* Sidebar ouverte */}
             <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} h-full flex flex-col transition-all duration-300 overflow-hidden bg-primary-200`}>
