@@ -345,7 +345,7 @@ export default function Home() {
                         ) : (
                             <div className="text-center py-6 ">
                                 <h1
-                                    className='text-3xl font-bold text-primary-300 cursor-text outline-none'
+                                    className='text-3xl font-bold text-primary-500 cursor-text outline-none'
                                     contentEditable
                                     suppressContentEditableWarning
                                     onInput={changeBookTitle}
@@ -353,7 +353,7 @@ export default function Home() {
                                     {selectedBook?.title || 'Aucun livre'}
                                 </h1>
                                 <p
-                                    className='text-lg text-primary-200 cursor-text outline-none mt-1'
+                                    className='text-lg text-primary-500 cursor-text outline-none mt-1'
                                     contentEditable
                                     suppressContentEditableWarning
                                     onInput={changeChapterTitle}
