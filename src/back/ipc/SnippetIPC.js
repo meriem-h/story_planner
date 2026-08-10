@@ -10,11 +10,27 @@ class SnippetIPC extends BaseIPC {
 
     custom() {
         ipcMain.handle('snippet:findWithoutTimeline', async (_, tomeId) => {
-            // const result = await snippetRepo.findWithoutTimeline(tomeId)
             const result = await this.repo.findWithoutTimeline(tomeId)
             return { success: true, data: result }
         })
 
+        ipcMain.handle('snippet:createVersion', async (_, snippetId) => {
+            try {
+                const id = await this.repo.createVersion(snippetId)
+                return { success: true, id }
+            } catch (err) {
+                return { success: false, message: err.message }
+            }
+        })
+
+        ipcMain.handle('snippet:setDefault', async (_, { id, version_group }) => {
+            try {
+                await this.repo.setDefault(id, version_group)
+                return { success: true }
+            } catch (err) {
+                return { success: false, message: err.message }
+            }
+        })
     }
 }
 

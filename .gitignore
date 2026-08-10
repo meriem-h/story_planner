@@ -8,6 +8,13 @@ yarn-error.log*
 lerna-debug.log*
 commande.txt
 
+src/front/component/utils
+src/front/component/editor
+src/front/component/Editor_old_V1.jsx
+src/front/component/Editor_old_V2.jsx
+src/front/component/Editor_old_V3.jsx
+src/front/component/Editor_old_V4.jsx
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 

@@ -144,6 +144,18 @@ class BaseRepository {
         return result.affectedRows
     }
 
+    async duplicate(id, overrides = {}) {
+        const original = await this.findById(id)
+        if (!original) return null
+
+        delete original.id
+        delete original.created_at
+        delete original.updated_at
+
+        const newData = { ...original, ...overrides }
+        return await this.create(newData)
+    }
+
     async delete(id) {
         const [result] = await db.query(
             `DELETE FROM ${this.table} WHERE id = ?`,

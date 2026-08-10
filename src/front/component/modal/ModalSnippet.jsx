@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Lightbulb, Pin, GitBranch } from 'lucide-react'
+import { Lightbulb, Pin, GitBranch, GitFork, Star } from 'lucide-react'
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
 
@@ -18,15 +18,17 @@ const TYPE_LABELS = {
 const TABS = [
     { key: 'infos', label: 'Infos' },
     { key: 'contenu', label: 'Contenu' },
+    { key: 'versions', label: 'Versions' },
 ]
 
-export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, chapters }) {
+export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, allSnippets, chapters }) {
 
     const api = useApi()
     const [error, setError] = useState(null)
     const [activeTab, setActiveTab] = useState('infos')
     const [showTimeline, setShowTimeline] = useState(false)
     const [timelineChapterId, setTimelineChapterId] = useState(null)
+    const [newVersionLabel, setNewVersionLabel] = useState('')
     const [snippet, setSnippet] = useState(
         selectedSnippet || {
             book_id: book.id,
@@ -51,8 +53,12 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         { label: 'Titre', name: 'title', type: 'text', placeholder: 'Titre optionnel' },
     ])
 
-    useEffect(() => {
+    const versions = allSnippets.filter(s =>
+        s.version_group !== null && s.version_group === snippet.version_group
+    )
+    const hasVersions = versions.length > 1
 
+    useEffect(() => {
         setFieldSnippet(prev => prev.map(f => ({
             ...f,
             value: selectedSnippet?.[f.name],
@@ -62,7 +68,6 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         })))
 
         if (!selectedSnippet?.id) {
-
             setSnippet({
                 book_id: book.id,
                 tome_id: tome?.id || null,
@@ -77,7 +82,6 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
             return
         }
         setSnippet(selectedSnippet)
-
         checkTimelineItem(selectedSnippet.id)
     }, [selectedSnippet])
 
@@ -99,6 +103,32 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         }))
     }
 
+    const handleVersionSwitch = (selectedId) => {
+        const version = allSnippets.find(s => s.id === Number(selectedId))
+        if (!version) return
+        setSnippet(version)
+        setFieldSnippet(prev => prev.map(f => ({
+            ...f,
+            value: version[f.name],
+            ...(f.type === 'select' && {
+                data: f.data.map(d => ({ ...d, selected: d.value === version[f.name] }))
+            })
+        })))
+    }
+
+    const handleCreateVersion = async () => {
+        const result = await api('snippet:createVersion', { snippetId: selectedSnippet.id, label: newVersionLabel.trim() || null })
+
+        if (!result.success) return
+        setNewVersionLabel('')
+        onSuccess(result)
+    }
+
+    const handleSetDefault = async () => {
+        await api('snippet:setDefault', { id: snippet.id, version_group: snippet.version_group })
+        onSuccess({})
+    }
+
     const handleClick = async (e) => {
         e.preventDefault()
         setError(null)
@@ -114,7 +144,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         const { position, ...snippetData } = snippet
 
         const result = selectedSnippet?.id
-            ? await api('snippet:update', { id: selectedSnippet.id, data: snippetData })
+            ? await api('snippet:update', { id: snippet.id, data: snippetData })
             : await api('snippet:create', snippet)
 
         if (!result.success) {
@@ -123,7 +153,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
             return
         }
 
-        const snippetId = selectedSnippet ? selectedSnippet.id : result.id
+        const snippetId = selectedSnippet ? snippet.id : result.id
         const existing = await api('timeline:findBy', { snippet_id: snippetId })
         const hasTimelineItem = existing.success && existing.data.length > 0
 
@@ -149,7 +179,6 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
         }
 
         onSuccess(result)
-
     }
 
     return (
@@ -160,9 +189,24 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                 <div className='w-16 h-16 rounded-2xl bg-primary-300 flex items-center justify-center'>
                     <Lightbulb className='text-white' size={32} />
                 </div>
-                <p className='text-primary-800 font-bold text-lg'>
-                    {snippet.title || 'Nouveau snippet'}
-                </p>
+                <div className='flex items-center gap-2'>
+                    <p className='text-primary-800 font-bold text-lg'>
+                        {snippet.title || 'Nouveau snippet'}
+                    </p>
+                    {hasVersions && (
+                        <select
+                            value={snippet.id}
+                            onChange={(e) => handleVersionSwitch(e.target.value)}
+                            className='border border-primary-200 rounded-lg px-2 py-0.5 text-xs text-primary-600 outline-none bg-primary-50 cursor-pointer'
+                        >
+                            {versions.map(v => (
+                                <option key={v.id} value={v.id}>
+                                    v{v.version_label}{v.is_default ? ' ⭐' : ''}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
                 {tome && <p className='text-xs text-primary-400'>{tome.title}</p>}
             </div>
 
@@ -251,6 +295,60 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, c
                     />
                 )}
 
+                {activeTab === 'versions' && (
+                    <div className='flex flex-col gap-4'>
+
+                        {/* infos version actuelle */}
+                        <div className='flex flex-col gap-2'>
+                            <label className='text-xs text-primary-400 font-medium'>Label de version</label>
+                            <input
+                                type='text'
+                                name='version_label'
+                                value={snippet.version_label || ''}
+                                onChange={handleChange}
+                                placeholder='ex: 1, 2, Bis, 1.2...'
+                                className='border border-primary-200 rounded-lg px-3 py-2 text-sm text-primary-600 outline-none focus:border-primary-300'
+                            />
+                        </div>
+
+                        {/* bouton défaut */}
+                        {snippet.version_group && (
+                            <button
+                                type='button'
+                                onClick={handleSetDefault}
+                                disabled={snippet.is_default == 1}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${snippet.is_default == 1
+                                    ? 'bg-yellow-50 border-yellow-300 text-yellow-600 cursor-default'
+                                    : 'border-gray-200 text-gray-400 hover:border-yellow-300 hover:text-yellow-500'
+                                    }`}
+                            >
+                                <Star size={14} className={snippet.is_default == 1 ? 'fill-yellow-400' : ''} />
+                                {snippet.is_default == 1 ? 'Version par défaut' : 'Définir comme version par défaut'}
+                            </button>
+                        )}
+
+                        {/* créer nouvelle version */}
+                        {selectedSnippet?.id && (
+                            <div className='flex items-center gap-2 mt-2'>
+                                <input
+                                    type='text'
+                                    placeholder='Label (ex: 2, Bis...)'
+                                    value={newVersionLabel}
+                                    onChange={(e) => setNewVersionLabel(e.target.value)}
+                                    className='flex-1 border border-primary-200 rounded-lg px-3 py-2 text-sm text-primary-600 outline-none focus:border-primary-300'
+                                />
+                                <button
+                                    type='button'
+                                    onClick={handleCreateVersion}
+                                    className='flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-100 hover:bg-primary-200 text-primary-600 text-sm transition-colors whitespace-nowrap'
+                                >
+                                    <GitFork size={14} />
+                                    Nouvelle version
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* erreur + bouton toujours visibles */}

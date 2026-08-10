@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useApi } from '../../context/ApiContext'
-import { BadgePlus, Pin, Check, Tag, Filter, Search, Trash2, Pen } from 'lucide-react'
+import { BadgePlus, Pin, Check, Tag, Filter, Search, Trash2, Pen, Star } from 'lucide-react'
 import { ReactSortable } from 'react-sortablejs'
 import Modal from '../modal/Modal'
 import ModalView from '../modal/ModalView'
@@ -35,6 +35,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
 
     const api = useApi()
     const [snippets, setSnippets] = useState([])
+    const [allSnippets, setAllSnippets] = useState([])
     const [isOpen, setIsOpen] = useState(false)
     const [snippetToEdit, setSnippetToEdit] = useState(null)
     const [snippetToDelete, setSnippetToDelete] = useState(null)
@@ -45,6 +46,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
     const [search, setSearch] = useState('')
     const [itemToView, setItemToView] = useState(null)
     const [isViewOpen, setIsViewOpen] = useState(false)
+    const [openVersionSelect, setOpenVersionSelect] = useState(null)
 
     useEffect(() => {
         fetchSnippets()
@@ -54,8 +56,12 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
         const conditions = selectedTome
             ? { tome_id: selectedTome.id }
             : { book_id: selectedBook.id }
-        const result = await api('snippet:findBy', conditions)
+
+        const result = await api('snippet:findBy', { ...conditions, is_default: 1 })
+        const allResult = await api('snippet:findBy', conditions)
+
         setSnippets(result.data || [])
+        setAllSnippets(allResult.data || [])
     }
 
     const handleSnippetCreated = () => {
@@ -73,6 +79,27 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
         await api('snippet:reorder', newList.map(s => ({ id: s.id })))
     }
 
+    const handleVersionChange = (groupId, selectedId) => {
+        const version = allSnippets.find(s => s.id === Number(selectedId))
+        if (!version) return
+        setSnippets(prev => prev.map(s =>
+            s.version_group === groupId ? version : s
+        ))
+        setOpenVersionSelect(null)
+    }
+
+    const handleSetDefault = async (e, snippet) => {
+        e.stopPropagation()
+        await api('snippet:setDefault', { id: snippet.id, version_group: snippet.version_group })
+        setAllSnippets(prev => prev.map(s => ({
+            ...s,
+            is_default: s.version_group === snippet.version_group ? (s.id === snippet.id ? 1 : 0) : s.is_default
+        })))
+        setSnippets(prev => prev.map(s =>
+            s.version_group === snippet.version_group ? { ...snippet, is_default: 1 } : s
+        ))
+    }
+
     const isFiltering = !!search || filterType !== 'tous' || filterPinned
 
     const filtered = snippets
@@ -84,53 +111,96 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
             s.content.toLowerCase().includes(search.toLowerCase())
         )
 
-    const renderSnippet = (snippet) => (
-        <div
-            key={snippet.id}
-            className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
+    const renderSnippet = (snippet) => {
+        const versions = allSnippets.filter(s => s.version_group !== null && s.version_group === snippet.version_group)
+        const hasVersions = versions.length > 1
+        const isVersionOpen = openVersionSelect === snippet.id
+
+        return (
+            <div
+                key={snippet.id}
+                className={`group p-3 rounded-xl cursor-pointer transition-colors border-l-4 ${snippet.used === 'utilise' ? 'bg-green-50 border-green-200 opacity-70'
                     : snippet.used === 'abandonne' ? 'bg-red-50 border-red-200 opacity-70'
                         : 'bg-primary-50 border-primary-200 hover:bg-primary-50'
-                }`}
-            onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
-        >
-            <div className='flex justify-between items-start mb-2'>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[snippet.type] || TYPE_COLORS.autre}`}>
-                    {TYPE_LABELS[snippet.type] || snippet.type}
-                </span>
-                <div className='flex gap-1 items-center'>
-                    {snippet.pinned == 1 && <Pin size={14} className='text-primary-400 fill-orange-400' />}
-                    {snippet.used === 'utilise' && <Check size={14} className='text-green-400' />}
-                    {snippet.used === 'abandonne' && <span className='text-xs text-red-400'>❌</span>}
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setSnippetToEdit(snippet); setIsOpen(true) }}
-                        className='hidden group-hover:flex text-primary-300 hover:text-primary-500 ml-1'
-                    >
-                        <Pen size={14} />
-                    </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setSnippetToDelete(snippet.id); setIsConfirmOpen(true) }}
-                        className='hidden group-hover:flex text-red-300 hover:text-red-500 ml-1'
-                    >
-                        <Trash2 size={14} />
-                    </button>
+                    }`}
+                onClick={() => { setItemToView(snippet); setIsViewOpen(true) }}
+            >
+                <div className='flex justify-between items-start mb-2'>
+                    <div className='flex items-center gap-1.5'>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[snippet.type] || TYPE_COLORS.autre}`}>
+                            {TYPE_LABELS[snippet.type] || snippet.type}
+                        </span>
+                        {hasVersions && !isVersionOpen && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setOpenVersionSelect(snippet.id) }}
+                                className='text-xs px-2 py-0.5 rounded-full font-medium bg-primary-100 text-primary-500 hover:bg-primary-200 transition-colors'
+                            >
+                                v{snippet.version_label}
+                            </button>
+                        )}
+                        {hasVersions && isVersionOpen && (
+                            <div className='flex items-center gap-1' onClick={e => e.stopPropagation()}>
+                                <select
+                                    autoFocus
+                                    value={snippet.id}
+                                    onChange={(e) => handleVersionChange(snippet.version_group, e.target.value)}
+                                    onBlur={() => setOpenVersionSelect(null)}
+                                    className='text-xs bg-white border border-primary-200 rounded-lg px-1.5 py-0.5 text-primary-600 outline-none cursor-pointer'
+                                >
+                                    {versions.map(v => (
+                                        <option key={v.id} value={v.id}>
+                                            v{v.version_label}{v.is_default ? ' ⭐' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                {snippet.is_default !== 1 && (
+                                    <button
+                                        onClick={(e) => handleSetDefault(e, snippet)}
+                                        className='text-primary-300 hover:text-yellow-400 transition-colors'
+                                        title='Définir comme version par défaut'
+                                    >
+                                        <Star size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className='flex gap-1 items-center'>
+                        {snippet.pinned == 1 && <Pin size={14} className='text-primary-400 fill-orange-400' />}
+                        {snippet.used === 'utilise' && <Check size={14} className='text-green-400' />}
+                        {snippet.used === 'abandonne' && <span className='text-xs text-red-400'>❌</span>}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setSnippetToEdit(snippet); setIsOpen(true) }}
+                            className='hidden group-hover:flex text-primary-300 hover:text-primary-500 ml-1'
+                        >
+                            <Pen size={14} />
+                        </button>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setSnippetToDelete(snippet.id); setIsConfirmOpen(true) }}
+                            className='hidden group-hover:flex text-red-300 hover:text-red-500 ml-1'
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    </div>
                 </div>
-            </div>
-            {snippet.title && (
-                <p className='font-bold text-primary-800 text-sm mb-1'>{snippet.title}</p>
-            )}
-            <p className={`text-xs line-clamp-2 ${snippet.used === 'abandonne' ? 'text-red-300 line-through'
+
+                {snippet.title && (
+                    <p className='font-bold text-primary-800 text-sm mb-1'>{snippet.title}</p>
+                )}
+                <p className={`text-xs line-clamp-2 ${snippet.used === 'abandonne' ? 'text-red-300 line-through'
                     : snippet.used === 'utilise' ? 'text-gray-400'
                         : 'text-primary-400'
-                }`}>
-                {snippet.content}
-            </p>
-        </div>
-    )
+                    }`}>
+                    {snippet.content}
+                </p>
+            </div>
+        )
+    }
 
     return (
         <>
             <Modal isOpen={isOpen} onClose={() => { setIsOpen(false); setSnippetToEdit(null) }} size={50}>
-                <ModalSnippet onSuccess={handleSnippetCreated} book={selectedBook} tome={selectedTome} selectedSnippet={snippetToEdit} chapters={chapters} />
+                <ModalSnippet onSuccess={handleSnippetCreated} book={selectedBook} tome={selectedTome} selectedSnippet={snippetToEdit} allSnippets={allSnippets} chapters={chapters} />
             </Modal>
             <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
                 <ModalView item={itemToView} type="snippet" />
