@@ -6,18 +6,18 @@ import Modal from '../modal/Modal'
 import ModalView from '../modal/ModalView'
 import ModalSnippet from '../modal/ModalSnippet'
 import ModalDelete from '../modal/ModalDelete'
+import { useTheme } from '../../context/ThemeContext'
 
-const TYPE_COLORS = {
-    dialogue: 'bg-blue-100 text-blue-600',
-    scene: 'bg-green-100 text-green-600',
-    description: 'bg-purple-100 text-purple-600',
-    flashback: 'bg-yellow-100 text-yellow-600',
-    idee: 'bg-primary-100 text-primary-600',
-    citation: 'bg-pink-100 text-pink-600',
-    note_auteur: 'bg-gray-100 text-gray-600',
-    transition: 'bg-cyan-100 text-cyan-600',
-    autre: 'bg-gray-100 text-gray-500',
-}
+
+// const TYPE_COLORS = {
+//     dialogue:   'bg-purple-200 text-purple-700',
+//     scene:      'bg-green-200 text-green-700',
+//     flashback:  'bg-yellow-200 text-yellow-700',
+//     citation:   'bg-red-200 text-red-700',
+//     transition: 'bg-cyan-200 text-cyan-700',
+//     autre:      'bg-blue-200 text-blue-700',
+//     idee:      'bg-orange-200 text-orange-700',
+// }
 
 const TYPE_LABELS = {
     dialogue: 'Dialogue',
@@ -34,6 +34,8 @@ const TYPE_LABELS = {
 export default function SnippetLayout({ selectedBook, selectedTome, chapters, refreshTimeline }) {
 
     const api = useApi()
+    const { theme } = useTheme()
+
     const [snippets, setSnippets] = useState([])
     const [allSnippets, setAllSnippets] = useState([])
     const [isOpen, setIsOpen] = useState(false)
@@ -47,6 +49,26 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
     const [itemToView, setItemToView] = useState(null)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [openVersionSelect, setOpenVersionSelect] = useState(null)
+
+
+    const PURPLE_THEMES = ['violet', 'purple', 'fuchsia']
+    const GREEN_THEMES = ['lime', 'green', 'emerald', 'teal']
+    const YELLOW_THEMES = ['yellow', 'amber']
+    const RED_THEMES = ['red', 'rose', 'pink']
+    const CYAN_THEMES = ['cyan', 'sky']
+    const BLUE_THEMES = ['indigo', 'blue']
+    const ORANGE_THEMES = ['orange']
+
+    const TYPE_COLORS = {
+        dialogue: PURPLE_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-purple-200 text-purple-700',
+        scene: GREEN_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-green-200 text-green-700',
+        flashback: YELLOW_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-yellow-200 text-yellow-700',
+        citation: RED_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-red-200 text-red-700',
+        transition: CYAN_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-cyan-200 text-cyan-700',
+        autre: BLUE_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-blue-200 text-blue-700',
+        idee: ORANGE_THEMES.includes(theme) ? 'bg-zinc-300 text-zinc-700' : 'bg-orange-200 text-orange-700',
+    }
+
 
     useEffect(() => {
         fetchSnippets()
@@ -216,7 +238,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>
+                <p className='text-xs font-bold text-primary-700 uppercase tracking-wider'>
                     Snippets {selectedTome && <span className='normal-case font-normal'>— {selectedTome.title}</span>}
                 </p>
                 <div className='flex items-center gap-2'>
@@ -227,7 +249,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
                     >
                         <Pin size={16} />
                     </button>
-                    <button onClick={() => { setSnippetToEdit(null); setIsOpen(true) }} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                    <button onClick={() => { setSnippetToEdit(null); setIsOpen(true) }} className='text-primary-700 hover:text-primary-500 transition-colors'>
                         <BadgePlus size={20} />
                     </button>
                 </div>

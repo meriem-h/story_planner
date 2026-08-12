@@ -60,7 +60,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
         }
     }, [chapters, selectedChapter, books, selectedBook, tomes, selectedTome])
 
-    const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-primary-600 text-primary-100' : 'bg-primary-400 text-primary-100 hover:bg-primary-500'}`
+    const btnClass = (view) => `rounded-2xl p-2 transition-colors ${activeView === view ? 'bg-primary-800 text-primary-100' : 'bg-primary-600 text-primary-100 hover:bg-primary-500'}`
 
     const showChapter = () => {
         setActiveView('chapter')
@@ -111,7 +111,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
 
             {/* Sidebar ouverte */}
-            <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} h-full flex flex-col transition-all duration-300 overflow-hidden bg-primary-200`}>
+            <div className={`${isOpen ? 'w-80 px-4' : 'w-0'} h-full flex flex-col transition-all duration-300 overflow-hidden bg-primary-300`}>
                 <div className='p-4 flex gap-2 justify-center flex-shrink-0'>
                     <button className={btnClass('chapter')} title="Chapitres" onClick={showChapter}>
                         <BookOpenText />
@@ -136,7 +136,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                             <NotebookPen />
                         </button>
                     }
-                    <button className='bg-primary-400 rounded-2xl p-2 text-primary-100 hover:bg-primary-500' onClick={() => setIsOpen(!isOpen)}>
+                    <button className='bg-primary-600 rounded-2xl p-2 text-primary-100 hover:bg-primary-500' onClick={() => setIsOpen(!isOpen)}>
                         <X />
                     </button>
                 </div>
@@ -145,7 +145,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
 
             {/* Sidebar fermée */}
             <div className="flex">
-                <div className={`${isOpen && "hidden"} p-4 bg-primary-200 flex flex-col gap-4`} onClick={() => setIsOpen(!isOpen)}>
+                <div className={`${isOpen && "hidden"} p-4 bg-primary-300 flex flex-col gap-4`} onClick={() => setIsOpen(!isOpen)}>
                     {!isOpen &&
                         <>
                             <button className={btnClass('chapter')} title="Chapitres" onClick={(e) => { e.stopPropagation(); showChapter(); setIsOpen(true) }}>

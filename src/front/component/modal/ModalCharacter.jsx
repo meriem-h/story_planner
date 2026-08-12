@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
+import { useTheme } from '../../context/ThemeContext'
 import ModalImage from './ModalImage'
+
 
 const TABS = [
     { key: 'infos', label: 'Infos' },
@@ -18,6 +20,8 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
     const [activeTab, setActiveTab] = useState('infos')
     const [previewSrc, setPreviewSrc] = useState(null)
     const api = useApi()
+    const { isDark } = useTheme()
+
 
     useEffect(() => {
         fetchTypes()
@@ -149,7 +153,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                             value={character.description || ''}
                             onChange={handleChange}
                             rows={20}
-                            className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                            className={`w-full h-full px-3 py-2.5 border rounded-lg text-sm ${isDark ? 'text-primary-200' : 'text-primary-800'}  placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none`}
                         />
                     )}
 
@@ -161,7 +165,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                             onChange={handleChange}
                             rows={20}
 
-                            className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                            className={`w-full h-full px-3 py-2.5 border rounded-lg text-sm ${isDark ? 'text-primary-200' : 'text-primary-800'}  placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none`}
                         />
                     )}
 
@@ -173,7 +177,7 @@ export default function ModalCharacter({ onSuccess, book, selectedCharacter }) {
                             onChange={handleChange}
                             rows={20}
 
-                            className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                            className={`w-full h-full px-3 py-2.5 border rounded-lg text-sm ${isDark ? 'text-primary-200' : 'text-primary-800'}  placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none`}
                         />
                     )}
 

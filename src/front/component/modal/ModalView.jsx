@@ -1,5 +1,5 @@
-import React from 'react'
-import { Pin, BookOpen, ScrollText, NotebookPen, Lightbulb } from 'lucide-react'
+import React, { useState } from 'react'
+import { Pin, BookOpen, ScrollText, NotebookPen, Lightbulb, Copy, Check } from 'lucide-react'
 
 const TYPE_LABELS = {
     dialogue: 'Dialogue',
@@ -28,10 +28,18 @@ const TYPE_ICONS = {
 }
 
 export default function ModalView({ item, type }) {
+    const [copied, setCopied] = useState(false)
+
     if (!item) return null
 
+    const handleCopy = () => {
+        navigator.clipboard.writeText(item.content || item.description || '')
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
     return (
-        <div className='flex flex-col gap-4 overflow-y-auto max-h-[70vh]'>
+        <div className='flex flex-col gap-4 max-h-[70vh]'>
 
             {/* header */}
             <div className='flex items-center gap-3'>
@@ -78,12 +86,25 @@ export default function ModalView({ item, type }) {
             <div className='min-h-[200px] pb-4'>
                 {item.content || item.description ? (
                     <div>
-                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider mb-3'>
-                            {type === 'book' || type === 'tome' ? 'Description' : 'Contenu'}
-                        </p>
-                        <p className='text-primary-800 leading-relaxed whitespace-pre-wrap'>
-                            {item.content || item.description}
-                        </p>
+                        <div className='flex items-center justify-between mb-3'>
+                            <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>
+                                {type === 'book' || type === 'tome' ? 'Description' : 'Contenu'}
+                            </p>
+                            <button
+                                onClick={handleCopy}
+                                className='flex items-center gap-1.5 text-xs text-primary-300 hover:text-primary-500 transition-colors'
+                            >
+                                {copied
+                                    ? <><Check size={12} className='text-green-500' /> <span className='text-green-500'>Copié !</span></>
+                                    : <><Copy size={12} /> Copier</>
+                                }
+                            </button>
+                        </div>
+                        <div className=' max-h-[35em] overflow-y-auto hide-scrollbar '>
+                            <p className='text-primary-800 leading-relaxed whitespace-pre-wrap'>
+                                {item.content || item.description}
+                            </p>
+                        </div>
                     </div>
                 ) : (
                     <p className='text-center text-primary-300 italic pt-8'>Aucun contenu</p>

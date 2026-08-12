@@ -233,10 +233,10 @@ export default function CharacterLayout({ selectedBook }) {
             ) : (
                 <>
                     <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                        <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Personnages</p>
+                        <p className='text-xs font-bold text-primary-700 uppercase tracking-wider'>Personnages</p>
                         <button
                             onClick={() => { setSelectedCharacter(null); setIsOpen(true) }}
-                            className='text-primary-400 hover:text-primary-600 transition-colors'
+                            className='text-primary-700 hover:text-primary-600 transition-colors'
                         >
                             <BadgePlus size={20} />
                         </button>

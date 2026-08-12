@@ -310,7 +310,7 @@ export default function ChapterLayout(props) {
                         }
                     </div>
                     {props.selectedBook &&
-                        <button onClick={() => props.addBook(true)} className='text-primary-400 hover:text-primary-600 transition-colors flex-shrink-0'>
+                        <button onClick={() => props.addBook(true)} className='text-primary-600 hover:text-primary-700 transition-colors flex-shrink-0'>
                             <BadgePlus size={20} />
                         </button>
                     }
@@ -333,19 +333,19 @@ export default function ChapterLayout(props) {
                         <div className='hidden group-hover:flex gap-1'>
                             <button
                                 onClick={() => { setTomeToView(props.selectedTome); setIsViewTomeOpen(true) }}
-                                className='text-primary-400 hover:text-primary-600 transition-colors'
+                                className='text-primary-600 hover:text-primary-700 transition-colors'
                             >
                                 <Eye size={16} />
                             </button>
                             <button
                                 onClick={() => { setTomeToEdit(props.selectedTome); setIsTomeOpen(true) }}
-                                className='text-primary-400 hover:text-primary-600 transition-colors'
+                                className='text-primary-600 hover:text-primary-700 transition-colors'
                             >
                                 <Pen size={16} />
                             </button>
                             <button
                                 onClick={() => { setTomeToEdit(null); setIsTomeOpen(true) }}
-                                className='text-primary-400 hover:text-primary-600 transition-colors'
+                                className='text-primary-600 hover:text-primary-700 transition-colors'
                             >
                                 <BadgePlus size={16} />
                             </button>
@@ -357,9 +357,9 @@ export default function ChapterLayout(props) {
             {/* liste chapitres */}
             <div className='flex-1 overflow-hidden flex flex-col p-4'>
                 <div className='flex justify-between items-center mb-3'>
-                    <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Chapitres</p>
+                    <p className='text-xs font-bold text-primary-700 uppercase tracking-wider'>Chapitres</p>
                     {props.selectedBook &&
-                        <button onClick={() => props.addChapter(true)} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                        <button onClick={() => props.addChapter(true)} className='text-primary-600 hover:text-primary-500 transition-colors'>
                             <BadgePlus size={20} />
                         </button>
                     }
@@ -376,8 +376,8 @@ export default function ChapterLayout(props) {
                             <div
                                 key={chapter.id}
                                 className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${selectedFamilyId === chapter.id
-                                    ? 'bg-primary-300 text-white font-bold'
-                                    : 'hover:bg-primary-100 text-primary-800'
+                                    ? 'bg-primary-500 text-white font-bold'
+                                    : 'hover:bg-primary-100 text-primary-700'
                                     }`}
                             >
                                 {editingChapterId === chapter.id ? (

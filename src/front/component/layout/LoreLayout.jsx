@@ -103,8 +103,8 @@ export default function LoreLayout({ selectedBook }) {
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Lore</p>
-                <button onClick={() => { setLoreToEdit(null); setIsOpen(true) }} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                <p className='text-xs font-bold text-primary-700 uppercase tracking-wider'>Lore</p>
+                <button onClick={() => { setLoreToEdit(null); setIsOpen(true) }} className='text-primary-700 hover:text-primary-600 transition-colors'>
                     <BadgePlus size={20} />
                 </button>
             </div>

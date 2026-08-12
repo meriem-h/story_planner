@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Lightbulb, Pin, GitBranch, GitFork, Star } from 'lucide-react'
 import FormField from '../FormField'
 import { useApi } from '../../context/ApiContext'
+import { useTheme } from '../../context/ThemeContext'
+
 
 const TYPE_LABELS = {
     dialogue: 'Dialogue',
@@ -24,6 +26,8 @@ const TABS = [
 export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, allSnippets, chapters }) {
 
     const api = useApi()
+    const { isDark } = useTheme()
+
     const [error, setError] = useState(null)
     const [activeTab, setActiveTab] = useState('infos')
     const [showTimeline, setShowTimeline] = useState(false)
@@ -53,9 +57,14 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, a
         { label: 'Titre', name: 'title', type: 'text', placeholder: 'Titre optionnel' },
     ])
 
-    const versions = allSnippets.filter(s =>
+    // const versions = allSnippets.filter(s =>
+    //     s.version_group !== null && s.version_group === snippet.version_group
+    // )
+
+    const versions = (allSnippets || []).filter(s =>
         s.version_group !== null && s.version_group === snippet.version_group
     )
+
     const hasVersions = versions.length > 1
 
     useEffect(() => {
@@ -291,7 +300,7 @@ export default function ModalSnippet({ onSuccess, book, tome, selectedSnippet, a
                         value={snippet.content || ''}
                         onChange={handleChange}
                         rows={25}
-                        className='w-full h-full px-3 py-2.5 border rounded-lg text-sm text-primary-800 placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none'
+                        className={`w-full h-full px-3 py-2.5 border rounded-lg text-sm ${isDark ? 'text-primary-200' : 'text-primary-800'} placeholder:text-primary-300 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none`}
                     />
                 )}
 

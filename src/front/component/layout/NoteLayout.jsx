@@ -94,8 +94,8 @@ export default function NoteLayout({ selectedBook, refreshPostit }) {
 
             {/* header */}
             <div className='flex justify-between items-center px-3 py-2 mb-2'>
-                <p className='text-xs font-bold text-primary-400 uppercase tracking-wider'>Notes</p>
-                <button onClick={() => { setNoteToEdit(null); setIsOpen(true) }} className='text-primary-400 hover:text-primary-600 transition-colors'>
+                <p className='text-xs font-bold text-primary-700 uppercase tracking-wider'>Notes</p>
+                <button onClick={() => { setNoteToEdit(null); setIsOpen(true) }} className='text-primary-700 hover:text-primary-500 transition-colors'>
                     <BadgePlus size={20} />
                 </button>
             </div>
