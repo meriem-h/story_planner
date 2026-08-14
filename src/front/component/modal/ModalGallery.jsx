@@ -204,7 +204,7 @@ export default function ModalGallery({ book }) {
                         animation={200}
                         ghostClass='opacity-30'
                         direction='horizontal'
-                        className='flex gap-2 overflow-x-auto flex-shrink-0 pb-1'
+                        className='flex gap-2 overflow-x-auto hide-scrollbar flex-shrink-0 pb-1'
                     >
                         {assets.map(asset => (
                             <div

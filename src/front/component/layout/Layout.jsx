@@ -221,7 +221,7 @@ export default function Layout({ children, books, selectedBook, setSelectedBook,
                 <div className='flex flex-col'>
                     {/* Barre flottante */}
 
-                    <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden ${isFloatingOpen ? 'max-h-[100%] opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+                    <div className={`flex flex-col gap-3 bg-primary-200 rounded-l-2xl p-3 shadow-lg transition-all duration-300 overflow-hidden  ${isFloatingOpen ? 'max-h-[100%] opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
 
                         {selectedBook &&

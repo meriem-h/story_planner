@@ -148,7 +148,7 @@ export default function LoreLayout({ selectedBook }) {
                     </button>
                 </div>
             ) : (
-                <div className='p-3 overflow-y-auto max-h-[calc(90vh-120px)] flex flex-col gap-3'>
+                <div className='p-3 overflow-y-auto hide-scrollbar max-h-[calc(90vh-120px)] flex flex-col gap-3'>
                     {isFiltering ? (
                         filteredLores.map(lore => renderLore(lore))
                     ) : (

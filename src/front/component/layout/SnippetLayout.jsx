@@ -305,7 +305,7 @@ export default function SnippetLayout({ selectedBook, selectedTome, chapters, re
                     </button>
                 </div>
             ) : (
-                <div className='p-3 overflow-y-auto max-h-[calc(90vh-160px)] flex flex-col gap-3'>
+                <div className='p-3 overflow-y-auto hide-scrollbar max-h-[calc(90vh-160px)] flex flex-col gap-3'>
                     {isFiltering ? (
                         filtered.map(snippet => renderSnippet(snippet))
                     ) : (
