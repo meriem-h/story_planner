@@ -129,7 +129,6 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                 .ql-toolbar {
                     position: sticky !important;
                     top: 0 !important;
-                    z-index: 8 !important;
                     background: ${isDark ? 'var(--primary-200)' : 'var(--primary-1)'} !important;
                     display: flex !important;
                     justify-content: center !important;
@@ -142,6 +141,8 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     height: auto !important;
                 }
                 .ql-editor {
+                    z-index: 1 !important;
+
                     font-size: 18px !important;
                     line-height: 2 !important;
                     max-width: 880px !important;

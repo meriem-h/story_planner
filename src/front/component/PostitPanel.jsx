@@ -83,7 +83,7 @@ export default function PostitPanel({ selectedBook }) {
 
     return (
         <>
-            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50}>
+            <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} size={50} index={50}>
                 <ModalView item={itemToView} type="lore" />
             </Modal>
 

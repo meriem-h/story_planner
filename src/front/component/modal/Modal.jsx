@@ -3,11 +3,16 @@ import { X } from 'lucide-react'
 import { Styles } from 'docx'
 
 
-export default function Modal({ isOpen, onClose, title, children, size, maxSize = 80, minSize = 50, height, maxHeight = 90, minHeight }) {
+export default function Modal({ isOpen, onClose, title, children, size, maxSize = 80, minSize = 50, height, maxHeight = 90, minHeight, index = 20 }) {
     if (!isOpen) return null
 
+    index = "z-" + index 
+
+    console.log("index => ", index);
+
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className={`fixed inset-0 ${index} flex items-center justify-center`}>
             {/* fond grisé cliquable */}
             <div
                 className="absolute inset-0 bg-black/50"
@@ -24,7 +29,7 @@ export default function Modal({ isOpen, onClose, title, children, size, maxSize 
                     height: height ? `${height}vh` : 'auto',
                     ...(maxHeight && { maxHeight: `${maxHeight}vh` }),
                     ...(minHeight && { minHeight: `${minHeight}vh` }),
-                    
+
                 }}
             >
 
