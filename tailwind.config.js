@@ -18,13 +18,7 @@ module.exports = {
           950: 'var(--primary-950)',
           1000: 'var(--primary-1000)',
         }
-      },
-      zIndex: {
-      60: '60',
-      70: '70',
-      70: '80',
-      70: '90',
-    }
+      }
     },
   },
   plugins: [],
