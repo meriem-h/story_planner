@@ -127,6 +127,8 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
         <div className="flex flex-col h-full">
             <style>{`
                 .ql-toolbar {
+                                    z-index: 10 !important;
+
                     position: sticky !important;
                     top: 0 !important;
                     background: ${isDark ? 'var(--primary-200)' : 'var(--primary-1)'} !important;
@@ -141,7 +143,6 @@ export default function Editor({ content, onChange, chapters, selectedChapter })
                     height: auto !important;
                 }
                 .ql-editor {
-                    z-index: 1 !important;
 
                     font-size: 18px !important;
                     line-height: 2 !important;
